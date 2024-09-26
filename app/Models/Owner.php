@@ -18,4 +18,8 @@ class Owner extends Model
     {
         return $this->belongsTo(Member::class, 'member_id');
     }
+
+    public function vehicle() {
+        return $this->hasMany(Vehicle::class, 'onwer_id'); 
+    }
 }

@@ -6,9 +6,9 @@
     <title>Vehicle</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.datatables.net/2.1.7/css/dataTables.dataTables.min.css">
     <style>
         body {
-            /* background-color: #f8f9fa; */
             padding: 30px;
         }
 
@@ -50,7 +50,7 @@
     </div>
 
     <div class="table-container mt-6">
-        <table class="min-w-full bg-white border border-gray-300">
+        <table class="min-w-full bg-white border border-gray-300" id="myTable">
             <thead>
                 <tr>
                     <th class="py-2 border-2 border-black header-cell">Owner</th>
@@ -91,8 +91,12 @@
     </div>
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="//cdn.datatables.net/2.1.7/js/dataTables.min.js"></script>
 
+<script>
+    let table = new DataTable('#myTable');
+</script>
 </body>
 </html>

@@ -17,6 +17,7 @@
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Admin Dashboard') }}
                         </x-nav-link>
+                         <!-- Admin Navigation -->
                     @elseif(Auth::guard('member')->check())
                         <x-nav-link :href="route('member.dashboard')" :active="request()->routeIs('member.dashboard')">
                             {{ __('Member Dashboard') }}
@@ -45,11 +46,25 @@
                     </x-slot>
 
                     <x-slot name="content">
+                  
+                        @if(!Auth::guard('admin')->check() && !Auth::guard('member')->check())
                             <x-dropdown-link :href="route('profile.edit')">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
+                            <x-dropdown-link :href="route('booking')">
+                                {{ __('Bookings') }}
+                            </x-dropdown-link>
+                        @endif
 
-                        <!-- Authentication -->
+                        @if(Auth::guard('member')->check())
+                            <x-dropdown-link :href="route('member.profile.edit')">
+                                {{ __('Profile') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('member.membermonthlydues')">
+                                {{ __('Monthly Dues') }}
+                            </x-dropdown-link>
+                        @endif
+                  
                         @if(Auth::guard('admin')->check())
                         <form method="POST" action="{{ route('admin.logout') }}">
                             @csrf
@@ -129,14 +144,21 @@
                 @if(Auth::guard('admin')->check())
                     <div></div>
                 @elseif(Auth::guard('member')->check())
-                <x-responsive-nav-link :href="route('profile.edit')">
+                <x-responsive-nav-link :href="route('member.profile.edit')">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('member.membermonthlydues')">
+                        {{ __('Monthly Dues') }}
+                    </x-responsive-nav-link>
+                    
                 @else
                     <!-- User Responsive Dropdown Items -->
                     <x-responsive-nav-link :href="route('profile.edit')">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
+                    <x-dropdown-link :href="route('booking')">
+                                {{ __('Bookings') }}
+                     </x-dropdown-link>
                 @endif
 
                 <!-- Authentication -->

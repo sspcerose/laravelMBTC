@@ -35,7 +35,7 @@ class Member extends Authenticatable
     {
         return $this->hasMany(Driver::class, 'member_id');
     }
-
+    
     public function owner()
     {
         return $this->hasMany(Owner::class, 'member_id');

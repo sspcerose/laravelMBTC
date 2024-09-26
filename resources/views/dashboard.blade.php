@@ -109,6 +109,39 @@
                 modalImage.src = receipt;
             });
         });
+
+    $(document).ready(function() {
+        function calculatePrice() {
+            var id = $('#id').val();
+            var start_date = $('#start_date').val();
+            var end_date = $('#end_date').val();
+
+            if (id && start_date && end_date) {
+                $.ajax({
+                    url: '{{ url("/calculate-price") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        id: id,
+                        start_date: start_date,
+                        end_date: end_date,
+                    },
+                    success: function(response) {
+                        $('#price').val('₱' + response.price);
+                 },
+    error: function(xhr, status, error) {
+        console.log('Error: ', xhr.responseText); // Capture the error
+    }
+                });
+            }
+        }
+
+        // Trigger price calculation when destination or dates are changed
+        $('#id, #start_date, #end_date').change(function() {
+            calculatePrice();
+        });
+    });
+
     </script>
 
 </x-app-layout>

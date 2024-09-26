@@ -11,7 +11,7 @@
                 <div class="p-6 text-gray-900 mb-6">
                     <!-- {{ __("You're logged in!") }} -->
                     <a href="{{ route('admin.booking.booking') }}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Booking</a>
-                    <a href="" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Schedule</a>
+                    <a href="{{ route('admin.schedule.schedule') }}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Schedule</a>
                     <a href="{{ route('admin.member.member') }}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Member</a>
                     <a href="{{ route('admin.monthlydues.monthlydues')}}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Monthly Dues</a>
                     <a href="{{ route('admin.vehicle.vehicle') }}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Vehicle</a>

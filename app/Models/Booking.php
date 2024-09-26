@@ -33,4 +33,15 @@ class Booking extends Model
     {
         return $this->belongsTo(Tariff::class, 'tariff_id');
     }
+
+    public function schedule() 
+    {
+        return $this->hasMany(Schedule::class, 'book_id');
+    }
+    public function driver() 
+    {
+        return $this->belongsTo(Driver::class, 'driver_id');
+    }
+    
+
 }

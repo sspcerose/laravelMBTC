@@ -6,6 +6,8 @@
     <title>Vehicle</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
     <style>
         body {
             padding: 30px;
@@ -43,7 +45,7 @@
     </div>
 
     <div class="table-container">
-        <table class="min-w-full bg-white">
+        <table id="myTable" class="min-w-full bg-white">
             <thead>
                 <tr>
                     <th class="py-2 border-2 border-black header-cell">Customer</th>
@@ -53,6 +55,7 @@
                     <th class="py-2 border-2 border-black header-cell">Date</th>
                     <th class="py-2 border-2 border-black header-cell">Price</th>
                     <th class="py-2 border-2 border-black header-cell">Receipt</th>
+                    <th class="py-2 border-2 border-black header-cell">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -78,6 +81,14 @@
                                 View Receipt
                             </button>
                         </td>
+                        <td class="py-2 border-2 border-black header-cell">
+                            @if( $viewBooking->status == "active")
+                            <span class="text-success">Active</span>
+                            @else
+                            <span class="text-danger">Cancelled</span>
+                            @endif
+                            </td>
+
                     </tr>
                     @endforeach
                 @endif
@@ -108,14 +119,18 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="//cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 
 <script>
     $(document).ready(function() {
+        // Initialize DataTable
+        $('#myTable').DataTable();
+
+        // Modal event to show image
         $('#imageModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var receipt = button.data('receipt');
-            var modalImage = document.getElementById("modalImage");
-            modalImage.src = receipt;
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var receipt = button.data('receipt'); // Extract info from data-* attributes
+            $('#modalImage').attr('src', receipt); // Update modal image src
         });
     });
 </script>

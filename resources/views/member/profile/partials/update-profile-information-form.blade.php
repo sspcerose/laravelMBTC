@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('member.profile.update') }}" class="mt-6 space-y-6">
         @csrf
         @method('patch')
 
@@ -30,8 +30,14 @@
         </div>
 
         <div>
+            <x-input-label for="tin" :value="__('TIN')" />
+            <x-text-input id="tin" name="tin" type="text" class="mt-1 block w-full" :value="old('tin', $user->tin)" required autofocus autocomplete="last_name" />
+            <x-input-error class="mt-2" :messages="$errors->get('tin')" />
+        </div>
+
+        <div>
             <x-input-label for="mobile_num" :value="__('Mobile Number')" />
-            <x-text-input id="mobile_num" name="mobile_num" type="text" class="mt-1 block w-full" :value="old('mobile_num', $user->mobile_num)" required autofocus autocomplete="mobile_num" />
+            <x-text-input id="mobile_num" name="mobile_num" type="number" class="mt-1 block w-full" :value="old('mobile_num', $user->mobile_num)" required autofocus autocomplete="mobile_num" />
             <x-input-error class="mt-2" :messages="$errors->get('mobile_num')" />
         </div>
 

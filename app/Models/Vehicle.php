@@ -23,4 +23,11 @@ class Vehicle extends Model
     {
         return $this->belongsTo(Member::class, 'member_id');
     }
+    public function schedule() 
+    {
+        return $this->hasMany(Schedule::class, 'vehicle_id'); 
+    }
+    public function owner() {
+        return $this->belongsTo(Owner::class, 'owner_id');
+    }
 }

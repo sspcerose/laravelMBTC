@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MemberProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MBTCController;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+//////////////////////USER/////////////////////////////
 Route::get('/dashboard', [MBTCController::class, 'bookingform'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -28,6 +30,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/booking-form', [MBTCController::class, 'showBookingForm']);
     Route::post('bookingform', [MBTCController::class, 'bookingform']);
+    Route::post('/calculate-price', [MBTCController::class, 'calculatePrice']);
+    Route::get('userbookingpage', [MBTCController::class, 'userbookingpage'])->name('booking');
+    Route::post('cancelbooking/{id}', [MBTCController::class, 'cancelbooking'])->name('cancelbooking');
 });
 
 require __DIR__.'/auth.php';
@@ -49,7 +54,7 @@ Route::get('/member/welcome', function () {
 })->name('member.welcome');
 
 
-//admin
+//////////////////////ADMIN/////////////////////////////
 Route::get('/admin/adminwelcome', function () {
     return view('admin.adminwelcome');
 });
@@ -91,6 +96,11 @@ Route::middleware(['auth:admin'])->group(function () {
     //monthlydues
     Route::get('admin/monthlydues/monthlydues', [MBTCController::class, 'viewMonthlyDues'])->name('admin.monthlydues.monthlydues');
     Route::post('admin/monthlydues/monthlydues/{id}', [MBTCController::class, 'confirmPayment']);
+
+    //schedule
+
+    Route::get('admin/schedule/schedule', [MBTCController::class, 'viewSchedule'])->name('admin.schedule.schedule');
+    Route::post('admin/schedule/schedule', [MBTCCOntroller::class, 'assignDriver']);
     
 });
 
@@ -107,9 +117,20 @@ Route::get('/member/welcome', function () {
     return view('member.welcome');
 });
 
-Route::get('/member/dashboard', function () {
-    return view('member.dashboard');
-})->middleware(['auth:member', 'verified'])->name('member.dashboard');
+// Route::get('/member/dashboard', function () {
+//     return view('member.dashboard');
+// })->middleware(['auth:member', 'verified'])->name('member.dashboard');
 
+//////////////////////MEMBER/////////////////////////////
+Route::get('/member/dashboard', [MBTCController::class, 'memberdashboard'])->middleware(['auth:member', 'verified'])->name('member.dashboard');
+
+Route::middleware(['auth:member'])->group(function () {
+    Route::post('/schedule/{scheduleId}/accept', [MBTCController::class, 'acceptSchedule'])->name('schedule.accept');
+    Route::post('/schedule/{scheduleId}/cancel', [MBTCController::class, 'cancelSchedule'])->name('schedule.cancel');
+    Route::get('member/profile', [MemberProfileController::class, 'edit'])->name('member.profile.edit');
+    Route::patch('member/profile', [MemberProfileController::class, 'update'])->name('member.profile.update');
+    Route::delete('member/profile', [MemberProfileController::class, 'destroy'])->name('member.profile.destroy');
+    Route::get('member/membermonthlydues', [MBTCController::class, 'memberMonthlyDues'])->name('member.membermonthlydues');
+});
 require __DIR__.'/memberauth.php';
 

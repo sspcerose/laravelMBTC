@@ -39,7 +39,7 @@ Route::middleware('auth:member')->group(function () {
     Route::get('member/verify-email', EmailVerificationPromptController::class)
                 ->name('verification.notice');
 
-    Route::get('amember/verify-email/{id}/{hash}', VerifyEmailController::class)
+    Route::get('member/verify-email/{id}/{hash}', VerifyEmailController::class)
                 ->middleware(['signed', 'throttle:6,1'])
                 ->name('verification.verify');
 
