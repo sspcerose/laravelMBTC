@@ -739,7 +739,7 @@ public function memberdashboard()
 {
     $member_id = Auth::guard('member')->user()->id;
 
-    $schedules = Schedule::with(['booking', 'booking.user', 'driver.member', 'booking.tariff']) // Eager load tariff
+    $schedules = Schedule::with(['booking', 'booking.user', 'driver.member', 'booking.tariff'])
         ->where('cust_status', 'active')
         ->whereHas('driver.member', function ($query) use ($member_id) {
             $query->where('member_id', $member_id);

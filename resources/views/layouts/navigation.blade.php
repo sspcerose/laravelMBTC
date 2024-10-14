@@ -1,200 +1,118 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                </div>
-
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    @if(Auth::guard('admin')->check())
-                        <!-- Admin Navigation -->
-                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                            {{ __('Admin Dashboard') }}
-                        </x-nav-link>
-                         <!-- Admin Navigation -->
-                    @elseif(Auth::guard('member')->check())
-                        <x-nav-link :href="route('member.dashboard')" :active="request()->routeIs('member.dashboard')">
-                            {{ __('Member Dashboard') }}
-                        </x-nav-link>
-                    @else
-                        <!-- User Navigation -->
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            {{ __('Dashboard') }}
-                        </x-nav-link>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                  
-                        @if(!Auth::guard('admin')->check() && !Auth::guard('member')->check())
-                            <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Profile') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('booking')">
-                                {{ __('Bookings') }}
-                            </x-dropdown-link>
-                        @endif
-
-                        @if(Auth::guard('member')->check())
-                            <x-dropdown-link :href="route('member.profile.edit')">
-                                {{ __('Profile') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('member.membermonthlydues')">
-                                {{ __('Monthly Dues') }}
-                            </x-dropdown-link>
-                        @endif
-                  
-                        @if(Auth::guard('admin')->check())
-                        <form method="POST" action="{{ route('admin.logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('admin.logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                        @elseif(Auth::guard('member')->check())
-                        <form method="POST" action="{{ route('member.logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('member.logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                        @else
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                        @endif
-                    </x-slot>
-                </x-dropdown>
-            </div>
-
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+<nav class="bg-white shadow fixed w-full z-50">
+    <div class="mx-auto px-5 pt-5 pb-3 md:px-10 md:pb-5 xl:px-52">
+        <div class="flex items-center justify-between">
+            <div class="text-xl lg:text-xl font-bold">MBTC</div>
+            <div class="lg:hidden">
+                <button id="menu-toggle" class="text-gray-500 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16m-7 6h7"></path>
                     </svg>
                 </button>
             </div>
-        </div>
-    </div>
+            @if(!Auth::guard('admin')->check() && !Auth::guard('member')->check())
+            <div class="hidden font-semibold lg:flex space-x-6">
+                <a href="{{ route('dashboard') }}" class="text-gray-900 hover:text-gray-500">Home</a>
+                <a href="{{ route('booking') }}" class="text-gray-900 hover:text-gray-500">Booking</a>
+                <button id="profile-toggle" class="text-gray-500 focus:outline-none">
+                    <img width="20" height="20" src="{{ asset('img/userNav.png') }}" alt="User Icon" />
+                </button>
+            </div>
+            @endif
 
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            @if(Auth::guard('admin')->check())
-                <!-- Admin Responsive Links -->
-                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                    {{ __('Admin Dashboard') }}
-                </x-responsive-nav-link>
-            @elseif(Auth::guard('member')->check())
-             <!-- Member Responsive Links -->
-             <x-responsive-nav-link :href="route('member.dashboard')" :active="request()->routeIs('member.dashboard')">
-                    {{ __('Member Dashboard') }}
-                </x-responsive-nav-link>
-            @else
-                <!-- User Responsive Links -->
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
+            @if(Auth::guard('member')->check())
+            <div class="hidden font-semibold lg:flex space-x-6">
+                <a href="{{ route('member.dashboard') }}" class="text-gray-900 hover:text-gray-500">Home</a>
+                <a href="{{ route('member.membermonthlydues') }}" class="text-gray-900 hover:text-gray-500">Monthly Dues</a>
+                <button id="profile-toggle" class="text-gray-500 focus:outline-none">
+                    <img width="20" height="20" src="{{ asset('img/userNav.png') }}" alt="User Icon" />
+                </button>
+            </div>
             @endif
         </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                @if(Auth::guard('admin')->check())
-                    <div></div>
-                @elseif(Auth::guard('member')->check())
-                <x-responsive-nav-link :href="route('member.profile.edit')">
-                        {{ __('Profile') }}
-                    </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('member.membermonthlydues')">
-                        {{ __('Monthly Dues') }}
-                    </x-responsive-nav-link>
-                    
-                @else
-                    <!-- User Responsive Dropdown Items -->
-                    <x-responsive-nav-link :href="route('profile.edit')">
-                        {{ __('Profile') }}
-                    </x-responsive-nav-link>
-                    <x-dropdown-link :href="route('booking')">
-                                {{ __('Bookings') }}
-                     </x-dropdown-link>
-                @endif
-
-                <!-- Authentication -->
-
-                @if(Auth::guard('admin')->check())
-                    <form method="POST" action="{{ route('admin.logout') }}">
-                        @csrf
-
-                        <x-responsive-nav-link :href="route('admin.logout')"
-                                onclick="event.preventDefault();
-                                            this.closest('form').submit();">
-                            {{ __('Log Out') }}
-                        </x-responsive-nav-link>
-                    </form>
-                @elseif(Auth::guard('member')->check())
-                <form method="POST" action="{{ route('member.logout') }}">
-                        @csrf
-
-                        <x-responsive-nav-link :href="route('member.logout')"
-                                onclick="event.preventDefault();
-                                            this.closest('form').submit();">
-                            {{ __('Log Out') }}
-                        </x-responsive-nav-link>
-                    </form>
-                @else
-                <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-
-                        <x-responsive-nav-link :href="route('logout')"
-                                onclick="event.preventDefault();
-                                            this.closest('form').submit();">
-                            {{ __('Log Out') }}
-                        </x-responsive-nav-link>
-                    </form>
-                @endif
-            </div>
-        </div>
     </div>
+    
+
+    <!-- Mobile Menu -->
+    @if(!Auth::guard('admin')->check() && !Auth::guard('member')->check())
+    <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
+        <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>
+        <a href="{{ route('booking') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Booking</a>
+        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Profile</a>
+        <a href="{{ route('logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
+    </div>
+    
+
+    <!-- Profile Menu -->
+    <div id="profile-menu" class="hidden absolute top-15 w-40 md:right-10 xl:right-52 bg-white shadow-lg">
+        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Profile</a>
+        <a href="{{ route('logout') }}" class="block px-4 pt-2 pb-4 text-gray-700 hover:bg-gray-200"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
+    </div>
+
+    <form id="logout-form" method="POST" action="{{ route('logout') }}">
+        @csrf
+    </form>
+    @endif
+
+    @if(Auth::guard('member')->check())
+    <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
+        <a href="{{ route('member.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>
+        <a href="{{ route('member.membermonthlydues') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Monthly Dues</a>
+        <a href="{{ route('member.profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Member Profile</a>
+        <a href="{{ route('member.logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
+    </div>
+    
+
+    <!-- Profile Menu -->
+    <div id="profile-menu" class="hidden absolute top-15 w-40 md:right-10 xl:right-52 bg-white shadow-lg">
+        <a href="{{ route('member.profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Member Profile</a>
+        <a href="{{ route('member.logout') }}" class="block px-4 pt-2 pb-4 text-gray-700 hover:bg-gray-200"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
+    </div>
+
+    <form id="logout-form" method="POST" action="{{ route('member.logout') }}">
+        @csrf
+    </form>
+    @endif
+
+    @if(Auth::guard('admin')->check())
+    <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
+        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>
+        <a href="{{ route('admin.logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
+    </div>
+    
+
+    <!-- Profile Menu -->
+    <div id="profile-menu" class="hidden absolute top-15 w-40 md:right-10 xl:right-52 bg-white shadow-lg">
+        <a href="{{ route('admin.logout') }}" class="block px-4 pt-2 pb-4 text-gray-700 hover:bg-gray-200"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
+    </div>
+
+    <form id="logout-form" method="POST" action="{{ route('admin.logout') }}">
+        @csrf
+    </form>
+    @endif
 </nav>
+
+<script>
+    document.getElementById('menu-toggle').onclick = () => {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+    };
+
+    const profileToggle = document.getElementById('profile-toggle');
+    const profileMenu = document.getElementById('profile-menu');
+
+    profileToggle.onclick = () => {
+        profileMenu.classList.toggle('hidden');
+    };
+
+    document.addEventListener('click', (event) => {
+        if (!profileMenu.contains(event.target) && !profileToggle.contains(event.target)) {
+            profileMenu.classList.add('hidden');
+        }
+    });
+</script>

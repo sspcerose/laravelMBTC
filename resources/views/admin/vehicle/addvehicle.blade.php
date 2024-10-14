@@ -46,7 +46,7 @@
                         <option value="{{ $activeMember->id }}">{{ $activeMember->name }} {{ $activeMember->last_name }}</option>
                     @endforeach
                 </select>
-            </div>
+    </div>
 
             <div class="form-group">
                 <label for="type">Type:</label>

@@ -45,7 +45,29 @@ require __DIR__.'/auth.php';
 // });
 
 
+//////for testing
 
+Route::get('/user/userHome', function () {
+    return view('user.userHome');
+})->name('user.userHome');
+
+Route::get('/user/userLogin', function () {
+    return view('user.userLogin');
+});
+
+Route::get('/user/userSignUp', function () {
+    return view('user.userSignUp');
+});
+
+Route::get('/user/adminLogin', function () {
+    return view('user.adminLogin');
+});
+
+Route::get('/user/memberLogin', function () {
+    return view('user.memberLogin');
+});
+
+///////////
 
 
 
