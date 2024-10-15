@@ -28,6 +28,7 @@
                     <img width="20" height="20" src="{{ asset('img/userNav.png') }}" alt="User Icon" />
                 </button>
             </div>
+            
             @endif
         </div>
     </div>

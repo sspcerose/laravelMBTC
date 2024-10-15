@@ -47,24 +47,30 @@ require __DIR__.'/auth.php';
 
 //////for testing
 
-Route::get('/user/userHome', function () {
-    return view('user.userHome');
-})->name('user.userHome');
+Route::get('/ForTesting/userHome', function () {
+    return view('Fortesting.userHome');
+})->name('ForTesting.userHome');
 
-Route::get('/user/userLogin', function () {
-    return view('user.userLogin');
+Route::get('/ForTesting/userLogin', function () {
+    return view('ForTesting.userLogin');
 });
 
-Route::get('/user/userSignUp', function () {
-    return view('user.userSignUp');
+Route::get('/ForTesting/userSignUp', function () {
+    return view('ForTesting.userSignUp');
 });
 
-Route::get('/user/adminLogin', function () {
-    return view('user.adminLogin');
+Route::get('/ForTesting/adminLogin', function () {
+    return view('FOrTesting.adminLogin');
 });
 
-Route::get('/user/memberLogin', function () {
-    return view('user.memberLogin');
+Route::get('/ForTesting/memberLogin', function () {
+    return view('ForTesting.memberLogin');
+});
+Route::get('/ForTesting/memberHome', function () {
+    return view('ForTesting.memberHome');
+});
+Route::get('/ForTesting/UserBooking', function () {
+    return view('ForTesting.UserBooking');
 });
 
 ///////////

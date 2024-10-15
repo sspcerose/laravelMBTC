@@ -1,35 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
+@include('layouts.MemberNav')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vehicle</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="//cdn.datatables.net/2.1.7/css/dataTables.dataTables.min.css">
-    <style>
-        body {
-            padding: 30px;
-        }
 
-        .container {
-            margin-top: 10px;
-        }
-
-        .table-container {
-            margin-top: 30px;
-        }
-
-        .header-cell {
-            padding-left: 10px;
-            padding-right: 10px;
-            background-color: #f8f9fa;
-        }
-    </style>
-</head>
-
-<body>
+<div class="py-12">
     <div class="container">
         <div class="mb-4">
             <a href="{{ route('member.dashboard') }}" class="bg-red-500 text-white py-2 px-4 rounded">Back</a>
