@@ -1,127 +1,263 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schedule</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="//cdn.datatables.net/2.1.7/css/dataTables.dataTables.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .container {
-            margin-top: 50px;
-        }
-        .confirmed {
-            color: green;
-        }
-        .paid {
-            color: green;
-        }
-        .unpaid {
-            color: red;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-        <a href="{{ url('admin/dashboard') }}" class="btn btn-danger mb-4">Back</a>
-    <h1 class="mt-5">Schedule</h1>
-    <div class="card mt-3">
-        <div class="card-body">
-            <table class="table table-striped" id="myTable">
-                <thead>
-                    <tr>
-                        <th>Customer Name</th>
-                        <th>Destination</th>
-                        <th>Date</th>
-                        <th>Driver</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach($viewBookings as $viewBooking)
-                    <tr>
-                        <td>{{ $viewBooking->user->name }} {{ $viewBooking->user->last_name }}</td>
-                        <td>{{ $viewBooking->destination }}</td>
-                        <td>{{ date('M d, Y', strtotime($viewBooking->start_date)) }} - {{ date('M d, Y', strtotime($viewBooking->end_date)) }}</td>
-                        <td>
-                        @if($viewBooking->schedule->isNotEmpty())
-                            @php
-                                // Get the most recent schedule for the booking
-                                $latestSchedule = $viewBooking->schedule->first();
-                            @endphp
-                            @if($latestSchedule->driver_status == 'cancelled')
-                                {{-- If the driver status is "cancelled", show the driver selection dropdown --}}
-                                <form action="{{ url('admin/schedule/schedule') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="booking_id" value="{{ $viewBooking->id }}">
-                                    <select name="driver_id" class="form-control">
-                                        @foreach($drivers as $driver)
-                                            {{-- Loop through each driver's collection --}}
-                                            @foreach($driver->driver as $individualDriver)
-                                                <option value="{{ $individualDriver->id }}">
-                                                    {{ $driver->name }} {{ $driver->last_name }}
-                                                </option>
-                                            @endforeach
-                                        @endforeach
-                                    </select>
-                                    <button type="submit" class="btn btn-primary mt-2">Assign Driver</button>
-                                </form>
-                            @elseif(!empty($latestSchedule->driver))
-                                {{-- If a driver is already assigned and not cancelled, show the driver name --}}
-                                {{ $latestSchedule->driver->member->name }} {{ $latestSchedule->driver->member->last_name }}
-                            @endif
-                        @else
-                            {{-- If no driver is assigned, show the driver selection dropdown --}}
-                            <form action="{{ url('admin/schedule/schedule') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="booking_id" value="{{ $viewBooking->id }}">
-                                <select name="driver_id" class="form-control">
-                                    @foreach($drivers as $driver)
-                                        {{-- Loop through each driver's collection --}}
-                                        @foreach($driver->driver as $individualDriver)
-                                            <option value="{{ $individualDriver->id }}">
-                                                {{ $driver->name }} {{ $driver->last_name }}
-                                            </option>
-                                        @endforeach
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="btn btn-primary mt-2">Assign Driver</button>
-                            </form>
-                        @endif
-                        </td>
-                        <td>
-                            {{-- Show status whether a driver is assigned or not --}}
-                            @if($viewBooking->schedule->isNotEmpty())
-                                @if($latestSchedule->driver_status == 'accepted')
-                                    <span class="text-success">Driver Accepted</span>
-                                @elseif($latestSchedule->driver_status == 'scheduled')
-                                    <span class="text-success">Assigned</span>
-                                @elseif($latestSchedule->driver_status == 'cancelled')
-                                    <span class="text-danger">Driver Cancelled, Assign New One</span>
-                                @endif
-                            @else
-                                <span class="text-danger">To be Assigned</span>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
+@extends('layout.layout')
 
+
+@include('layouts.adminNav')
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<link href="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.css" rel="stylesheet">
+<script src="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.js"></script>
+
+<body class="font-inter">
+    <div class="lg:pl-20 lg:pr-10">
+        <h1 class="text-black pt-24 lg:pt-28 p-4 pl-4 text-center md:text-left font-extrabold text-3xl">Driver Schedule</h1>
+
+        <div class="bg-neutral-300 mx-4 rounded-3xl p-2 items-center mb-4">
+            <div class="overflow-x-auto bg-neutral-100 px-2 md:px-4 lg:py-2 rounded-2xl" id="largeTable">
+            @if($viewBookings->isEmpty())
+            <p class="text-center">NOTHING TO SCHEDULE YET</p>
+            @else
+                <table class="min-w-full" id="myTable">
+                    <thead>
+                        <tr class="text-left text-sm text-neutral-950 uppercase tracking-wider">
+                            <th class="py-3 px-4">ID</th>
+                            <th class="py-3 px-4">CUSTOMER NAME</th>
+                            <th class="py-3 px-4">DESTINATION</th>
+                            <th class="py-3 px-4">DATE</th>
+                            <th class="py-3 px-4" style="width: 10%;">RECEIPT</th>
+                            <th class="py-3 px-4">DRIVER</th>
+                            <th class="py-3 px-4">STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm text-gray-600" id="tableBody">
+                    @foreach($viewBookings as $viewBooking)
+                        <tr>
+                            <td class="py-3 px-4">{{ $viewBooking->id }}</td>
+                            <td class="py-3 px-4">{{ $viewBooking->user->name }} {{ $viewBooking->user->last_name }}</td>
+                            <td class="py-3 px-4">{{ $viewBooking->destination }}</td>
+                            <td class="py-3 px-4">{{ date('F d, Y', strtotime($viewBooking->start_date)) }} - {{ date('F d, Y', strtotime($viewBooking->end_date)) }}</td>
+                            <td class="py-3 px-4">
+                            <button type="button" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600"  data-receipt="{{ asset('img/' . $viewBooking->receipt) }}" onclick="openModal(this)">
+                                        View Receipt
+                                    </button>
+                            </td>
+                            <td class="py-3 px-4" id="scheduleTd">
+                                @if(!$vehiclesExist)
+                                <option disabled class="font-bold text-red-500">No Vehicles Available</option>
+                                @else
+                                @if($viewBooking->schedule->isNotEmpty())
+                                    @php
+                                        $latestSchedule = $viewBooking->schedule->first();
+                                    @endphp
+                                    @if($latestSchedule->driver_status == 'cancelled')
+                                        @if($drivers->isEmpty())
+                                            <option disabled class="font-bold text-red-500">No Drivers Available</option>
+                                        @else
+                                        <form action="{{ url('admin/schedule/schedule') }}" method="POST" class="assignForm">
+                                            @csrf
+                                            <input type="hidden" name="booking_id" value="{{ $viewBooking->id }}">
+                                            <select name="driver_id" class="border rounded p-1 mb-1">
+                                            <!-- <option class="" disabled selected>Select Driver</option> -->
+                                                @foreach($drivers as $driver)
+                                                    @foreach($driver->driver as $individualDriver)
+                                                        <option value="{{ $individualDriver->id }}">
+                                                            {{ $driver->name }} {{ $driver->last_name }}
+                                                        </option>
+                                                    @endforeach
+                                                @endforeach
+                                            </select>
+                                            <button type="button" class="bg-green-500 text-white py-1 px-2 rounded triggerAssign">Assign Driver</button>
+                                        </form>
+
+                                        <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-blue-100 border border-blue-600 rounded-md hidden cancelAlert">
+                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                            </svg>
+                                                Are you sure you want to assign this driver?
+                                                <div class="flex justify-end mt-2">
+                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
+                                                        Back
+                                                    </button>
+                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
+                                                        Yes
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @elseif(!empty($latestSchedule->driver))
+                                    <div class="flex items-center space-x-2">
+                                        @if($latestSchedule->cust_status == 'inactive')
+                                        <p class="border rounded p-1 mb-1">
+                                            {{ $latestSchedule->driver->member->name }} {{ $latestSchedule->driver->member->last_name }}
+                                        </p>
+                                        @else
+                                        <!-- <p class="border rounded p-1 mb-1"> -->
+                                        <p class="">
+                                            {{ $latestSchedule->driver->member->name }} {{ $latestSchedule->driver->member->last_name }}
+                                        </p>
+                                        <!-- <button type="submit" class="bg-red-500 text-white py-1 px-2 rounded mb-1">Undo</button> -->
+                                        @endif
+                                    </div>
+                                    @endif
+                                @else
+
+                                    @if($drivers->isEmpty())
+                                        <option disabled class="font-bold text-red-500">No Drivers Available</option>
+                                    @else
+                                    <form action="{{ url('admin/schedule/schedule') }}" method="POST" class="assignForm">
+                                        @csrf
+                                        <input type="hidden" name="booking_id" value="{{ $viewBooking->id }}">
+                                        <select name="driver_id" class="border rounded p-1 mb-1">
+                                        <!-- <option class="" disabled selected>Select Driver</option> -->
+                                            @foreach($drivers as $driver)
+                                                @foreach($driver->driver as $individualDriver)
+                                                    <option value="{{ $individualDriver->id }}">
+                                                        {{ $driver->name }} {{ $driver->last_name }}
+                                                    </option>
+                                                @endforeach
+                                            @endforeach
+                                        </select>
+                                        <button type="button" class="bg-green-500 text-white py-1 px-2 rounded mb-1 triggerAssign">Assign Driver</button>
+                                    </form>
+
+                                    <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-blue-100 border border-blue-600 rounded-md hidden cancelAlert">
+                                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                            </svg>
+                                                Are you sure you want to assign this driver?
+                                                <div class="flex justify-end mt-2">
+                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
+                                                        Back
+                                                    </button>
+                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
+                                                        Yes
+                                                    </button>
+                                                </div>
+                                            </div>
+                                    @endif
+                                @endif
+                                @endif
+                            </td>
+                            <td class="py-3 px-4">
+                                @if($viewBooking->schedule->isNotEmpty())
+                                    @if($latestSchedule->driver_status == 'accepted')
+                                        <span class="font-bold text-green-500">Driver Accepted</span>
+                                    @elseif($latestSchedule->driver_status == 'scheduled')
+                                        <span class="font-bold text-blue-500">Scheduled</span>
+                                    @elseif($latestSchedule->cust_status == 'inactive')
+                                        <span class="font-bold text-red-500">Customer Cancelled</span>
+                                    @elseif($latestSchedule->driver_status == 'cancelled')
+                                        <span class="font-bold text-red-500">Driver Cancelled, Schedule New One</span>
+                                    @endif
+                                @else
+                                    <span class="font-bold text-yellow-500">To be Scheduled</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
                     </tbody>
-            </table>
+                </table>
+                @endif
+            </div>
         </div>
     </div>
-</div>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="//cdn.datatables.net/2.1.7/js/dataTables.min.js"></script>
 
-<script>
-    let table = new DataTable('#myTable');
-</script>
+    <!-- Modal -->
+<div class="fixed inset-0 flex items-center justify-center z-50 hidden" id="imageModal" onclick="closeOnClickOutside(event)">
+        <div class="bg-white rounded-lg overflow-hidden shadow-lg max-w-xl mx-4 w-full" id="modalContent">
+            <div class="p-4">
+                <h5 class="text-lg font-bold mb-2">Receipt</h5>
+                <button type="button" class="absolute top-0 right-0 m-2 text-gray-500" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="p-4 text-center">
+                <img id="modalImage" src="" alt="Receipt" class="max-w-full h-auto mx-auto" style="max-width: 90%;" />
+            </div>
+            <div class="p-4 text-right">
+                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        $(document).ready(function () {
+            $('#myTable').DataTable({
+                responsive: true,
+                order: [[0, 'desc']],
+                columnDefs: [
+                    { targets: 0, visible: false }
+                ]
+            });
+        });
 
+    
+
+        document.addEventListener('click', function (e) {
+    // Trigger cancel confirmation
+    if (e.target.classList.contains('triggerAssign')) {
+        let assignForm = e.target.closest('.assignForm');
+        let cancelAlert = assignForm.nextElementSibling;
+        cancelAlert.classList.remove('hidden');
+        document.getElementById('scheduleTd').style.width = '25%'; 
+        e.target.style.display = 'none';
+    }
+
+    // Close the cancel confirmation
+    if (e.target.classList.contains('cancelButton')) {
+        let cancelAlert = e.target.closest('.cancelAlert');
+        cancelAlert.classList.add('hidden');
+        document.getElementById('scheduleTd').style.width = '';
+        let assignForm = cancelAlert.previousElementSibling;
+        let cancelButton = assignForm.querySelector('.triggerAssign');
+        if (cancelButton) {
+            cancelButton.style.display = '';
+        }
+    }
+
+    // Confirm cancellation and display success message
+    if (e.target.classList.contains('yesButton')) {
+        let cancelAlert = e.target.closest('.cancelAlert');
+        let assignForm = cancelAlert.previousElementSibling;
+
+        if (assignForm) {
+            e.preventDefault(); 
+            
+            if (!assignForm.querySelector('.successMessageAlert')) {
+                let successMessage = document.createElement('div');
+                successMessage.setAttribute('role', 'alert');
+                successMessage.className = 'successMessageAlert mt-3 relative flex w-full p-3 text-sm text-white bg-blue-500 rounded-md';
+                successMessage.innerHTML = `<svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                            </svg>
+                                            Successfully Assigned the Driver!`;
+
+                let scheduleTd = assignForm.closest('td');
+                scheduleTd.appendChild(successMessage); 
+                cancelAlert.classList.add('hidden');
+
+                setTimeout(function () {
+                    successMessage.remove();
+                    assignForm.submit(); 
+                    // cancelAlert.classList.add('hidden');
+                }, 1000);
+            }
+        }
+    }
+});
+
+// Modal
+function openModal(button) {
+            var receipt = $(button).data('receipt');
+            $('#modalImage').attr('src', receipt);
+            $('#imageModal').removeClass('hidden');
+        }
+        function closeModal() {
+            $('#imageModal').addClass('hidden');
+        }
+
+        function closeOnClickOutside(event) {
+            if (!event.target.closest('#modalContent')) {
+                closeModal();
+            }
+        }
+    </script>
 </body>
 </html>

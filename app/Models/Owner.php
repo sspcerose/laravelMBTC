@@ -22,4 +22,9 @@ class Owner extends Model
     public function vehicle() {
         return $this->hasMany(Vehicle::class, 'onwer_id'); 
     }
+
+    public function schedule()
+    {
+        return $this->hasMany(Schedule::class, 'owner_id');
+    }
 }

@@ -8,7 +8,7 @@
         <section class="bg-slate-800 md:flex-[4] rounded-br-5xl rounded-bl-5xl lg:rounded-br-5xl lg:rounded-tr-5xl lg:rounded-bl-none md:h-screen">
             <div class="p-5">
                 <div class="font-bold text-white text-3xl pb-40 xl:pb-48">
-                    <h1>MBTC</h1>
+                    <h1><a href="{{ route('dashboard') }}">MBTC</a></h1>
                 </div>
 
                 <div class='px-0 sm:px-5 lg:px-10'>
@@ -43,10 +43,13 @@
                     </div>
 
                     <div class="flex items-center justify-between pb-4">
-                        <label for="remember_me" class="inline-flex items-center">
+                        <!-- <label for="remember_me" class="inline-flex items-center">
                             <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
                             <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-                        </label>
+                        </label> -->
+                        <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('register') }}">
+                            {{ __('Not yet registered?') }}
+                        </a>
                         @if (Route::has('password.request'))
                             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
                                 {{ __('Forgot your password?') }}

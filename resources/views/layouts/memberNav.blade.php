@@ -39,15 +39,15 @@
 </div>
 
 <form id="logout-form" method="POST" action="{{ route('member.logout') }}">
-        @csrf
-    </form>
+    @csrf
+</form>
     
 <!-- Original Sidebar (Hidden by Default) -->
 <div id="sidebar" class="fixed inset-y-0 left-0 z-40 bg-gray-800 bg-opacity-75 hidden transition-opacity duration-300" style="top: 4rem;">
     <div class="absolute text-xl font-semibold top-0 left-0 w-56 h-full bg-neutral-200 p-5">
         <ul class="mt-4 space-y-2">
             <li>
-                <a href="{{ route('member.dashboard') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold bg-slate-900" data-tab="Home">Home</a>
+                <a href="{{ route('member.dashboard') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Home">Home</a>
             </li>
             <li>
                 <a href="{{ route('member.membermonthlydues') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Booking">Monthly Dues</a>
@@ -67,18 +67,12 @@
 
     // Toggle the sidebars
     menuToggle.addEventListener('click', () => {
-        if (iconSidebar.classList.contains('hidden')) {
-            iconSidebar.classList.remove('hidden'); // Show icon-only sidebar
-            sidebar.classList.add('hidden'); // Hide original sidebar
-        } else {
-            iconSidebar.classList.add('hidden'); // Hide icon-only sidebar
-            sidebar.classList.remove('hidden'); // Show original sidebar
-        }
+        iconSidebar.classList.toggle('hidden'); // Toggle icon-only sidebar visibility
+        sidebar.classList.toggle('hidden'); // Toggle original sidebar visibility
     });
 
     // Function to update active state for both sidebars
     function updateActiveState(clickedTab) {
-        /
         const activeTabName = clickedTab.getAttribute('data-tab');
 
         // Reset colors for all icon tabs
@@ -93,7 +87,7 @@
             tab.classList.add('text-slate-900'); // Reset to default icon color
         });
 
-        // Add active color and square to the clicked icon
+        // Add active color and background to the clicked icon
         clickedTab.classList.add('text-white', 'bg-slate-900', 'rounded-lg'); 
 
         // Sync with the expanded sidebar
@@ -106,7 +100,6 @@
 
     // Set the initial active state for the tab based on the current URL
     function setInitialActiveState() {
-        // Get the current URL path
         const currentPath = window.location.pathname;
 
         // Find the tab link that matches the current path
@@ -123,7 +116,7 @@
         }
     }
 
-    // Set the active tab
+    // Set the active tab when clicked
     tabLinks.forEach(link => {
         link.addEventListener('click', function() {
             updateActiveState(this); 
@@ -154,23 +147,5 @@
 
     // Listen for window resize events
     window.addEventListener('resize', handleResize);
-
-    document.getElementById('menu-toggle').onclick = () => {
-        document.getElementById('mobile-menu').classList.toggle('hidden');
-    };
-
-    const profileToggle = document.getElementById('profile-toggle');
-    const profileMenu = document.getElementById('profile-menu');
-
-    profileToggle.onclick = () => {
-        profileMenu.classList.toggle('hidden');
-    };
-
-    document.addEventListener('click', (event) => {
-        if (!profileMenu.contains(event.target) && !profileToggle.contains(event.target)) {
-            profileMenu.classList.add('hidden');
-        }
-    });
-
 </script>
 @endif

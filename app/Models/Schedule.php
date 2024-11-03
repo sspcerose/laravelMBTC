@@ -29,7 +29,9 @@ class Schedule extends Model
     {
         return $this->belongsTo(Vehicle::class, 'vehicle_id'); 
     }
+    public function owner()
+    {
+        return $this->belongsTo(Owner::class, 'owner_id');
+    }
     
-
-   
 }

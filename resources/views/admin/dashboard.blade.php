@@ -1,27 +1,34 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+@extends('layout.layout')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-12">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 mb-6">
-                    <!-- {{ __("You're logged in!") }} -->
-                    <a href="{{ route('admin.booking.booking') }}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Booking</a>
-                    <a href="{{ route('admin.schedule.schedule') }}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Schedule</a>
-                    <a href="{{ route('admin.member.member') }}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Member</a>
-                    <a href="{{ route('admin.monthlydues.monthlydues')}}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Monthly Dues</a>
-                    <a href="{{ route('admin.vehicle.vehicle') }}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Vehicle</a>
-                    <a href="{{ route('admin.tariff.tariff') }}" class="bg-red-500 text-white py-2 px-4 rounded ml-4 mb-4">Tariff</a>
+@include('layouts.adminNav')
+
+<body class="font-inter">
+
+    <div class="lg:pl-20 md:pr-5">
+
+        <h1 class="font-semibold pt-28 px-4 text-4xl">Hello, <span>Admin</span>!</h1>
+        <h1 class="text-black p-4 font-extrabold text-4xl">Welcome</h1>
+
+        <div class="bg-neutral-200 p-4 lg:p-8 rounded-3xl m-4">
+
+            <!-- Bento Box Layout -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-8 mb-8">
+                <!-- Total Bookings Card -->
+                <div class="bg-blue-500 text-white  p-5 rounded-2xl  lg:h-52 shadow-md">
+                    <h2 class="text-xl font-bold mb-2">Total Bookings</h2>
+                    <p class="text-xl lg:text-5xl font-semibold">{{ $totalBookings }}</p> <!-- Placeholder value -->
                 </div>
-                
-
+                <!-- Registered Users Card -->
+                <div class="bg-green-500 text-white p-5 rounded-2xl lg:h-52 shadow-md">
+                    <h2 class="text-xl font-bold mb-2">Registered Users</h2>
+                    <p class="text-xl lg:text-5xl font-semibold">{{ $totalUsers }}</p> <!-- Placeholder value -->
+                </div>
+                <div class="bg-red-500 text-white p-5 rounded-2xl lg:h-52 shadow-md">
+                    <h2 class="text-xl font-bold mb-2">Total Members</h2>
+                    <p class="text-xl lg:text-5xl font-semibold">{{ $totalMembers }}</p> <!-- Placeholder value -->
+                </div>
             </div>
         </div>
     </div>
 
-   
-</x-app-layout>
+</body>

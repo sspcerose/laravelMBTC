@@ -55,6 +55,17 @@ class MBTCController extends Controller
             $receipt->move(public_path('img'), $bookReceipt);
         }
     
+        $validated = $request->validate([
+            'passenger'   => 'required|integer|min:1',
+            'location'    => 'required|string',
+            'start_date'  => 'required|date',
+            'end_date'    => 'required|date|after_or_equal:start_date',
+        ], [
+            'passenger.required' => 'Passenger is required',
+            'location.required' => 'Location is required',
+            'start_date.required' => 'Start date is required',
+            'end_date.required' => 'End date is required',
+        ]);
 
         Booking::create([
             'customer_id' => auth()->id(),
@@ -120,16 +131,14 @@ class MBTCController extends Controller
 
     
 
-// calculated price 
+/////Calculated price 
 public function calculatePrice(Request $request) {
-    // Validate the incoming request
     $request->validate([
         'id' => 'required|exists:tariffs,id',
         'start_date' => 'required|date',
         'end_date' => 'required|date|after_or_equal:start_date',
     ]);
 
-    // Retrieve the tariff based on the selected destination
     $tariff = Tariff::find($request->id);
 
     if (!$tariff) {
@@ -156,7 +165,20 @@ public function calculatePrice(Request $request) {
 }
 
 
+///////////////ADMIN/////////////////////////////////////////////////////////
+///////////////Admin dashboard///////////////////////////////////////////////
+public function dashboard()
+{
+    $totalBookings = Booking::count();
+    $totalUsers = User::count();
+    $totalMembers = Member::count();
 
+    return view('admin.dashboard', [
+        'totalBookings' => $totalBookings,
+        'totalUsers' => $totalUsers,
+        'totalMembers' => $totalMembers,
+    ]);
+}
 ///////////////Member///////////////////////////////////////////////
     public function viewmember(Request $request)
     {
@@ -249,8 +271,8 @@ public function archivemember(Request $request, $id) {
             $viewtariffs = Tariff::where('status', 'active')
             ->where(function ($query) use ($search) {
                 $query->where('destination', 'LIKE', '%' . $search . '%')
-                      ->orWhere('rate', 'LIKE', '%' . $search . '%')
-                      ->orWhere('succeeding', 'LIKE', '%' . $search . '%');
+                    ->orWhere('rate', 'LIKE', '%' . $search . '%')
+                    ->orWhere('succeeding', 'LIKE', '%' . $search . '%');
             })
             ->get();
         } else {
@@ -261,18 +283,18 @@ public function archivemember(Request $request, $id) {
     }
 
 /////Add Tariff
-    public function addtariff(Request $request){
+public function addtariff(Request $request)
+{
+    Tariff::create([
+        'destination' => $request->destination,
+        'rate' => $request->rate,
+        'succeeding' => $request->succeeding,
+        'status' => $request->status
+    ]);
 
-        Tariff::create ([
-            'destination' => $request->destination,
-            'rate' => $request->rate,
-            'succeeding' => $request->succeeding,
-            'status' => $request->status
-        ]);
+    return redirect()->route('admin.tariff.addtariff')->with('success', 'Successfully Added the Tariff!');
+}
 
-        return redirect()->route('admin.tariff.tariff')->with('success', 'Tariff added successfully.');
-
-    }
 
     public function addtariffform(){
         return view('admin.tariff.addtariff');
@@ -320,8 +342,8 @@ public function archivemember(Request $request, $id) {
                 $viewtariffs = Tariff::where('status', 'inactive')
                 ->where(function ($query) use ($search) {
                     $query->where('destination', 'LIKE', '%' . $search . '%')
-                          ->orWhere('rate', 'LIKE', '%' . $search . '%')
-                          ->orWhere('succeeding', 'LIKE', '%' . $search . '%');
+                        ->orWhere('rate', 'LIKE', '%' . $search . '%')
+                        ->orWhere('succeeding', 'LIKE', '%' . $search . '%');
                 })
                 ->get();
             } else {
@@ -357,7 +379,7 @@ public function archivemember(Request $request, $id) {
 
         }
         
-        return redirect()->back();
+        return redirect()->route('admin.tariff.tariff');
     }
 
 
@@ -370,8 +392,8 @@ public function archivemember(Request $request, $id) {
             $viewVehicles = Vehicle::where('status', 'active')
             ->where(function ($query) use ($search) {
                 $query->where('type', 'LIKE', '%' . $search . '%')
-                      ->orWhere('plate_num', 'LIKE', '%' . $search . '%')
-                      ->orWhere('capacity', 'LIKE', '%' . $search . '%');
+                    ->orWhere('plate_num', 'LIKE', '%' . $search . '%')
+                    ->orWhere('capacity', 'LIKE', '%' . $search . '%');
             })
             ->get();
         } else {
@@ -417,7 +439,7 @@ public function archivemember(Request $request, $id) {
         }
     
     
-        return redirect()->route('admin.vehicle.vehicle')->with('success', 'Vehicle added successfully.');
+        return redirect()->route('admin.vehicle.addvehicle')->with('success', 'Successfully Added the Vehicle!');
     }
 
 
@@ -445,14 +467,14 @@ public function archivemember(Request $request, $id) {
         if ($selectedMember) {
             $ownerExists = Owner::where('member_id', $selectedMember->id)->exists();
             if (!$ownerExists) {
-               Owner::create([
+                Owner::create([
                 'member_id' => $selectedMember->id,
                 'member_type' => 'Owner'
             ]);
             }
         }
     
-        return redirect()->back();
+        return redirect()->route('admin.vehicle.vehicle');
     }
     
 /////Archive Vehicle Page
@@ -464,8 +486,8 @@ public function archivemember(Request $request, $id) {
             $viewVehicles = Vehicle::where('status', 'inactive')
             ->where(function ($query) use ($search) {
                 $query->where('type', 'LIKE', '%' . $search . '%')
-                      ->orWhere('plate_num', 'LIKE', '%' . $search . '%')
-                      ->orWhere('capacity', 'LIKE', '%' . $search . '%');
+                    ->orWhere('plate_num', 'LIKE', '%' . $search . '%')
+                    ->orWhere('capacity', 'LIKE', '%' . $search . '%');
             })
             ->get();
         } else {
@@ -497,8 +519,8 @@ public function archivemember(Request $request, $id) {
                 $viewVehicles = Vehicle::where('status', 'inactive')
                 ->where(function ($query) use ($search) {
                     $query->where('type', 'LIKE', '%' . $search . '%')
-                      ->orWhere('plate_num', 'LIKE', '%' . $search . '%')
-                      ->orWhere('capacity', 'LIKE', '%' . $search . '%');
+                        ->orWhere('plate_num', 'LIKE', '%' . $search . '%')
+                        ->orWhere('capacity', 'LIKE', '%' . $search . '%');
                 })
                 ->get();
             } else {
@@ -526,7 +548,7 @@ public function archivemember(Request $request, $id) {
                 $viewBookings = Booking::all()
                     ->whereHas('user', function ($query) use ($search) {
                         $query->where('name', 'LIKE', '%' . $search . '%')
-                              ->orWhere('last_name', 'LIKE', '%' . $search . '%');
+                            ->orWhere('last_name', 'LIKE', '%' . $search . '%');
                     })
                     ->orWhere('passenger', 'LIKE', '%' . $search . '%')
                     ->orWhere('location', 'LIKE', '%' . $search . '%')
@@ -543,6 +565,15 @@ public function archivemember(Request $request, $id) {
 
 
 ///////////////Admin Monthly Dues///////////////////////////////////////////////
+        public function viewAllMonthlyDues(Request $request)
+        {
+                $payments = Payment::with('member', 'dues')
+                    ->whereHas('dues')
+                    ->get();
+        
+                return view('admin.monthlydues.viewallmonthlydues', compact('payments'));
+        }
+
         public function viewMonthlyDues(Request $request)
         {
             $search = $request->monthlyduesSearch;
@@ -551,7 +582,7 @@ public function archivemember(Request $request, $id) {
                 $payments = Member::where('member_status', 'active')
                     ->where(function ($query) use ($search) {
                         $query->where('name', 'LIKE', '%' . $search . '%')
-                              ->orWhere('last_name', 'LIKE', '%' . $search . '%');
+                            ->orWhere('last_name', 'LIKE', '%' . $search . '%');
                     })
                     ->get();
             } else {
@@ -561,7 +592,6 @@ public function archivemember(Request $request, $id) {
                 $existingDues = Dues::where('date', $currentMonth)->first();
         
                 if (!$existingDues) {
-                 
                     $newDues = Dues::create([
                         'date' => $currentMonth,
                         'amount' => $amount
@@ -571,14 +601,12 @@ public function archivemember(Request $request, $id) {
                 }
         
                 if ($newDues && $newDues->wasRecentlyCreated) {
-                  
                     $members = Member::where('member_status', 'active')->get();  
         
                     foreach ($members as $member) {
-                     
                         $lastPayment = Payment::where('member_id', $member->id)
-                                               ->orderBy('last_payment', 'desc')
-                                               ->first();
+                                            ->orderBy('last_payment', 'desc')
+                                            ->first();
         
                         Payment::create([
                             'member_id' => $member->id,
@@ -589,7 +617,6 @@ public function archivemember(Request $request, $id) {
                     }
                 }
         
-           
                 $payments = Payment::with('member', 'dues')
                     ->whereHas('dues', function ($query) use ($currentMonth) {
                         $query->where('date', $currentMonth);
@@ -611,28 +638,46 @@ public function archivemember(Request $request, $id) {
         return redirect()->back();
     }
 
+////Send payment update
+    public function sendPaymentUpdate(Request $request, $id)
+{
 
-///////////////Admin Monthly Dues///////////////////////////////////////////////
+    $payment = Payment::findOrFail($id);
+    $payment->status = 'update';
+    $payment->save();
+
+    return redirect()->back();
+}
+
+
+///////////////Admin Schedule///////////////////////////////////////////////
 
 public function viewSchedule(Request $request) {
+
+    $vehiclesExist = Vehicle::exists();
     $members = Member::where('type', 'Driver')
+        ->where('member_status', 'active')
         ->with(['driver.schedule', 'payment']) 
         ->get();
-
 
     $drivers = $members->filter(function ($member) {
         if ($member->driver) {
             foreach ($member->driver as $driver) {
-             
+
                 $scheduledCount = $driver->schedule()
-                                    ->where('driver_status', 'scheduled')
-                                    ->count();
+                    ->where('driver_status', 'scheduled')
+                    ->where('cust_status', '!=', 'inactive') 
+                    ->count();
+
                 $acceptedCount = $driver->schedule()
-                                  ->where('driver_status', 'accepted')
-                                  ->count();
+                    ->where('driver_status', 'accepted')
+                    ->where('cust_status', '!=', 'inactive') 
+                    ->count();
+
                 $cancelledCount = $driver->schedule()
-                                  ->where('driver_status', 'cancelled')
-                                  ->count();
+                    ->where('driver_status', 'cancelled')
+                    ->count();
+
                 $count = $scheduledCount + $acceptedCount + $cancelledCount;
 
                 $paidCount = $member->payment()->where('status', 'paid')->count();
@@ -648,14 +693,14 @@ public function viewSchedule(Request $request) {
     $viewBookings = Booking::where('status', 'active')
         ->with(['schedule' => function ($query) {
             $query->orderBy('created_at', 'desc'); 
-        }, 'schedule.driver.member', 'user']) 
+        }, 'schedule.driver.member', 'user'])
         ->get();
 
-    return view('Admin.schedule.schedule', compact('drivers', 'viewBookings'));
+    return view('Admin.schedule.schedule', compact('drivers', 'viewBookings', 'vehiclesExist'));
 }
 
 
-/////Schedule
+/////Assign a Driver
     public function assignDriver(Request $request)
     {
         $bookingId = $request->input('booking_id');
@@ -730,26 +775,30 @@ public function viewSchedule(Request $request) {
 
 
 
-
-
-
-
 ///////////////Member///////////////////////////////////////////////
 public function memberdashboard()
 {
     $member_id = Auth::guard('member')->user()->id;
+    $memberType = Member::find($member_id);
 
-    $schedules = Schedule::with(['booking', 'booking.user', 'driver.member', 'booking.tariff'])
+    $schedules = Schedule::with(['booking', 'booking.user', 'driver.member', 'vehicle.member', 'booking.tariff'])
         ->where('cust_status', 'active')
-        ->whereHas('driver.member', function ($query) use ($member_id) {
-            $query->where('member_id', $member_id);
+        ->where(function ($query) use ($member_id) {
+            $query->whereHas('driver.member', function ($q) use ($member_id) {
+                $q->where('member_id', $member_id);
+            })
+            ->orWhereHas('vehicle.member', function ($q) use ($member_id) {
+                $q->where('member_id', $member_id);
+            });
         })
         ->get();
 
-    return view('member.dashboard', compact('schedules'));
+    return view('member.dashboard', compact('schedules', 'memberType'));
 }
 
 
+
+/////accept schedule
     public function acceptSchedule(Request $request, $scheduleId)
     {
         $schedule = Schedule::find($scheduleId);
@@ -759,7 +808,7 @@ public function memberdashboard()
         return redirect()->route('member.dashboard')->with('success', 'Schedule accepted successfully.');
     }
 
-    
+/////cancel schedule
     public function cancelSchedule(Request $request, $scheduleId)
     {
         $schedule = Schedule::find($scheduleId);
@@ -769,6 +818,7 @@ public function memberdashboard()
         return redirect()->route('member.dashboard')->with('success', 'Schedule cancelled successfully.');
     }
 
+/////monthly dues
     public function memberMonthlyDues() {
         $member_id = Auth::guard('member')->user()->id;
     

@@ -1,7 +1,7 @@
 <nav class="bg-white shadow fixed w-full z-50">
     <div class="mx-auto px-5 pt-5 pb-3 md:px-10 md:pb-5 xl:px-52">
         <div class="flex items-center justify-between">
-            <div class="text-xl lg:text-xl font-bold">MBTC</div>
+            <div class="text-xl lg:text-xl font-bold"><a href="{{ route('dashboard') }}">MBTC</a></div>
             <div class="lg:hidden">
                 <button id="menu-toggle" class="text-gray-500 focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -10,7 +10,26 @@
                     </svg>
                 </button>
             </div>
-            @if(!Auth::guard('admin')->check() && !Auth::guard('member')->check())
+            @if(!Auth::check())
+            <div class="hidden font-semibold lg:flex space-x-6">
+                <a href="{{ route('login') }}" class="text-gray-900 hover:text-gray-500">Login</a>
+                <a href="{{ route('register') }}" class="text-gray-900 hover:text-gray-500">Register</a>
+            </div>
+            @elseif(Auth::guard('member')->check())
+            <div class="hidden font-semibold lg:flex space-x-6">
+                <a href="{{ route('member.dashboard') }}" class="text-gray-900 hover:text-gray-500">Home</a>
+                <a href="{{ route('member.membermonthlydues') }}" class="text-gray-900 hover:text-gray-500">Monthly Dues</a>
+                <button id="profile-toggle" class="text-gray-500 focus:outline-none">
+                    <img width="20" height="20" src="{{ asset('img/userNav.png') }}" alt="User Icon" />
+                </button>
+            </div>
+            @elseif(Auth::guard('admin')->check())
+            <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
+                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>
+                <a href="{{ route('admin.logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
+                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
+            </div>
+            @else
             <div class="hidden font-semibold lg:flex space-x-6">
                 <a href="{{ route('dashboard') }}" class="text-gray-900 hover:text-gray-500">Home</a>
                 <a href="{{ route('booking') }}" class="text-gray-900 hover:text-gray-500">Booking</a>
@@ -20,44 +39,22 @@
             </div>
             @endif
 
-            @if(Auth::guard('member')->check())
-            <div class="hidden font-semibold lg:flex space-x-6">
-                <a href="{{ route('member.dashboard') }}" class="text-gray-900 hover:text-gray-500">Home</a>
-                <a href="{{ route('member.membermonthlydues') }}" class="text-gray-900 hover:text-gray-500">Monthly Dues</a>
-                <button id="profile-toggle" class="text-gray-500 focus:outline-none">
-                    <img width="20" height="20" src="{{ asset('img/userNav.png') }}" alt="User Icon" />
-                </button>
-            </div>
-            
-            @endif
         </div>
     </div>
+
+    <!--  -->
     
 
     <!-- Mobile Menu -->
-    @if(!Auth::guard('admin')->check() && !Auth::guard('member')->check())
+
+    @if(!Auth::check())
     <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
-        <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>
-        <a href="{{ route('booking') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Booking</a>
-        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Profile</a>
+        <a href="{{ route('login') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Login</a>
+        <a href="{{ route('register') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Register</a>
         <a href="{{ route('logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
     </div>
-    
-
-    <!-- Profile Menu -->
-    <div id="profile-menu" class="hidden absolute top-15 w-40 md:right-10 xl:right-52 bg-white shadow-lg">
-        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Profile</a>
-        <a href="{{ route('logout') }}" class="block px-4 pt-2 pb-4 text-gray-700 hover:bg-gray-200"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
-    </div>
-
-    <form id="logout-form" method="POST" action="{{ route('logout') }}">
-        @csrf
-    </form>
-    @endif
-
-    @if(Auth::guard('member')->check())
+    @elseif(Auth::guard('member')->check())
     <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
         <a href="{{ route('member.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>
         <a href="{{ route('member.membermonthlydues') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Monthly Dues</a>
@@ -77,16 +74,8 @@
     <form id="logout-form" method="POST" action="{{ route('member.logout') }}">
         @csrf
     </form>
-    @endif
 
-    @if(Auth::guard('admin')->check())
-    <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
-        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>
-        <a href="{{ route('admin.logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
-    </div>
-    
-
+    @elseif(Auth::guard('admin')->check())
     <!-- Profile Menu -->
     <div id="profile-menu" class="hidden absolute top-15 w-40 md:right-10 xl:right-52 bg-white shadow-lg">
         <a href="{{ route('admin.logout') }}" class="block px-4 pt-2 pb-4 text-gray-700 hover:bg-gray-200"
@@ -96,7 +85,30 @@
     <form id="logout-form" method="POST" action="{{ route('admin.logout') }}">
         @csrf
     </form>
-    @endif
+
+    @else
+    <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
+        <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>
+        <a href="{{ route('booking') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Booking</a>
+        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Profile</a>
+        <a href="{{ route('logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
+    </div>
+    
+
+    <!-- Profile Menu -->
+    <div id="profile-menu" class="hidden absolute top-15 w-40 md:right-10 xl:right-52 bg-white shadow-lg">
+        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Profile</a>
+        <a href="{{ route('logout') }}" class="block px-4 pt-2 pb-4 text-gray-700 hover:bg-gray-200"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
+    </div>
+
+    <form id="logout-form" method="POST" action="{{ route('logout') }}">
+        @csrf
+    </form>
+@endif
+
+
 </nav>
 
 <script>

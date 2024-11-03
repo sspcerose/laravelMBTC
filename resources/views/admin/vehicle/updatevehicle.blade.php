@@ -1,74 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layout.layout')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Vehicle</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
+@include('layouts.adminNav')
 
-        .container {
-            margin-top: 50px;
-        }
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<link href="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.css" rel="stylesheet">
+<script src="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
-    </style>
-</head>
+<body class="font-inter">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="pt-24 md:pt-0 max-w-md w-full mx-auto">
+            <h1 class="text-black p-8 text-center font-extrabold text-3xl">Update Vehicle</h1>
+            <div class="items-center">
 
-<body>
-    <div class="container">
-        <div class="mb-4">
-            <a href="{{ route('admin.vehicle.vehicle') }}" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Back</a>
+                <!-- Success Message Container -->
+                <div id="successMessage" class="hidden successMessageAlert mt-3 relative flex w-5/6 mx-auto p-3 text-sm text-white bg-green-500 rounded-md">
+                    <svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    </svg>
+                    <span class="ml-2">Vehicle successfully updated!</span>
+                </div>
+
+                <!-- Form -->
+                <form id="vehicleForm" method="POST" action="{{ url('admin/vehicle/updatevehicle/' . $viewVehicles->id) }}" class="mx-10">
+                    @csrf
+                    <div class="flex flex-col justify-center">
+                    <label for="owner">Owner:</label>
+                        <select name="member_id" id="member_id" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required>
+                            @foreach($activeMembers as $activeMember)
+                                <option value="{{ $activeMember->id }}" @if($viewVehicles->member_id == $activeMember->id) selected @endif>
+                                    {{ $activeMember->name }} {{ $activeMember->last_name }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <label for="vehicletype">Vehicle Type:</label>
+                        <input type="text" id="type" name="type" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" placeholder="Vehicle Type" required value="{{ $viewVehicles->type }}">
+                        <label for="rate">Rate:</label>
+                        <input type="text" id="plate_num" name="plate_num" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" placeholder="Plate Number" required value="{{ $viewVehicles->plate_num }}">
+                        <label for="succeedingrate">Succeeding Rate:</label>
+                        <input type="number" id="capacity" name="capacity" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" placeholder="Capacity" required value="{{ $viewVehicles->capacity }}">
+                    </div>
+
+                    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 pb-40 lg:pb-0">
+                        <button class="w-full md:w-1/2 py-2 bg-red-600 text-gray-50 font-semibold rounded-lg hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400" type="button" onclick="window.history.back();">Cancel</button>
+
+                        <input type="hidden" id="status" value="active" name="status">
+
+                        <button id="submitButton" class="w-full md:w-1/2 py-2 bg-yellow-400 text-gray-50 font-semibold rounded-lg hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">Update</button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <h2 class="text-center text-2xl font-bold">Update Vehicle</h2>
-        <form method="POST" action="{{ url('admin/vehicle/updatevehicle/' . $viewVehicles->id) }}">
-            @csrf
-
-            <div class="form-group">
-                <label for="member_id" class="form-label">Owner:</label>
-                <select name="member_id" id="member_id" class="form-control" required>
-                    @foreach($activeMembers as $activeMember)
-                        <option value="{{ $activeMember->id }}" 
-                            @if($viewVehicles->member_id == $activeMember->id) 
-                                selected 
-                            @endif>
-                            {{ $activeMember->name }} {{ $activeMember->last_name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="type" class="form-label">Type:</label>
-                <input type="text" id="type" name="type" class="form-control"
-                required value="{{ $viewVehicles->type }}">
-            </div>
-
-            <div class="form-group">
-                <label for="plate_num" class="form-label">Plate Number:</label>
-                <input type="text" id="plate_num" name="plate_num" class="form-control"
-                required value="{{ $viewVehicles->plate_num }}">
-            </div>
-
-            <div class="form-group">
-                <label for="capacity" class="form-label">Capacity:</label>
-                <input type="number" id="capacity" name="capacity" class="form-control"
-                required value="{{ $viewVehicles->capacity }}">
-            </div>
-
-            <input type="hidden" id="status" value="active" name="status">
-
-            <button type="submit" class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600">Update Vehicle</button>
-        </form>
     </div>
+
+    <script>
+        document.getElementById('submitButton').addEventListener('click', function(event) {
+            event.preventDefault(); 
+
+            var successMessage = document.getElementById('successMessage');
+            successMessage.classList.remove('hidden');
+
+            setTimeout(function() {
+                document.getElementById('vehicleForm').submit();
+            }, 3000); 
+        });
+    </script>
 </body>
 
-</html>

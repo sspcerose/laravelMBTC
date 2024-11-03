@@ -1,59 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layout.layout')
+@include('layouts.adminNav')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tariffs</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<link href="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <style>
-        body {
-            background-color: #f8f9fa;
-            padding: 20px;
-        }
+@if (session('success'))
+    <meta http-equiv="refresh" content="1;url={{ route('admin.tariff.tariff') }}">
+@endif
 
-        .container {
-            margin-top: 10px;
-        }
+<body class="font-inter">
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="pt-24 md:pt-0 max-w-md w-full mx-auto">
+            <h1 class="text-black p-8 text-center font-extrabold text-3xl">Add Tariff</h1>
+            <div class="items-center">
 
-        .table-container {
-            margin-top: 30px;
-        }
-    </style>
-</head>
+            <!-- Success Message Container -->
+            @if (session('success'))
+                <div id="successMessage" class="successMessageAlert mt-3 mb-3 flex w-5/6 mx-auto p-3 text-sm text-white bg-blue-500 rounded-md">
+                    <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    </svg>
+                    <span class="ml-2">{{ session('success') }}</span>
+                </div>
+            @endif
 
-<body>
-
-    <div class="container">
-        <div class="mb-4">
-            <a href="{{ route('admin.tariff.tariff') }}" class="bg-red-500 text-white py-2 px-4 rounded">Back</a>
+            <form id="tariffForm" action="{{ url('admin/tariff/addtariff') }}" method="POST" class="mx-10">
+                @csrf
+                <div class="flex flex-col justify-center">
+                    <input type="text" id="destination" name="destination" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required placeholder="Destination">
+                    <input type="number" id="rate" name="rate" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required placeholder="Rate">
+                    <input type="number" id="succeeding" name="succeeding" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required placeholder="Succeeding Rate">
+                </div>
+                
+                <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 pb-40 lg:pb-0">
+                    <button class="w-full md:w-1/2 py-2 bg-red-600 text-gray-50 font-semibold rounded-lg hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400" type="button" onclick="window.history.back();">
+                        Cancel
+                    </button>
+                    <input type="hidden" id="status" value="active" name="status">
+                    <button id="submitButton" class="w-full md:w-1/2 py-2 bg-green-400 text-gray-50 font-semibold rounded-lg hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-400" type="submit">
+                        Add
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <h2 class="text-center text-2xl font-bold">Add Tariff</h2>
-        <form action="{{ url('admin/tariff/addtariff') }}" method="POST">
-            @csrf
-            <div class="form-group">
-                <label for="destination">Destination:</label>
-                <input type="text" id="destination" name="destination" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label for="rate">Rate:</label>
-                <input type="number" id="rate" name="rate" class="form-control" required>
-            </div>
-
-            <div class="mb-4">
-                <label for="succeeding">Succeeding:</label>
-                <input type="number" id="succeeding" name="succeeding" class="form-control" required>
-            </div>
-
-            <input type="hidden" id="status" value="active" name="status">
-            <button type="submit" class="btn btn-success">Add Tariff</button>
-        </form>
     </div>
-
 </body>
-
-</html>
