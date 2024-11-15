@@ -74,7 +74,8 @@ class RegisteredUserController extends Controller
         // Auth::guard('admin')->login($user);
 
         // return redirect(RouteServiceProvider::ADMIN_DASHBOARD);
+        return redirect()->route('member.verification.notice');
 
-        return redirect('admin/member/member');
+        // return redirect('admin/member/member');
     }
 }

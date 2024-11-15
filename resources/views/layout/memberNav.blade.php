@@ -47,6 +47,9 @@
             <li>
                 <a href="#" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Profile">Profile</a>
             </li>
+            <li>
+            <i class="fas fa-sign-out-alt fa-xl">Logout</i>
+            </li>
         </ul>
     </div>
 </div>

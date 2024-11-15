@@ -18,7 +18,16 @@
                     </svg>
                 </button>
             </div>
-            <div class="text-xl lg:text-3xl font-bold text-white">MBTC</div>
+
+            <div class="sidebar-brand flex items-center justify-between w-full">
+                <h1 class="text-xl lg:text-3xl font-bold text-white">MBTC</h1>
+                <div class="flex items-center ml-auto">
+                    <img width="20" height="20" src="{{ asset('img/memNav.png') }}" alt="User Icon" class="mr-2" />
+                    <p class="text-sm font-bold text-white">Admin</p>
+                </div>
+            </div>
+
+            
         </div>
     </div>
 </nav>

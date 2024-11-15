@@ -15,6 +15,7 @@ class Booking extends Model
         'tariff_id',
         'passenger',
         'location',
+        'time',
         'destination',
         'receipt',
         'start_date',

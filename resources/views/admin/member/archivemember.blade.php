@@ -10,7 +10,7 @@
 <body class="font-inter">
     <div class="lg:pl-20 lg:pr-10">
         <div class="pt-24 lg:pt-28 lg:pr-6 flex justify-between items-center">
-            <h1 class="text-black p-4 pl-4 text-center md:text-left font-extrabold text-3xl">Archive Members</h1>
+            <h1 class="text-black p-4 pl-4 text-center md:text-left font-extrabold text-3xl">Archived Members</h1>
             <div class="flex">
                     <button class="bg-red-600 hover:bg-red-400 text-white flex items-center py-3 px-4 rounded-xl" onclick="window.location.href='{{ route('admin.member.member') }}';">
                         Back

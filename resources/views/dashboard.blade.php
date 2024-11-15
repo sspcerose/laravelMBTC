@@ -20,6 +20,10 @@
                                 <label class="font-bold pb-2">Location</label>
                                 <div class="md:flex md:flex-row justify-center md:flex-grow md:space-x-3">
                                     <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="text" id="location" name="location" placeholder="From" required>
+                                    <select name="sample" id="sample" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full">
+                                            <option value="San Jose">San Jose</option>
+                                    </select>
+
                                     <select name="id" id="id" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full">
                                         @foreach($activetariffs as $activetariff)
                                             <option value="{{ $activetariff->id }}">{{ $activetariff->destination }}</option>
@@ -29,6 +33,7 @@
 
                                 <label class="font-bold pb-2">Date</label>
                                 <div class="md:flex md:flex-row justify-center md:flex-grow md:space-x-3 md:pb-5">
+                                    <input type="text" id="time" name="time" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" placeholder="pick-up time">
                                     <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="start_date" name="start_date" min="{{ date('Y-m-d') }}" required>
                                     <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="end_date" name="end_date" min="{{ date('Y-m-d') }}" required>
                                 </div>
@@ -56,7 +61,18 @@
                 
                                 <label class="font-bold pb-2">Location</label>
                                 <div class="md:flex md:flex-row justify-center md:flex-grow md:space-x-3">
-                                    <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="text" id="location" name="location" placeholder="From" required>
+                                    <!-- <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="text" id="location" name="location" placeholder="From" required> -->
+                                    <select name="location" id="location" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full">
+                                            <option value="Abar 1st">Abar 1st</option>
+                                            <option value="Calaocan">Calaocan</option>
+                                            <option value="Canuto Ramos">Canuto Ramos</option>
+                                            <option value="Crisanto Sanchez">Crisanto Sanchez</option>
+                                            <option value="F.E. Marcos">F.E. Marcos</option>
+                                            <option value="R. Eugenio">R. Eugenio</option>
+                                            <option value="R. Rueda Sr.">R. Rueda Sr.</option>
+                                            <option value="Sibut">Sibut</option>
+                                            <option value="Sto. Niño 1st">Sto. Niño 1st</option>
+                                    </select>
                                     <select name="id" id="id" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full">
                                         @foreach($activetariffs as $activetariff)
                                             <option value="{{ $activetariff->id }}">{{ $activetariff->destination }}</option>
@@ -64,21 +80,39 @@
                                     </select>
                                 </div>
 
-                                <label class="font-bold pb-2">Date</label>
+                                <!-- <label class="font-bold pb-2">Date and Time</label> -->
                                 <div class="md:flex md:flex-row justify-center md:flex-grow md:space-x-3 md:pb-5">
-                                    <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="start_date" name="start_date" min="{{ date('Y-m-d') }}" required>
-                                    <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="end_date" name="end_date" min="{{ date('Y-m-d') }}" required>
-                                    <!-- <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="time" required> -->
+                                    
+                                    <div class="w-full">
+                                    <label for="start_date" class="font-bold pb-2">Pick-up time</label>
+                                        <input type="text" id="time" name="time" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" placeholder="time" required>
+                                    </div>
+                                    
+                                    <div class="w-full">
+                                        <label for="start_date" class="font-bold pb-2">Start Date</label>
+                                        <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="start_date" name="start_date" min="{{ date('Y-m-d') }}" required>
+                                    </div>
+                                    
+                                    <div class="w-full">
+                                        <label for="end_date" class="font-bold pb-2">End Date</label>
+                                        <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="end_date" name="end_date" min="{{ date('Y-m-d') }}" required>
+                                    </div>
+
                                 </div>
 
                                 <div class="md:flex justify-center md:flex-grow md:space-x-3 pb-4 md:pb-8">
-                                    <div class="mb-4 bg-gray-200 rounded-md w-full flex items-center space-x-3 py-1 pl-3 px-1 justify-between">
-                                        <label class="font-medium">Passenger</label>
-                                        <div class="flex items-center md:space-x-1">
-                                            <button type="button" id="decrement-button" class="font-bold w-8 h-8 rounded-md hover:bg-gray-300 text-1xl">−</button>
+                                    <div class="mb-4 bg-gray-200 rounded-md w-full flex items-center space-x-3 py-1 px-3">
+                                        <label class="font-medium w-1/3">Passenger</label> 
+                                        <!-- <div class="flex items-center md:space-x-1"> -->
+                                            <!-- <button type="button" id="decrement-button" class="font-bold w-8 h-8 rounded-md hover:bg-gray-300 text-1xl">−</button>
                                             <input type="text" id="counter-input" class="text-black bg-gray-50 text-sm rounded-md max-w-[2.5rem] h-7 text-center" placeholder="1" value="1" required id="passenger" name="passenger"/>
-                                            <button type="button" id="increment-button" class="font-bold w-8 h-8 rounded-md hover:bg-gray-300 text-1xl">+</button>
-                                        </div>
+                                            <button type="button" id="increment-button" class="font-bold w-8 h-8 rounded-md hover:bg-gray-300 text-1xl">+</button> -->
+                                            <select name="passenger" id="passenger" class="bg-gray-200 rounded-md px-3 py-1 w-2/3">
+                                                @for ($i = 1; $i <= 15; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                        </select>
+                                        <!-- </div> -->
                                     </div>
                                     <input class="mb-4 font-bold text-black bg-gray-200 rounded-md px-3 py-2 w-full" type="text" placeholder="Total:" id="price" name="price">
                                 </div>
@@ -95,29 +129,28 @@
     </body>
 
     <script>
-        const decrementButton = document.getElementById('decrement-button');
-        const incrementButton = document.getElementById('increment-button');
-        const counterInput = document.getElementById('counter-input');
-        let counterValue = 1;
+        // const decrementButton = document.getElementById('decrement-button');
+        // const incrementButton = document.getElementById('increment-button');
+        // const counterInput = document.getElementById('counter-input');
+        // let counterValue = 1;
 
-        function updateCounter() {
-            counterInput.value = counterValue;
-        }
+        // function updateCounter() {
+        //     counterInput.value = counterValue;
+        // }
 
-        decrementButton.addEventListener('click', function() {
-            if (counterValue > 1) {
-                counterValue--;
-                updateCounter();
-            }
-        });
+        // decrementButton.addEventListener('click', function() {
+        //     if (counterValue > 1) {
+        //         counterValue--;
+        //         updateCounter();
+        //     }
+        // });
 
-        incrementButton.addEventListener('click', function() {
-            if (counterValue < 20) { 
-                counterValue++;
-                updateCounter();
-            }
-        });
-
+        // incrementButton.addEventListener('click', function() {
+        //     if (counterValue < 20) { 
+        //         counterValue++;
+        //         updateCounter();
+        //     }
+        // });
         $(document).ready(function() {
             var firstPageData = {}; 
 
@@ -132,19 +165,21 @@
                 firstPageData['customer_id'] = $('#customer_id').val();
                 firstPageData['location'] = $('#location').val();
                 firstPageData['id'] = $('#id').val();
+                firstPageData['time'] = $('#time').val();
                 firstPageData['start_date'] = $('#start_date').val();
                 firstPageData['end_date'] = $('#end_date').val();
-                firstPageData['passenger'] = $('#counter-input').val();
+                // firstPageData['passenger'] = $('#counter-input').val();
+                firstPageData['passenger'] = $('#passenger').val();
                 firstPageData['price'] = $('#price').val();
 
                 // second page
                 $('#bookingCard').html(`
                     <div class="flex flex-col justify-center px-8 md:px-4 ">
                         <i id="goBackButton" class="fas fa-arrow-left text-2xl text-slate-950 hover:text-slate-600 pb-8 md:pb-4"
-                            style="cursor: pointer;">Where is the back icon</i>
+                            style="cursor: pointer;">Back</i>
 
                         <h1 class="text-black font-extrabold text-center text-sm pb-2">Please complete payment or down payment to confirm booking reservation</h1>
-                        <p class="text-center mb-8 text-xs">A down payment of 50% is needed to confirm booking</p>
+                        <p class="text-center mb-8 text-xs">A mimimum of ₱1,000 down payment is needed to confirm booking</p>
 
                         <div class="flex justify-center space-x-3 items-center">
                             <h1 class="text-black font-extrabold text-center text-4xl">Total:</h1>
@@ -152,8 +187,8 @@
                         </div>
 
                         <div class="flex justify-center mb-8 items-center">
-                            <h2 class="text-black font-bold text-center text-md">Down payment: </h2>
-                            <p class="text-black font-bold text-center text-md">₱1,000{{-- ${{ number_format($downPaymentAmount, 2) }} --}}</p>
+                            <h2 class="text-black font-bold text-center text-md">Please be advised that if you wish to cancel your reservation, your payment is non-refundable</h2>
+                            <p class="text-black font-bold text-center text-md"></p>
                         </div>
 
                         <div class="flex flex-col justify-center lg:flex-row items-center lg:space-y-0 pb-4">
@@ -219,6 +254,7 @@
                     formData.append('customer_id', firstPageData.customer_id);
                     formData.append('location', firstPageData.location);
                     formData.append('id', firstPageData.id);
+                    formData.append('time', firstPageData.time);
                     formData.append('start_date', firstPageData.start_date);
                     formData.append('end_date', firstPageData.end_date);
                     formData.append('passenger', firstPageData.passenger);
@@ -248,8 +284,13 @@
 
             // $('html, body').animate({ scrollTop: 0 }, 'slow');
         },
-                        error: function(error) {
-                            alert('Error occurred during booking confirmation.');
+                                    error: function(xhr, status, error) {
+                                // Alert a custom error message along with error details
+                                alert('Error occurred during booking confirmation:\n\n' +
+                                    'Status: ' + status + '\n' +
+                                    'Error: ' + error + '\n' +
+                                    'Response: ' + xhr.responseText);
+                            
                         }
                     });
                 });
@@ -293,6 +334,31 @@
             calculatePrice();
         });
     });
+    let isChangingDate = false; // Flag to prevent recursive calls
+
+flatpickr("#time", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "h:i K", // 12-hour format with AM/PM
+    minuteIncrement: 30, // Default minute increment
+    clickOpens: true,
+    // allowInput: true, // Allow input to ensure users can type in the field if needed
+
+    onChange: function(selectedDates, dateStr, instance) {
+        if (isChangingDate) return; // Prevent recursion
+        var date = selectedDates[0];
+        if (date) {
+            var minutes = date.getMinutes();
+            var roundedMinutes = Math.round(minutes / 30) * 30;
+            date.setMinutes(roundedMinutes);
+
+            isChangingDate = true; // Set the flag to true before changing the date
+            instance.setDate(date, true);
+            isChangingDate = false; // Reset the flag after the change
+        }
+    }
+});
+
 
 
     </script>

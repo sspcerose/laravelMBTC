@@ -64,7 +64,11 @@
                         <td class="py-3 px-4">{{ $viewmember->name }} {{ $viewmember->last_name }}</td>
                         <td class="py-3 px-4">{{ $viewmember->tin }}</td>
                         <td class="py-3 px-4">{{ $viewmember->mobile_num }}</td>
-                        <td class="py-3 px-4">{{ $viewmember->email }}</td>
+                        @if($viewmember->created_at == $viewmember->updated_at)
+                        <td class="py-3 px-4">{{ $viewmember->email }}<span class="font-bold text-red-700"> (not yet verified)</span></td>
+                        @else
+                        <td class="py-3 px-4">{{ $viewmember->email }}<span class="font-bold text-green-700"> (verified)</td>
+                        @endif
                         <td class="py-3 px-4">{{\Carbon\Carbon::parse($viewmember->date_joined)->format('F d, Y')}}</td>
                         <td class="py-3 px-4">{{ $viewmember->type }}</td>
                         <td class="py-3 px-4" id="archiveTd">

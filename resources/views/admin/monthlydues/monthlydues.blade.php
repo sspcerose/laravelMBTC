@@ -17,6 +17,28 @@
                         SEE ALL
                     </button>
                 </a>
+                <div class="px-4 lg:px-0 pt-4 lg:pr-5">
+                <!-- Notification Icon -->
+                <div class="relative">
+                    <button id="notification-icon" class="relative p-4 bg-blue-500 text-white rounded-lg focus:outline-none">
+                    <i class="fa-solid fa-bell"></i>
+                        <span id="notification-badge" class="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">3</span>
+                    </button>
+
+                    <!-- Notification Container -->
+                    <div id="notification-container" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg overflow-hidden z-10 border-2 border-gray-500">
+                    <ul class="p-4 max-h-96 overflow-y-auto" id="notification-list">
+                    @foreach($paymentss as $paymentts)
+                        @if($paymentts->status == 'update')
+                                <li class="text-sm text-gray-700 border-b p-2">
+                                <span class="font-bold">{{ $paymentts->member->name }} {{ $paymentts->member->last_name }}</span> wants an update on its <span class="font-bold">{{ \Carbon\Carbon::parse($paymentts->dues->date)->format('F Y') }} due</span>
+                                </li>
+                        @endif
+                    @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
                 </div>
                 </div>
 
@@ -161,6 +183,46 @@
             }
         }
     });
+
+    let seenNotifications = [];
+        let notificationCount = 0;
+
+        async function fetchNotifications() {
+
+            const newNotifications = notifications.filter(notification => !seenNotifications.includes(notification.id));
+            notificationCount = newNotifications.length;
+            updateNotificationBadge(notificationCount);
+            displayNotifications(newNotifications);
+        }
+
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notification-badge');
+            badge.textContent = count > 0 ? count : ''; 
+        }
+
+        function displayNotifications(notifications) {
+            const container = document.getElementById('notification-list');
+            container.innerHTML = '';
+            notifications.forEach(notification => {
+                const li = document.createElement('li');
+                li.className = "py-2 border-b cursor-pointer hover:bg-gray-100";
+                li.textContent = notification.message;
+                li.onclick = () => markAsSeen(notification.id);
+                container.appendChild(li);
+            });
+        }
+
+        function markAsSeen(notificationId) {
+            seenNotifications.push(notificationId);
+        }
+
+        document.getElementById('notification-icon').addEventListener('click', () => {
+            const container = document.getElementById('notification-container');
+            container.classList.toggle('hidden');
+            fetchNotifications();
+        });
+
+
 </script>
 
 </body>

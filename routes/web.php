@@ -5,6 +5,8 @@ use App\Http\Controllers\MemberProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MBTCController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,10 +24,13 @@ use Illuminate\Support\Facades\Route;
 // });
 
 //////////////////////USER/////////////////////////////
-Route::get('/dashboard', [MBTCController::class, 'bookingform'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [MBTCController::class, 'bookingform'])->middleware(['auth:web', 'verified'])->name('dashboard');
 Route::get('/', [MBTCController::class, 'bookingform'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+
+
+Route::middleware(['auth:web'])->group(function () {
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -40,15 +45,11 @@ require __DIR__.'/auth.php';
 
 
 
-Route::get('/member', function () {
-    return view('member.welcome');
-})->name('member.welcome');
+
 
 
 //////////////////////ADMIN/////////////////////////////
-Route::get('/admin/adminwelcome', function () {
-    return view('admin.adminwelcome');
-});
+
 
 
 Route::get('/admin/dashboard', [MBTCController::class, 'dashboard'])
@@ -56,7 +57,13 @@ Route::get('/admin/dashboard', [MBTCController::class, 'dashboard'])
     ->name('admin.dashboard');
 
 Route::middleware(['auth:admin'])->group(function () {
+    Route::get('/member', function () {
+        return view('member.welcome');
+    })->name('member.welcome');
 
+    Route::get('/admin/adminwelcome', function () {
+        return view('admin.adminwelcome');
+    });
     // member page
     Route::get('/admin/member/member', [MBTCController::class, 'viewmember'])->name('admin.member.member');
     Route::post('/admin/member/member/{id}/archive', [MBTCController::class, 'archivemember'])->name('archivemember');
@@ -85,6 +92,8 @@ Route::middleware(['auth:admin'])->group(function () {
 
     //booking page
     Route::get('admin/booking/booking', [MBTCController::class, 'adminbookingpage'])->name('admin.booking.booking');
+    Route::post('/booking/{bookingId}/accept', [MBTCController::class, 'acceptBooking'])->name('booking.accept');
+    Route::post('/booking/{bookingId}/reject', [MBTCController::class, 'rejectBooking'])->name('booking.reject');
 
     //monthlydues page
     Route::get('admin/monthlydues/monthlydues', [MBTCController::class, 'viewMonthlyDues'])->name('admin.monthlydues.monthlydues');
@@ -94,6 +103,7 @@ Route::middleware(['auth:admin'])->group(function () {
     //schedule page
     Route::get('admin/schedule/schedule', [MBTCController::class, 'viewSchedule'])->name('admin.schedule.schedule');
     Route::post('admin/schedule/schedule', [MBTCCOntroller::class, 'assignDriver']);
+    Route::post('admin/schedule/optionschedule', [MBTCCOntroller::class, 'optionAssignDriver']);
     
 });
 
@@ -104,14 +114,26 @@ require __DIR__.'/adminauth.php';
 //////////////////////MEMBER/////////////////////////////
 Route::get('/member/dashboard', [MBTCController::class, 'memberdashboard'])->middleware(['auth:member', 'verified'])->name('member.dashboard');
 
-Route::middleware(['auth:member'])->group(function () {
+Route::middleware(['auth:member', 'verified'])->group(function () {
+    Route::get('/member/welcome', function () {
+        return view('member.welcome');
+    });
+    
     Route::post('/schedule/{scheduleId}/accept', [MBTCController::class, 'acceptSchedule'])->name('schedule.accept');
     Route::post('/schedule/{scheduleId}/cancel', [MBTCController::class, 'cancelSchedule'])->name('schedule.cancel');
+    Route::post('/schedule/{scheduleId}/optionaccept', [MBTCController::class, 'optionSchedule'])->name('optionschedule.accept');
     Route::get('member/profile', [MemberProfileController::class, 'edit'])->name('member.profile.edit');
     Route::patch('member/profile', [MemberProfileController::class, 'update'])->name('member.profile.update');
     Route::delete('member/profile', [MemberProfileController::class, 'destroy'])->name('member.profile.destroy');
     Route::get('member/membermonthlydues', [MBTCController::class, 'memberMonthlyDues'])->name('member.membermonthlydues');
     Route::post('member/membermonthlydues/{id}', [MBTCController::class, 'sendPaymentUpdate'])->name('monthlydue.update');
+
+     //dagdag from here 
+    Route::get('member/profile/changepassword1', [MemberProfileController::class, 'showChangePasswordForm'])->name('member.profile.changepassword1');
+    Route::get('member/change-password', [PasswordController::class, 'showChangePasswordForm'])->name('change.password1');
+    Route::post('member/change-password', [PasswordController::class, 'updatePassword'])->name('password.update1');
+     //to here
+    
 });
 require __DIR__.'/memberauth.php';
 
@@ -199,13 +221,16 @@ Route::get('/ForTesting/AddVehicle', function () {
     return view('ForTesting.AddVehicle');
 })->name('ForTesting.AddVehicle');
 
+Route::get('/ForTesting/notif', function () {
+    return view('ForTesting.notif');
+});
+
+
 ///////////
 
 
 //member
-Route::get('/member/welcome', function () {
-    return view('member.welcome');
-});
+
 
 
 // might be useful 

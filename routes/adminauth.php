@@ -28,10 +28,10 @@ Route::middleware('guest:admin')->group(function () {
     Route::post('admin', [AuthenticatedSessionController::class, 'store']);
 
     Route::get('admin/forgot-password', [PasswordResetLinkController::class, 'create'])
-                ->name('password.request');
+                ->name('admin.password.request');
 
     Route::post('admin/forgot-password', [PasswordResetLinkController::class, 'store'])
-                ->name('password.email');
+                ->name('admin.password.email');
 
     Route::get('admin/reset-password/{token}', [NewPasswordController::class, 'create'])
                 ->name('password.reset');
@@ -42,15 +42,15 @@ Route::middleware('guest:admin')->group(function () {
 
 Route::middleware('auth:admin')->group(function () {
     Route::get('admin/verify-email', EmailVerificationPromptController::class)
-                ->name('verification.notice');
+                ->name('admin.verification.notice');
 
     Route::get('admin/verify-email/{id}/{hash}', VerifyEmailController::class)
                 ->middleware(['signed', 'throttle:6,1'])
-                ->name('verification.verify');
+                ->name('admin.verification.verify');
 
     Route::post('admin/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
                 ->middleware('throttle:6,1')
-                ->name('verification.send');
+                ->name('admin.verification.send');
 
     Route::get('admin/confirm-password', [ConfirmablePasswordController::class, 'show'])
                 ->name('password.confirm');

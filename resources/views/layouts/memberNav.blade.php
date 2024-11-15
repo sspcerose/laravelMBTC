@@ -15,7 +15,13 @@
                     </svg>
                 </button>
             </div>
-            <div class="text-xl lg:text-3xl font-bold text-white">MBTC</div>
+            <div class="sidebar-brand flex items-center justify-between w-full">
+                <h1 class="text-xl font-bold text-white">MBTC</h1>
+                <div class="flex items-center ml-auto">
+                    <img width="20" height="20" src="{{ asset('img/memNav.png') }}" alt="User Icon" class="mr-2" />
+                    <p class="text-sm font-bold text-white">Driver {{ Auth::guard('member')->user()->name }}</p>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
@@ -33,8 +39,8 @@
             <i class="fas fa-user fa-xl"></i>
         </a>
 
-        <a href="{{ route('member.logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
+        <a href="{{ route('member.logout') }}" class="tab-link text-slate-900 hover:text-slate-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fas fa-sign-out-alt fa-xl"></i></a>
     </div>
 </div>
 
@@ -54,6 +60,9 @@
             </li>
             <li>
                 <a href="{{ route('member.profile.edit') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Profile">Profile</a>
+            </li>
+            <li>
+                <a href="{{ route('member.logout') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" data-tab="Logout">Logout</a>
             </li>
         </ul>
     </div>

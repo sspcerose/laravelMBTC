@@ -1,13 +1,11 @@
-@extends("layout.userLayout")
+@extends("layout.userLayout") 
 
 <body class="bg-slate-800 flex flex-col lg:flex-row">
 
     <!-- Left Section -->
     <section class="bg-gray-50 rounded-br-5xl rounded-bl-5xl md:flex-[3] lg:rounded-tr-5xl lg:rounded-bl-none">
 
-    <div class="">
-
-        <div class="p-5 font-bold text-gray-400 text-3xl pb-36">
+        <div class="p-1 font-bold text-gray-400 text-3xl pb-20">
             <h1>MBTC</h1>
         </div>
 
@@ -28,76 +26,138 @@
 
             <div class="font-bolder mb-5">
                 <h2 class="text-3xl text-gray-50 font-bold md:text-3xl">Welcome!</h2>
-                <h2 class="text-1xl text-gray-400 pb-8 md:pb-4 lg:pb-5">Sign Up to MBTC</h2>
+                <h2 class="text-1xl text-gray-400 pb-4 md:pb-4 lg:pb-1">Sign Up to MBTC</h2>
             </div>
+
+            <div class="text-white">
+        Please note: fields marked with an asterisk (<span class="text-red-500">*</span>) are required
+        </div>
 
             <div class="">
 
-            <!-- Sign Up Form -->
-            <form method="POST" action="{{ route('register') }}">
-                @csrf
+                <!-- Sign Up Form -->
+                <form method="POST" action="{{ route('register') }}">
+                    @csrf
 
-                <div class="flex flex-col justify-center">
+                    <div class="flex flex-col justify-center">
 
-                    <!-- First Name and Last Name -->
-                    <div class="lg:flex lg:flex-row justify-center md:flex-grow lg:space-x-3">
-                        <!-- <div class="w-full"> -->
-                            <!-- <x-input-label for="name" :value="__('First Name')" /> -->
-                            <x-text-input id="name" class="mb-4 bg-gray-100 rounded-md px-3 py-2 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" placeholder="First Name" />
-                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                        <!-- </div> -->
+                        <!-- First Name and Last Name -->
+                        <div class="lg:flex lg:flex-row justify-center md:flex-grow lg:space-x-3"> 
+                            <!-- First Name -->
+                            <div class="w-full mb-2"> <!-- Reduced margin -->
+                                <label for="name" class="inline-flex items-center">
+                                    <span class="font-medium text-white">{{ __('First Name') }}</span>
+                                    <span class="text-red-500 ml-1">*</span> <!-- Red asterisk -->
+                                </label>
+                                <x-text-input id="name" class="bg-gray-100 rounded-md px-3 py-2 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" placeholder="First Name" />
+                                <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                            </div>
 
-                        <!-- <div class="w-full"> -->
-                            <!-- <x-input-label for="last_name" :value="__('Last Name')" /> -->
-                            <x-text-input id="last_name" class="mb-4 bg-gray-100 rounded-md px-3 py-2 w-full" type="text" name="last_name" :value="old('last_name')" required autofocus autocomplete="last_name" placeholder="Last Name" />
-                            <x-input-error :messages="$errors->get('last_name')" class="mt-2" />
-                        <!-- </div> -->
+                            <!-- Last Name -->
+                            <div class="w-full mb-2"> <!-- Reduced margin -->
+                                <label for="last_name" class="inline-flex items-center">
+                                    <span class="font-medium text-white">{{ __('Last Name') }}</span>
+                                    <span class="text-red-500 ml-1">*</span> <!-- Red asterisk -->
+                                </label>
+                                <x-text-input id="last_name" class="bg-gray-100 rounded-md px-3 py-2 w-full" type="text" name="last_name" :value="old('last_name')" required autofocus autocomplete="last_name" placeholder="Last Name" />
+                                <x-input-error :messages="$errors->get('last_name')" class="mt-2" />
+                            </div>
+                        </div>
+
+                        <!-- Mobile Number -->
+                        <div class="mb-2"> <!-- Reduced margin -->
+                            <label for="mobile_num" class="inline-flex items-center">
+                                <span class="font-medium text-white">{{ __('Mobile Number') }}</span>
+                                <span class="text-red-500 ml-1">*</span> <!-- Red asterisk -->
+                            </label>
+                            <x-text-input 
+                                id="mobile_num" 
+                                class="bg-neutral-100 rounded-md px-3 py-2 w-full" 
+                                type="text" 
+                                name="mobile_num" 
+                                :value="old('mobile_num')" 
+                                required 
+                                autofocus 
+                                autocomplete="mobile_num" 
+                                placeholder="Phone Number e.g. 09xxxxxxxxx" 
+                                pattern="09\d{9}" 
+                                title="Mobile number must start with 09 and be 11 digits long"
+                            />
+                            <x-input-error :messages="$errors->get('mobile_num')" class="mt-2" />
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-2"> <!-- Reduced margin -->
+                            <label for="email" class="inline-flex items-center">
+                                <span class="font-medium text-white">{{ __('Email') }}</span>
+                                <span class="text-red-500 ml-1">*</span> <!-- Red asterisk -->
+                            </label>
+                            <x-text-input 
+                                id="email" 
+                                class="bg-gray-100 rounded-md px-3 py-2 w-full" 
+                                type="email" 
+                                name="email" 
+                                :value="old('email')" 
+                                required 
+                                autocomplete="username" 
+                                placeholder="Email" 
+                            />
+                            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-2"> <!-- Reduced margin -->
+                            <label for="password" class="inline-flex items-center">
+                                <span class="font-medium text-white">{{ __('Password') }}</span>
+                                <span class="text-red-500 ml-1">*</span> <!-- Red asterisk -->
+                            </label>
+                            <x-text-input 
+                                id="password" 
+                                class="bg-gray-100 rounded-md px-3 py-2 w-full" 
+                                type="password" 
+                                name="password" 
+                                required 
+                                autocomplete="new-password" 
+                                placeholder="Password" 
+                            />
+                            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="mb-4"> <!-- Keep or reduce this margin based on preference -->
+                            <label for="password_confirmation" class="inline-flex items-center">
+                                <span class="font-medium text-white">{{ __('Confirm Password') }}</span>
+                                <span class="text-red-500 ml-1">*</span> <!-- Red asterisk -->
+                            </label>
+                            <x-text-input 
+                                id="password_confirmation" 
+                                class="bg-gray-100 rounded-md px-3 py-2 w-full" 
+                                type="password" 
+                                name="password_confirmation" 
+                                required 
+                                autocomplete="new-password" 
+                                placeholder="Confirm Password" 
+                            />
+                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                        </div>
+
+                        <div class="flex items-center">
+                            <a class="underline text-sm text-white hover:text-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+                                {{ __('Already registered?') }}
+                            </a>
+                        </div>
+
+                        <!-- Sign Up Button -->
+                        <div class="flex justify-center pb-40 lg:pb-0">
+                            <button class="px-20 py-2 bg-orange-300 text-gray-50 font-semibold rounded-lg hover:bg-orange-400 focus:outline-none focus:ring-2 focus:orange-400" type="submit">
+                                Sign Up
+                            </button>
+                        </div>
+
                     </div>
+                </form>
 
-                    <!-- Mobile Number -->
-                    <!-- <div> -->
-                        <!-- <x-input-label for="mobile_num" :value="__('Mobile Number')" /> -->
-                        <x-text-input id="mobile_num" class="mb-4 bg-gray-100 rounded-md px-3 py-2 w-full" type="number" name="mobile_num" :value="old('mobile_num')" required autofocus autocomplete="mobile_num" placeholder="Mobile Number" />
-                        <x-input-error :messages="$errors->get('mobile_num')" class="mt-2" />
-                    <!-- </div> -->
-
-                    <!-- Email -->
-                    <!-- <div class="mt-4"> -->
-                        <!-- <x-input-label for="email" :value="__('Email')" /> -->
-                        <x-text-input id="email" class="mb-4 bg-gray-100 rounded-md px-3 py-2 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" placeholder="Email" />
-                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                    <!-- </div> -->
-
-                    <!-- Password and Confirm Password -->
-                    <!-- <div class="mt-4"> -->
-                        <!-- <x-input-label for="password" :value="__('Password')" /> -->
-                        <x-text-input id="password" class="mb-4 bg-gray-100 rounded-md px-3 py-2 w-full" type="password" name="password" required autocomplete="new-password" placeholder="Password" />
-                        <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                    <!-- </div> -->
-
-                    <!-- <div class="mt-4"> -->
-                        <!-- <x-input-label for="password_confirmation" :value="__('Confirm Password')" /> -->
-                        <x-text-input id="password_confirmation" class="mb-6 bg-gray-100 rounded-md px-3 py-2 w-full" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="Confirm Password" />
-                        <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-                    <!-- </div> -->
-
-                </div>
-
-                <!-- Sign Up Button -->
-                <div class="flex justify-center pb-40 lg:pb-0">
-                    <button class="px-20 py-2 bg-orange-300 text-gray-50 font-semibold rounded-lg hover:bg-orange-400 focus:outline-none focus:ring-2 focus:orange-400" type="submit">
-                        Sign Up
-                    </button>
-                </div>
-
-
-                <div class="flex items-center justify-end mt-4">
-                    <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                        {{ __('Already registered?') }}
-                    </a>
-                </div>
-            </form>
-
+            </div>
         </div>
     </section>
 

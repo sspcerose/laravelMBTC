@@ -23,10 +23,11 @@
                         <tr class="text-left text-sm text-neutral-950 uppercase tracking-wider">
                             <th class="py-3 px-4">ID</th>
                             <th class="py-3 px-4">Driver</th>
-                            <th class="py-3 px-4">Location</th>
+                            <th class="py-3 px-4">Pick Up Location</th>
                             <th class="py-3 px-4">Destination</th>
-                            <th class="py-3 px-4">Date</th>
-                            <th class="py-3 px-4">Price</th>
+                            <th class="py-3 px-4">Start Date</th>
+                            <th class="py-3 px-4">End Date</th>
+                            <th class="py-3 px-4">Total Fare</th>
                             <th class="py-3 px-4">Receipt</th>
                             <th class="py-3 px-4">Action</th>
                         </tr>
@@ -36,32 +37,33 @@
                             @foreach($bookings as $booking)
                                 <tr>
                                     <td class="py-3 px-4">{{ $booking->id }}</td>
-                                    <td class="py-3 px-4"  style="width: 20%">
+                                    <td class="py-3 px-4"  style="width: 15%">
                                     @if ($booking->schedule->isNotEmpty())
-    @php
-        // Get the latest schedule by sorting in descending order of 'created_at'
-        $latestSchedule = $booking->schedule->sortByDesc('created_at')->first();
-    @endphp
+                                            @php
+                                                // Get the latest schedule by sorting in descending order of 'created_at'
+                                                $latestSchedule = $booking->schedule->sortByDesc('created_at')->first();
+                                            @endphp
 
-    @if ($latestSchedule && $latestSchedule->driver)
-        {{-- Check if the driver_status is "accepted" --}}
-        @if ($latestSchedule->driver_status === 'accepted')
-            {{-- Display the driver's name if driver_status is "accepted" --}}
-            {{ $latestSchedule->driver->member->name }} {{ $latestSchedule->driver->member->last_name }}
-        @else
-            {{-- Display "No Driver Yet" if driver_status is not "accepted" --}}
-            <p>No Driver Yet</p>
-        @endif
-    @else
-        <p>No Driver Yet</p>
-    @endif
-@else
-    <p>No Driver Yet</p>
-@endif
+                                            @if ($latestSchedule && $latestSchedule->driver)
+                                                {{-- Check if the driver_status is "accepted" --}}
+                                                @if ($latestSchedule->driver_status === 'accepted')
+                                                    {{-- Display the driver's name if driver_status is "accepted" --}}
+                                                    {{ $latestSchedule->driver->member->name }} {{ $latestSchedule->driver->member->last_name }}
+                                                @else
+                                                    {{-- Display "No Driver Yet" if driver_status is not "accepted" --}}
+                                                    <p>No Driver Yet</p>
+                                                @endif
+                                            @else
+                                                <p>No Driver Yet</p>
+                                            @endif
+                                        @else
+                                            <p>No Driver Yet</p>
+                                        @endif
                                     </td>
                                     <td class="py-3 px-4">{{ $booking->location }}</td>
                                     <td class="py-3 px-4">{{ $booking->destination }}</td>
-                                    <td class="py-3 px-4">{{ \Carbon\Carbon::parse($booking->start_date)->format('F d') }} - {{ \Carbon\Carbon::parse($booking->end_date)->format('d, Y') }}</td>
+                                    <td class="py-3 px-4">{{ \Carbon\Carbon::parse($booking->start_date)->format('F d, Y') }}</td>
+                                    <td class="py-3 px-4">{{ \Carbon\Carbon::parse($booking->end_date)->format('F d, Y') }}</td>
                                     <td class="py-3 px-4">₱{{ $booking->price }}</td>
                                     <td class="py-3 px-4" style="width: 15%">
                                         <button type="button" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600" data-receipt="{{ asset('img/' . $booking->receipt) }}" onclick="openModal(this)">
@@ -71,6 +73,8 @@
                                     <td class="py-3 px-4" id="bookingTd">
                                         @if($booking->status === "cancelled")
                                             <span class='font-bold text-red-500'>Cancelled</span>
+                                        @elseif($booking->status === "rejected")
+                                            <span class='font-bold text-red-500'>Rejected</span>
                                         @elseif($booking->status == "active" && \Carbon\Carbon::today()->gt($booking->end_date))
                                             <span class="font-bold text-green-500">Completed</span>
                                         @else
@@ -86,7 +90,8 @@
                                             <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                                 </svg>
-                                                Are you sure you want to cancel this {{ $booking->destination }} trip?
+                                                Are you sure you want to cancel your trip to {{ $booking->destination }}? 
+                                                <span class="font-bold text-red-600">Please note that your payment is non-refundable.</span>
                                                 <div class="flex justify-end mt-2">
                                                     <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
                                                         Back

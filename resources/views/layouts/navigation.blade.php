@@ -15,26 +15,17 @@
                 <a href="{{ route('login') }}" class="text-gray-900 hover:text-gray-500">Login</a>
                 <a href="{{ route('register') }}" class="text-gray-900 hover:text-gray-500">Register</a>
             </div>
-            @elseif(Auth::guard('member')->check())
-            <div class="hidden font-semibold lg:flex space-x-6">
-                <a href="{{ route('member.dashboard') }}" class="text-gray-900 hover:text-gray-500">Home</a>
-                <a href="{{ route('member.membermonthlydues') }}" class="text-gray-900 hover:text-gray-500">Monthly Dues</a>
-                <button id="profile-toggle" class="text-gray-500 focus:outline-none">
-                    <img width="20" height="20" src="{{ asset('img/userNav.png') }}" alt="User Icon" />
-                </button>
-            </div>
-            @elseif(Auth::guard('admin')->check())
-            <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
-                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>
-                <a href="{{ route('admin.logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
-                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
-            </div>
             @else
             <div class="hidden font-semibold lg:flex space-x-6">
                 <a href="{{ route('dashboard') }}" class="text-gray-900 hover:text-gray-500">Home</a>
                 <a href="{{ route('booking') }}" class="text-gray-900 hover:text-gray-500">Booking</a>
-                <button id="profile-toggle" class="text-gray-500 focus:outline-none">
-                    <img width="20" height="20" src="{{ asset('img/userNav.png') }}" alt="User Icon" />
+                <button id="profile-toggle" class="text-gray-500 focus:outline-none flex items-center">
+                <img width="20" height="20" src="{{ asset('img/userNav.png') }}" alt="User Icon" />
+                    <span class="text-gray-900 ml-1">{{ Auth::user()->name }}</span>
+                    <!-- You can use the icon below for a dropdown -->
+                    <svg class="fill-current h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
                 </button>
             </div>
             @endif
@@ -54,38 +45,6 @@
         <a href="{{ route('logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
     </div>
-    @elseif(Auth::guard('member')->check())
-    <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
-        <a href="{{ route('member.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>
-        <a href="{{ route('member.membermonthlydues') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Monthly Dues</a>
-        <a href="{{ route('member.profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Member Profile</a>
-        <a href="{{ route('member.logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
-    </div>
-    
-
-    <!-- Profile Menu -->
-    <div id="profile-menu" class="hidden absolute top-15 w-40 md:right-10 xl:right-52 bg-white shadow-lg">
-        <a href="{{ route('member.profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Member Profile</a>
-        <a href="{{ route('member.logout') }}" class="block px-4 pt-2 pb-4 text-gray-700 hover:bg-gray-200"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
-    </div>
-
-    <form id="logout-form" method="POST" action="{{ route('member.logout') }}">
-        @csrf
-    </form>
-
-    @elseif(Auth::guard('admin')->check())
-    <!-- Profile Menu -->
-    <div id="profile-menu" class="hidden absolute top-15 w-40 md:right-10 xl:right-52 bg-white shadow-lg">
-        <a href="{{ route('admin.logout') }}" class="block px-4 pt-2 pb-4 text-gray-700 hover:bg-gray-200"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
-    </div>
-
-    <form id="logout-form" method="POST" action="{{ route('admin.logout') }}">
-        @csrf
-    </form>
-
     @else
     <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
         <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Home</a>

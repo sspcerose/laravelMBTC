@@ -21,8 +21,9 @@ return new class extends Migration
             $table->string('password');
             $table->date('date_joined');
             $table->string('type');
+            $table->string('pass')->default('new');
             $table->string('member_status');
-            $table->timestamp('email_verified_at');
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

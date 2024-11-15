@@ -1,5 +1,3 @@
-
-
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
@@ -9,6 +7,7 @@
         <p class="mt-1 text-sm text-gray-600">
             {{ __('Ensure your account is using a long, random password to stay secure.') }}
         </p>
+        
     </header>
 
     <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
@@ -33,6 +32,9 @@
             <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
         </div>
 
+        <p class="mt-1 text-sm text-gray-600">
+            {{ __('You will be logout after changing your password. Login with your new password') }}
+        </p>
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

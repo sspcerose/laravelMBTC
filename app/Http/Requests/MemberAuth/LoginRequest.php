@@ -50,6 +50,30 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        $user = Auth::guard('member')->user();
+
+        // Check if created_at and updated_at are the same
+        if ($user->pass == 'new') {
+            // Logout the user
+            // Auth::guard('member')->logout();
+    
+            // Redirect to change password page
+            session(['change_password_required' => true]);
+            throw ValidationException::withMessages([
+                'password' => trans('auth.change_password_required'),
+            ])->redirectTo(route('member.profile.changepassword1'));
+        }
+
+        if ($user->member_status === 'inactive') {
+            // Logout the user
+            Auth::guard('member')->logout();
+    
+            // Redirect to login page or any other page you desire
+            throw ValidationException::withMessages([
+                'email' => trans('you are not allowed to sign in'),
+            ])->redirectTo(route('member.auth.login'));
+        }
     }
 
     /**

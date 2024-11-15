@@ -26,10 +26,10 @@ Route::middleware('guest:member')->group(function () {
     Route::post('member/login', [AuthenticatedSessionController::class, 'store']);
 
     Route::get('member/forgot-password', [PasswordResetLinkController::class, 'create'])
-                ->name('password.request');
+                ->name('member.password.request');
 
     Route::post('member/forgot-password', [PasswordResetLinkController::class, 'store'])
-                ->name('password.email');
+                ->name('member.password.email');
 
     Route::get('member/reset-password/{token}', [NewPasswordController::class, 'create'])
                 ->name('password.reset');
@@ -40,18 +40,23 @@ Route::middleware('guest:member')->group(function () {
 
 Route::middleware('auth:member')->group(function () {
     Route::get('member/verify-email', EmailVerificationPromptController::class)
-                ->name('verification.notice');
+                ->name('member.verification.notice');
 
     Route::get('member/verify-email/{id}/{hash}', VerifyEmailController::class)
                 ->middleware(['signed', 'throttle:6,1'])
-                ->name('verification.verify');
+                ->name('member.verification.verify');
 
     Route::post('member/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
                 ->middleware('throttle:6,1')
-                ->name('verification.send');
+                ->name('member.verification.send');
 
     Route::get('member/confirm-password', [ConfirmablePasswordController::class, 'show'])
                 ->name('password.confirm');
+    
+    //dagdag from here 
+    Route::get('member/change-password', [PasswordController::class, 'showChangePasswordForm'])->name('change.password1');
+    Route::post('member/change-password', [PasswordController::class, 'updatePassword'])->name('password.update1');
+    //to here
 
     Route::post('member/confirm-password', [ConfirmablePasswordController::class, 'store']);
 
@@ -59,4 +64,5 @@ Route::middleware('auth:member')->group(function () {
 
     Route::post('member/logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('member.logout');
+
 });

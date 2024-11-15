@@ -44,19 +44,14 @@
                     </div>
 
                     <!-- Remember Me & Forgot Password -->
-                <div class="flex items-center justify-between pb-4">
-                    <label for="remember_me" class="inline-flex items-center">
-                        <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                        <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-                    </label>
-
-                    @if (Route::has('password.request'))
-                        <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                            {{ __('Forgot your password?') }}
-                        </a>
-                    @endif
-                </div>
-
+                    <div class="flex items-center justify-between pb-4">
+                       
+                        @if (Route::has('member.password.request'))
+                            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
+                                {{ __('Forgot your password?') }}
+                            </a>
+                        @endif
+                    </div>
 
                     <div class="flex justify-center pb-40 lg:pb-0">
                         <button class="px-20 py-2 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-700" type="submit">

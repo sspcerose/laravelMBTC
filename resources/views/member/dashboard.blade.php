@@ -11,6 +11,49 @@
 <div class="lg:pl-20 lg:pr-10">
     <div class="pt-24 lg:pt-28 lg:pr-6 flex justify-between items-center">
         <h1 class="text-black p-4 text-center md:text-left font-extrabold text-3xl">Upcoming Trips</h1>
+
+        <div class="relative">
+                    <button id="notification-icon" class="relative p-4 bg-blue-500 text-white rounded-lg focus:outline-none">
+                    <i class="fa-solid fa-bell"></i>
+                        <span id="notification-badge" class="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">3</span>
+                    </button>
+
+                    <!-- Notification Container -->
+                    <div id="notification-container" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg overflow-hidden z-10 border-2 border-gray-500">
+                    <ul class="p-4 max-h-96 overflow-y-auto" id="notification-list">
+                    <div class="text-sm border-b p-2"><span class="font-bold text-red-700">Reminder:</span> <span>All the drivers received this notification, but only the first one to accept can have this schedule</span><br><br></div>
+                    @foreach($scheduless as $aschedule)
+                                <li class="text-sm text-gray-700 border-b p-2">
+                                <!-- <span class="font-bold">Schedule</span><br> -->
+                                <span class="font-bold">Customer Name: {{ $aschedule->booking->user->name }} {{ $aschedule->booking->user->last_name }}</span><br>
+                                <span class="">Pick Up Location: {{$aschedule->booking->location }}</span><br>
+                                <span class="">Destination: {{ $aschedule->booking->tariff->destination }}</span><br>
+                                <span class="">Start Date: {{ \Carbon\Carbon::parse($aschedule->booking->start_date)->format('F d, Y') }}</span><br>
+                                <span class="">End Date: {{ \Carbon\Carbon::parse($aschedule->booking->end_date)->format('F d, Y') }}</span><br>
+                                <form action="{{ route('optionschedule.accept', $aschedule->id) }}" method="POST" class="acceptForm" style="display:inline;">
+                                            @csrf
+                                            <button type="button" class="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 triggerConfirm">Accept</button>
+                                        </form>
+                                        <!-- Alert 1 -->
+                                        <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-green-100 border border-green-600 rounded-md hidden acceptAlert">
+                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                        </svg>
+                                                Are you sure you want to accept the schedule?
+                                                <div class="flex justify-end mt-2">
+                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
+                                                        Back
+                                                    </button>
+                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
+                                                        Yes
+                                                    </button>
+                                                </div>
+                                            </div>   
+                                </li>
+                    @endforeach
+                        </ul>
+                    </div>
+                </div>
     </div>
 
     <div class="bg-neutral-300 mx-4 rounded-3xl p-2 items-center mb-4">
@@ -24,10 +67,9 @@
                 <thead>
                     <tr class="text-left text-sm text-neutral-950 uppercase tracking-wider">
                         <th class="py-3 px-4">ID</th>
-                        <th></th>
                         <th class="py-3 px-4">Customer Name</th>
                         <th class="py-3 px-4">Destination</th>
-                        <th class="py-3 px-4">Location</th>
+                        <th class="py-3 px-4">Pick Up Location</th>
                         <th class="py-3 px-4">Mobile Number</th>
                         <th class="py-3 px-4">Start Date</th>
                         <th class="py-3 px-4">End Date</th>
@@ -45,11 +87,6 @@
                         @foreach($schedules as $schedule)
                             <tr>
                                 <td class="py-3 px-4"></td>
-                                <td class="py-3 px-4">
-                                    <button onclick="notify('')" class="bg-orange-500 text-white p-3 rounded hover:bg-orange-300">
-                                        <i class="fas fa-bell"></i>
-                                    </button>
-                                </td>
                                 <td class="py-6 px-4">{{ $schedule->booking->user->name }} {{ $schedule->booking->user->last_name }}</td>
                                 <td class="py-6 px-4">{{ $schedule->booking->tariff->destination }}</td>
                                 <td class="py-6 px-4">{{ $schedule->booking->location }}</td>
@@ -231,6 +268,71 @@ $(document).ready(function () {
         }
     }
 });
+
+let seenNotifications = [];
+        let notificationCount = 0;
+
+        async function fetchNotifications() {
+
+            const newNotifications = notifications.filter(notification => !seenNotifications.includes(notification.id));
+            notificationCount = newNotifications.length;
+            updateNotificationBadge(notificationCount);
+            displayNotifications(newNotifications);
+        }
+
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notification-badge');
+            badge.textContent = count > 0 ? count : ''; 
+        }
+
+        function displayNotifications(notifications) {
+            const container = document.getElementById('notification-list');
+            container.innerHTML = '';
+            notifications.forEach(notification => {
+                const li = document.createElement('li');
+                li.className = "py-2 border-b cursor-pointer hover:bg-gray-100";
+                li.textContent = notification.message;
+                li.onclick = () => markAsSeen(notification.id);
+                container.appendChild(li);
+            });
+        }
+
+        function markAsSeen(notificationId) {
+            seenNotifications.push(notificationId);
+        }
+
+        document.getElementById('notification-icon').addEventListener('click', () => {
+            const container = document.getElementById('notification-container');
+            container.classList.toggle('hidden');
+            fetchNotifications();
+        });
+
+
+        document.querySelectorAll('.triggerConfirm').forEach(button => {
+    button.addEventListener('click', function() {
+        // Show the confirmation modal
+        const alert = this.closest('li').querySelector('.acceptAlert');
+        alert.classList.remove('hidden');
+    });
+});
+
+document.querySelectorAll('.cancelButton').forEach(button => {
+    button.addEventListener('click', function() {
+        // Hide the confirmation modal
+        const alert = this.closest('.acceptAlert');
+        alert.classList.add('hidden');
+    });
+});
+
+document.querySelectorAll('.yesButton').forEach(button => {
+    button.addEventListener('click', function() {
+        // Submit the form to accept the schedule
+        const form = this.closest('li').querySelector('.acceptForm');
+        form.submit();
+    });
+});
+
+
 
 
 </script>

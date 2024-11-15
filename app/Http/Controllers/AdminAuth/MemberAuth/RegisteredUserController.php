@@ -51,6 +51,7 @@ class RegisteredUserController extends Controller
             'tin' => $request->tin,
             'mobile_num' => $request->mobile_num,
             'email' => $request->email,
+            'pass' => $request->pass,
             'password' => Hash::make($request->password),
             'date_joined' => $request->date_joined,
             'type' => $request->type,
