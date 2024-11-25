@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <body class="font-inter">
-    <div class="max-w-5xl mx-auto">
+    <div class="lg:pl-20 lg:pr-20">
         <div class="pt-24 lg:pt-28 flex justify-between items-center">
             <h1 class="text-black p-4 pl-5 text-center md:text-left font-extrabold text-3xl lg:text-5xl">Bookings</h1>
         </div>
@@ -23,12 +23,14 @@
                         <tr class="text-left text-sm text-neutral-950 uppercase tracking-wider">
                             <th class="py-3 px-4">ID</th>
                             <th class="py-3 px-4">Driver</th>
-                            <th class="py-3 px-4">Pick Up Location</th>
+                            <th class="py-3 px-4">Driver Contact</th>
+                            <th class="py-3 px-4">Pick-Up Time</th>
+                            <th class="py-3 px-4">Pick-Up Location</th>
                             <th class="py-3 px-4">Destination</th>
                             <th class="py-3 px-4">Start Date</th>
                             <th class="py-3 px-4">End Date</th>
                             <th class="py-3 px-4">Total Fare</th>
-                            <th class="py-3 px-4">Receipt</th>
+                            <th class="py-3 px-4">Proof of Payment</th>
                             <th class="py-3 px-4">Action</th>
                         </tr>
                     </thead>
@@ -60,14 +62,35 @@
                                             <p>No Driver Yet</p>
                                         @endif
                                     </td>
+                                    <td class="py-3 px-4">@if ($booking->schedule->isNotEmpty())
+                                            @php
+                                                // Get the latest schedule by sorting in descending order of 'created_at'
+                                                $latestSchedule = $booking->schedule->sortByDesc('created_at')->first();
+                                            @endphp
+                                            @if ($latestSchedule && $latestSchedule->driver)
+                                                {{-- Check if the driver_status is "accepted" --}}
+                                                @if ($latestSchedule->driver_status === 'accepted')
+                                                    {{-- Display the driver's name if driver_status is "accepted" --}}
+                                                    {{ $latestSchedule->driver->member->mobile_num }}
+                                                @else
+                                                    {{-- Display "No Driver Yet" if driver_status is not "accepted" --}}
+                                                    <p>No Driver Yet</p>
+                                                @endif
+                                            @else
+                                                <p>No Driver Yet</p>
+                                            @endif
+                                        @else
+                                            <p>No Driver Yet</p>
+                                        @endif</td>
+                                    <td class="py-3 px-4">{{ $booking->time }}</td>
                                     <td class="py-3 px-4">{{ $booking->location }}</td>
                                     <td class="py-3 px-4">{{ $booking->destination }}</td>
                                     <td class="py-3 px-4">{{ \Carbon\Carbon::parse($booking->start_date)->format('F d, Y') }}</td>
                                     <td class="py-3 px-4">{{ \Carbon\Carbon::parse($booking->end_date)->format('F d, Y') }}</td>
                                     <td class="py-3 px-4">₱{{ $booking->price }}</td>
-                                    <td class="py-3 px-4" style="width: 15%">
+                                    <td class="py-3 px-4" >
                                         <button type="button" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600" data-receipt="{{ asset('img/' . $booking->receipt) }}" onclick="openModal(this)">
-                                            View Receipt
+                                            View
                                         </button>
                                     </td>
                                     <td class="py-3 px-4" id="bookingTd">
@@ -85,7 +108,7 @@
                                                     Cancel
                                                 </button>
                                             </form>
-                                            <!-- Custom confirmation alert (initially hidden) -->
+                                            <!-- Alert  -->
                                             <div class="mt-3 relative flex flex-col p-3 text-sm bg-blue-100 border border-blue-600 rounded-md hidden cancelAlert">
                                             <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
@@ -119,7 +142,7 @@
     <div class="fixed inset-0 flex items-center justify-center z-50 hidden" id="imageModal" onclick="closeOnClickOutside(event)">
         <div class="bg-white rounded-lg overflow-hidden shadow-lg max-w-xl mx-4 w-full" id="modalContent">
             <div class="p-4">
-                <h5 class="text-lg font-bold mb-2">Receipt</h5>
+                <h5 class="text-lg font-bold mb-2">Proof of Payment</h5>
                 <button type="button" class="absolute top-0 right-0 m-2 text-gray-500" onclick="closeModal()">&times;</button>
             </div>
             <div class="p-4 text-center">
@@ -135,6 +158,7 @@
         $(document).ready(function () {
             $('#myTable').DataTable({
                 responsive: true,
+                lengthMenu: [5, 10, 25, 50, 100],
                 order: [[0, 'desc']],
                 columnDefs: [
                     { targets: 0, visible: false }
@@ -164,7 +188,7 @@
         let cancelForm = e.target.closest('.cancelForm');
         let cancelAlert = cancelForm.nextElementSibling;
         cancelAlert.classList.remove('hidden');
-        document.getElementById('bookingTd').style.width = '50%'; 
+        document.getElementById('bookingTd').style.width = '30%'; 
         e.target.style.display = 'none';
     }
 

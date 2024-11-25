@@ -7,7 +7,8 @@
 
         <div class="p-5">
             <div class="font-bold text-white text-3xl pb-40 xl:pb-52">
-                <h1>MBTC</h1>
+                <!-- <h1>MBTC</h1> -->
+                <img width="65" height="65" src="{{ asset('img/system/18.png') }}" alt="User Icon" class="mr-2" /> 
             </div>
             <div class='px-0 sm:px-5 lg:px-10'>
                 <div class="font-extrabold text-white text-4xl pb-3 md:text-6xl xl:text-7xl">

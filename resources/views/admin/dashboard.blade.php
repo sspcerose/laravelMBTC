@@ -6,14 +6,14 @@
 
     <div class="lg:pl-20 md:pr-5">
 
-        <h1 class="font-semibold pt-28 px-4 text-4xl">Hello, <span>Admin</span>!</h1>
-        <h1 class="text-black p-4 font-extrabold text-4xl">Welcome</h1>
+        <h1 class="font-semibold pt-28 px-4 text-4xl"><span></span></h1>
+        <h1 class="text-black p-4 font-extrabold text-4xl">Dashboard</h1>
 
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div id="chart1" class="bg-white p-4 rounded-2xl shadow-md"></div>
-            <div id="chart2" class="bg-white p-4 rounded-2xl shadow-md"></div>
-            <div id="chart3" class="bg-white p-4 rounded-2xl shadow-md"></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-8">
+            <div id="chart1" class="bg-white border border-gray-700 p-4 rounded-2xl shadow-md"></div>
+            <div id="chart2" class="bg-white border border-gray-700 p-4 rounded-2xl shadow-md"></div>
+            <div id="chart3" class="bg-white  border border-gray-700 p-4 rounded-2xl shadow-md"></div>
         </div>
 
         <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -23,7 +23,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         
 <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mb-8">
-<div id="chart4" class="bg-white p-4 rounded-2xl shadow-md"></div>
+<div id="chart4" class="bg-white  border border-gray-700 p-4 rounded-2xl shadow-md"></div>
 </div>
 
 <div class="bg-neutral-200 p-4 lg:p-8 rounded-3xl m-4">
@@ -36,18 +36,18 @@
         
         <!-- Registered Users Card -->
         <div class="bg-green-500 text-white p-3 rounded-2xl lg:h-40 shadow-md w-full max-w-xs">
-            <h2 class="text-lg font-bold mb-2">Registered Users</h2>
-            <p class="text-lg lg:text-4xl font-semibold">{{ $totalUsers }}</p>
+            <h2 class="text-lg font-bold mb-2">Trips Today</h2>
+            <p class="text-lg lg:text-4xl font-semibold">{{ $scheduleCount }}</p>
         </div>
         
         <!-- Total Members Card -->
-        <div class="bg-red-500 text-white p-3 rounded-2xl lg:h-40 shadow-md w-full max-w-xs">
+        <div class="bg-green-500 text-white p-3 rounded-2xl lg:h-40 shadow-md w-full max-w-xs">
             <h2 class="text-lg font-bold mb-2">Total Active Members</h2>
             <p class="text-lg lg:text-4xl font-semibold">{{ $activeMembersCount }} / {{ $totalMembers }} </p>
         </div>
 
         <!-- Duplicate Card for Total Members (adjusted) -->
-        <div class="bg-red-500 text-white p-3 rounded-2xl lg:h-40 shadow-md w-full max-w-xs">
+        <div class="bg-blue-500 text-white p-3 rounded-2xl lg:h-40 shadow-md w-full max-w-xs">
             <h2 class="text-lg font-bold mb-2">Paid Monthly Dues</h2>
             <p class="text-lg lg:text-4xl font-semibold">{{ $paidMembersCount }} / {{ $activeMembersCount }}</p>
         </div>
@@ -65,20 +65,26 @@
     var options = {
         series: [{
             name: "Bookings",
-            data:  @json(array_values($bookingData))
+            data:  @json(array_values($bookingData)),
+            
+            
         }],
         chart: {
             height: 350,
             type: 'line',
             zoom: {
-                enabled: true
+                enabled: false
             }
         },
         dataLabels: {
-            enabled: true
+            enabled: true,
+            style: {
+                colors: ['#28a745'] // Set the data label color to green
+            }
         },
         stroke: {
-            curve: 'smooth'
+            curve: 'smooth',
+            colors: ['#28a745']
         },
         title: {
             text: 'MONTHLY RESERVATION',
@@ -144,12 +150,12 @@
         bar: {
             borderRadius: 10,
             dataLabels: {
-                position: 'top', // top, center, bottom
+                position: 'top', 
             },
-             // This will change all bars to the color specified
+           
         }
     },
-        colors: ['#228B22'],// Color for each bar
+        colors: ['#228B22'],
         dataLabels: {
           enabled: true,
           formatter: function (val) {
@@ -217,59 +223,57 @@
         chart.render();
 
         var options = {
-          series: [{
-          name: 'TEAM A',
-          type: 'area',
-          data: [44, 55, 31, 47, 31, 43, 26, 41, 31, 47, 33]
-        }, {
-          name: 'TEAM B',
-          type: 'line',
-          data: [55, 69, 45, 61, 43, 54, 37, 52, 44, 61, 43]
-        }],
-          chart: {
-          height: 350,
-          type: 'line',
+    series: [{
+        name: 'Current Year',
+        type: 'area',
+        data: @json(array_values($bookingData))
+    }, {
+        name: 'Last Year',
+        type: 'line',
+        data: @json(array_values($lastBookingData))
+    }],
+    title: {
+            text: 'TWO-YEAR RESERVATION METRICS',
+            align: 'left'
+            // offsetY: 330,
         },
-        stroke: {
-          curve: 'smooth'
+    chart: {
+        height: 350,
+        type: 'line',
+    },
+    stroke: {
+        curve: 'smooth'
+    },
+    fill: {
+        type: 'solid',
+        opacity: [0.35, 1],
+    },
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], 
+    markers: {
+        size: 0
+    },
+    yaxis: [{
+        title: {
+            text: 'Bookings',
         },
-        fill: {
-          type:'solid',
-          opacity: [0.35, 1],
-        },
-        labels: ['Dec 01', 'Dec 02','Dec 03','Dec 04','Dec 05','Dec 06','Dec 07','Dec 08','Dec 09 ','Dec 10','Dec 11'],
-        markers: {
-          size: 0
-        },
-        yaxis: [
-          {
-            title: {
-              text: 'Series A',
-            },
-          },
-          {
-            opposite: true,
-            title: {
-              text: 'Series B',
-            },
-          },
-        ],
-        tooltip: {
-          shared: true,
-          intersect: false,
-          y: {
+    }],
+    tooltip: {
+        shared: true,
+        intersect: false,
+        y: {
             formatter: function (y) {
-              if(typeof y !== "undefined") {
-                return  y.toFixed(0) + " points";
-              }
-              return y;
+                if (typeof y !== "undefined") {
+                    return y.toFixed(0) + " bookings";
+                }
+                return y;
             }
-          }
         }
-        };
+    }
+};
 
-        var chart = new ApexCharts(document.querySelector("#chart4"), options);
-        chart.render();
+var chart = new ApexCharts(document.querySelector("#chart4"), options);
+chart.render();
+
 </script>
 
 </body>

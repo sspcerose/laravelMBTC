@@ -5,8 +5,11 @@ use App\Http\Controllers\MemberProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MBTCController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Middleware\EnsureEmailIsVerified;
+use App\Http\Controllers\MemberAuth\PasswordController;
+
+// use Illuminate\Foundation\Auth\EmailVerificationRequest;
+// use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,13 +22,10 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 |
 */
 
-// Route::get('/', function () {
-//     return view('dashboard');
-// });
 
 //////////////////////USER/////////////////////////////
 Route::get('/dashboard', [MBTCController::class, 'bookingform'])->middleware(['auth:web', 'verified'])->name('dashboard');
-Route::get('/', [MBTCController::class, 'bookingform'])->name('dashboard');
+Route::get('/', [MBTCController::class, 'bookingform'])->name('bookingdashboard');
 
 
 
@@ -49,8 +49,6 @@ require __DIR__.'/auth.php';
 
 
 //////////////////////ADMIN/////////////////////////////
-
-
 
 Route::get('/admin/dashboard', [MBTCController::class, 'dashboard'])
     ->middleware(['auth:admin', 'verified'])
@@ -104,37 +102,72 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('admin/schedule/schedule', [MBTCController::class, 'viewSchedule'])->name('admin.schedule.schedule');
     Route::post('admin/schedule/schedule', [MBTCCOntroller::class, 'assignDriver']);
     Route::post('admin/schedule/optionschedule', [MBTCCOntroller::class, 'optionAssignDriver']);
+    Route::post('admin/schedule/optionschedule1', [MBTCCOntroller::class, 'optionAssignDriver1']);
+
+    // customer page
+    Route::get('/admin/customer/customer', [MBTCController::class, 'viewCustomer'])->name('admin.customer.customer');
+
+    // delete img
+    // Route::get('admin/booking/booking', [MBTCCOntroller::class, 'deleteOldImages']);
     
 });
-
-
 
 require __DIR__.'/adminauth.php';
 
 //////////////////////MEMBER/////////////////////////////
-Route::get('/member/dashboard', [MBTCController::class, 'memberdashboard'])->middleware(['auth:member', 'verified'])->name('member.dashboard');
+// Route::get('/member/dashboard', [MBTCController::class, 'memberdashboard'])->middleware(['member', 'ensureEmailIsVerified:member, member.verification.notice'])->name('member.dashboard');
 
-Route::middleware(['auth:member', 'verified'])->group(function () {
+// Route::middleware(['member', 'ensureEmailIsVerified:member'])->group(function () {
+//     Route::get('/member/welcome', function () {
+//         return view('member.welcome');
+//     });
+//     Route::post('/schedule/{scheduleId}/accept', [MBTCController::class, 'acceptSchedule'])->name('schedule.accept');
+//     Route::post('/schedule/{scheduleId}/cancel', [MBTCController::class, 'cancelSchedule'])->name('schedule.cancel');
+//     Route::post('/schedule/{scheduleId}/optionaccept', [MBTCController::class, 'optionSchedule'])->name('optionschedule.accept');
+//     Route::get('member/profile', [MemberProfileController::class, 'edit'])->name('member.profile.edit');
+//     Route::patch('member/profile', [MemberProfileController::class, 'update'])->name('member.profile.update');
+//     Route::delete('member/profile', [MemberProfileController::class, 'destroy'])->name('member.profile.destroy');
+//     Route::get('member/membermonthlydues', [MBTCController::class, 'memberMonthlyDues'])->name('member.membermonthlydues');
+//     Route::post('member/membermonthlydues/{id}', [MBTCController::class, 'sendPaymentUpdate'])->name('monthlydue.update');
+
+//      //dagdag from here 
+//      //to here
+    
+// });
+
+Route::get('/member/dashboard', [MBTCController::class, 'memberdashboard'])
+    ->middleware(['member', 'ensureEmailIsVerified:member,member.verification.notice'])
+    ->name('member.dashboard');
+
+Route::middleware(['member', 'ensureEmailIsVerified:member,member.verification.notice'])->group(function () {
     Route::get('/member/welcome', function () {
         return view('member.welcome');
     });
     
-    Route::post('/schedule/{scheduleId}/accept', [MBTCController::class, 'acceptSchedule'])->name('schedule.accept');
-    Route::post('/schedule/{scheduleId}/cancel', [MBTCController::class, 'cancelSchedule'])->name('schedule.cancel');
-    Route::post('/schedule/{scheduleId}/optionaccept', [MBTCController::class, 'optionSchedule'])->name('optionschedule.accept');
-    Route::get('member/profile', [MemberProfileController::class, 'edit'])->name('member.profile.edit');
-    Route::patch('member/profile', [MemberProfileController::class, 'update'])->name('member.profile.update');
-    Route::delete('member/profile', [MemberProfileController::class, 'destroy'])->name('member.profile.destroy');
-    Route::get('member/membermonthlydues', [MBTCController::class, 'memberMonthlyDues'])->name('member.membermonthlydues');
-    Route::post('member/membermonthlydues/{id}', [MBTCController::class, 'sendPaymentUpdate'])->name('monthlydue.update');
+    Route::post('/schedule/{scheduleId}/accept', [MBTCController::class, 'acceptSchedule'])
+        ->name('member.schedule.accept');
+    Route::post('/schedule/{scheduleId}/cancel', [MBTCController::class, 'cancelSchedule'])
+        ->name('member.schedule.cancel');
+    Route::post('/schedule/{scheduleId}/optionaccept', [MBTCController::class, 'optionSchedule'])
+        ->name('member.optionschedule.accept');
 
-     //dagdag from here 
-    Route::get('member/profile/changepassword1', [MemberProfileController::class, 'showChangePasswordForm'])->name('member.profile.changepassword1');
-    Route::get('member/change-password', [PasswordController::class, 'showChangePasswordForm'])->name('change.password1');
-    Route::post('member/change-password', [PasswordController::class, 'updatePassword'])->name('password.update1');
-     //to here
-    
+    Route::get('/member/profile', [MemberProfileController::class, 'edit'])
+        ->name('member.profile.edit');
+    Route::patch('/member/profile', [MemberProfileController::class, 'update'])
+        ->name('member.profile.update');
+    Route::delete('/member/profile', [MemberProfileController::class, 'destroy'])
+        ->name('member.profile.destroy');
+        
+    Route::get('/member/membermonthlydues', [MBTCController::class, 'memberMonthlyDues'])
+        ->name('member.membermonthlydues');
+    Route::post('/member/membermonthlydues/{id}', [MBTCController::class, 'sendPaymentUpdate'])
+        ->name('member.monthlydue.update');
 });
+
+Route::get('member/profile/changepassword1', [MemberProfileController::class, 'showChangePasswordForm'])->name('member.profile.changepassword1');
+Route::get('member/change-password', [PasswordController::class, 'showChangePasswordForm'])->name('change.password1');
+Route::put('member/change-password', [PasswordController::class, 'updatePassword'])->name('password.update1');
+
 require __DIR__.'/memberauth.php';
 
 //////FOR TESTING///////

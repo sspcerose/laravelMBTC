@@ -26,6 +26,9 @@
                 </div>
             @endif
 
+            @If($activeMembers->isEmpty())
+                <span>NO MEMBER</span>
+            @else
             <form id="vehicleForm" action="{{ url('admin/vehicle/addvehicle') }}" method="POST" class="max-w-md">
                 @csrf
                 <div class="flex flex-col justify-center">
@@ -50,6 +53,7 @@
                     </button>
                 </div>
             </form>
+            @endif
         </div>
     </div>
 </body>

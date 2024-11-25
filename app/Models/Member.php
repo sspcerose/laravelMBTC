@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use App\Notifications\VerifyEmail;
 
-class Member extends Authenticatable implements MustVerifyEmail
+// class Member extends Authenticatable implements MustVerifyEmail
+class Member extends Authenticatable implements MustVerifyEmail, CanResetPassword
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -29,7 +32,8 @@ class Member extends Authenticatable implements MustVerifyEmail
         'password',
         'date_joined',
         'type',
-        'member_status'
+        'member_status',
+        'email_verified_at'
     ];
 
     public function driver()
@@ -70,6 +74,11 @@ class Member extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+     
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmail);
+    }
 
 
 }

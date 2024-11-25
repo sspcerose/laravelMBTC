@@ -4,10 +4,15 @@
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
         integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMXQ8cBO5Tmy8Z+5QoV9hD0HnQn4E9E5mCkF1" crossorigin="anonymous">
+
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+        <link href="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.css" rel="stylesheet">
+        <script src="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 
 <nav class="bg-slate-900 shadow fixed w-full z-50">
-    <div class="py-5 px-4 md:px-10">
+    <div class="py-3 px-4 md:px-10">
         <div class="flex justify-start items-center space-x-4">
             <div>
                 <button id="menu-toggle" class="text-gray-500 focus:outline-none">
@@ -20,9 +25,10 @@
             </div>
 
             <div class="sidebar-brand flex items-center justify-between w-full">
-                <h1 class="text-xl lg:text-3xl font-bold text-white">MBTC</h1>
+                <!-- <h1 class="text-xl lg:text-3xl font-bold text-white">2</h1> -->
+                <img width="65" height="65" src="{{ asset('img/system/17.png') }}" alt="User Icon" class="mr-2" /> <!--<span class="text-white font-bold">MBTC</span> -->
                 <div class="flex items-center ml-auto">
-                    <img width="20" height="20" src="{{ asset('img/memNav.png') }}" alt="User Icon" class="mr-2" />
+                    <img width="20" height="20" src="{{ asset('img/system/memNav.png') }}" alt="User Icon" class="mr-2" />
                     <p class="text-sm font-bold text-white">Admin</p>
                 </div>
             </div>
@@ -71,6 +77,11 @@
             class="tab-link text-slate-900 hover:text-slate-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg"
             data-tab="Vehicle">
             <i class="fas fa-car fa-xl"></i> <!-- Vehicle -->
+        </a>
+        <a href="{{ route('admin.customer.customer') }}"
+            class="tab-link text-slate-900 hover:text-slate-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg"
+            data-tab="Customers">
+            <i class="fa-solid fa-user-group fa-xl"></i> <!-- Customers -->
         </a>
 
         <a href="{{ route('admin.logout') }}" class="tab-link text-red-700 hover:text-red-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg" data-tab="Logout"
@@ -123,6 +134,11 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.customer.customer') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold flex items-center" data-tab="Customers">
+                    <i class="fa-solid fa-user-group mr-4 w-5"></i> Customers
+                </a>
+            </li>
+            <li>
             <a href="{{ route('admin.logout') }}" class="tab-link text-red-700 hover:text-red-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg" data-tab="Logout"
             onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fas fa-sign-out-alt fa-xl"></i> </a>
                 
@@ -134,6 +150,12 @@
         </ul>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vfs-fonts/2.0.3/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
 
 <script>
     const menuToggle = document.getElementById('menu-toggle');

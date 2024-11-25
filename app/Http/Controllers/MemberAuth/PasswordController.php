@@ -24,18 +24,16 @@ class PasswordController extends Controller
 
         $request->user()->update([
             'password' => Hash::make($validated['password']),
+            'pass' => 'changed',
         ]);
 
         // dagdag
         if (!session('change_password_required')) {
-            return back()->with('status', 'password-updated'); // Or another default page
+            return back()->with('status', 'password-updated'); 
        }else{
         // session()->flash('status', 'password-updated');
     
-        // Log out the user after setting the status message
         Auth::guard('member')->logout();
-        
-        // After logging out, redirect back to the previous page
         return redirect()->route('member.auth.login');
        }
     //    to here
@@ -47,12 +45,11 @@ class PasswordController extends Controller
     //dagdag from here 
     public function showChangePasswordForm()
     {
-        // Ensure the change password page can only be accessed when required
         if (!session('change_password_required')) {
-            return redirect()->route('member.dashboard'); // Or another default page
+            return redirect()->route('member.dashboard'); 
         }
     
-        return view('member.profile.edit'); // Show the change password form
+        return view('member.profile.edit');
     }
     
     public function updatePassword(Request $request)
@@ -69,10 +66,9 @@ class PasswordController extends Controller
             'pass' => 'changed',
         ]);
     
-        // Clear the session marker
         session()->forget('change_password_required');
     
-        // Redirect to the dashboard or another secure page
+        
         return redirect()->route('member.dashboard')->with('status', 'Password updated successfully!');
     }
     // to here

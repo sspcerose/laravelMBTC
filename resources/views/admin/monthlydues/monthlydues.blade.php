@@ -17,36 +17,54 @@
                         SEE ALL
                     </button>
                 </a>
+                
                 <div class="px-4 lg:px-0 pt-4 lg:pr-5">
                 <!-- Notification Icon -->
                 <div class="relative">
-                    <button id="notification-icon" class="relative p-4 bg-blue-500 text-white rounded-lg focus:outline-none">
+                @if($paymentnotifcount == 0)
+                    <button id="notification-icon" class="relative p-4 bg-gray-500 text-white rounded-lg focus:outline-none">
                     <i class="fa-solid fa-bell"></i>
-                        <span id="notification-badge" class="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">3</span>
+                @else
+                <button id="notification-icon" class="relative p-4 bg-blue-500 text-white rounded-lg focus:outline-none">
+                        <i class="fa-solid fa-bell"></i>
+                        <span id="notification-badge" class="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $paymentnotifcount }}</span>
+                @endif
                     </button>
 
                     <!-- Notification Container -->
                     <div id="notification-container" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg overflow-hidden z-10 border-2 border-gray-500">
                     <ul class="p-4 max-h-96 overflow-y-auto" id="notification-list">
-                    @foreach($paymentss as $paymentts)
-                        @if($paymentts->status == 'update')
-                                <li class="text-sm text-gray-700 border-b p-2">
-                                <span class="font-bold">{{ $paymentts->member->name }} {{ $paymentts->member->last_name }}</span> wants an update on its <span class="font-bold">{{ \Carbon\Carbon::parse($paymentts->dues->date)->format('F Y') }} due</span>
-                                </li>
-                        @endif
-                    @endforeach
-                        </ul>
-                    </div>
-                </div>
+                    <li class="text-sm text-gray-700 border-b p-2">
+                    @if($paymentss->isEmpty()) 
+                        <span class="font-bold text-center">No Notification</span><br>
+                    @else
+                        @foreach($paymentss as $paymentts)
+                            @if($paymentts->status == 'update')
+                                    
+                                    <span class="font-bold">{{ $paymentts->member->name }} {{ $paymentts->member->last_name }}</span> wants an update on its <span class="font-bold">{{ \Carbon\Carbon::parse($paymentts->dues->date)->format('F Y') }} due</span>
+                                    </li>
+                            @endif
+                        @endforeach
+                            </ul>
+                            @endif
+                        </div>
+                        
+                        </div>
+                       
             </div>
+            
                 </div>
+                   
+                
                 </div>
+                
 
         <div class="bg-neutral-300 mx-4 rounded-3xl p-2 items-center mb-4">
             <div class="overflow-x-auto bg-neutral-100 px-2 md:px-4 lg:py-2 rounded-2xl" id="largeTable">
             @if($payments->isEmpty())
             <p class="text-center">NO MONTHLY DUES YET</p>
             @else
+
             <table class="min-w-full" id="myTable">
                 <thead>
                     <tr>
@@ -77,7 +95,7 @@
                         <td class="py-3 px-4">{{ $payment->member->name }} {{ $payment->member->last_name }}</td>
                         <td class="py-3 px-4">{{ $payment->last_payment ? \Carbon\Carbon::parse($payment->last_payment)->format('F d, Y') : '-' }}</td>
                         <td class="py-3 px-4">₱{{ number_format($payment->dues->amount, 2) }}</td>
-                        <td class="py-3 px-4">{{ \Carbon\Carbon::parse($payment->dues->date)->format('F Y') }}</td>
+                        <td class="py-3 px-4 font-bold text-blue-500">{{ \Carbon\Carbon::parse($payment->dues->date)->format('F Y') }}</td>
                         <td class="py-3 px-4">
                             @if($payment->status == 'paid')
                             <span class="font-bold text-green-500">Paid</span>
@@ -121,6 +139,11 @@
     </div>
     </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vfs-fonts/2.0.3/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
     <script>
         $(document).ready(function () {
             $('#myTable').DataTable({
@@ -128,9 +151,51 @@
                 order: [[0, 'asc']],
                 columnDefs: [
                     { targets: 0, visible: false } 
+                ],
+                layout: {
+            topStart: {
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export As',
+                        buttons: [
+                            {
+                                extend: 'copy',
+                                exportOptions: {
+                                    columns: [2, 3, 4, 5, 6] 
+                                }
+                            },
+                            {
+                                extend: 'excel',
+                                exportOptions: {
+                                    columns: [2, 3, 4, 5, 6] 
+                                }
+                            },
+                            {
+                                extend: 'csv',
+                                exportOptions: {
+                                    columns: [2, 3, 4, 5, 6] 
+                                }
+                            },
+                            {
+                                extend: 'pdf',
+                                exportOptions: {
+                                    ccolumns: [2, 3, 4, 5, 6] 
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                exportOptions: {
+                                    columns: [2, 3, 4, 5, 6] 
+                                }
+                            }
+                        ]
+                    }
                 ]
-            });
-        });
+            }
+        }
+    });
+});
 
         document.addEventListener('click', function (e) {
         // Trigger paid confirmation

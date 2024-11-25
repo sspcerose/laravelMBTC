@@ -41,6 +41,12 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        // dd([
+        //     'active_guard' => 'member',
+        //     'auth_guard_instance' => Auth::guard('member'),
+        //     'request_data' => $this->only('email', 'password'),
+        // ]);
+
         if (! Auth::guard('member')->attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
@@ -53,12 +59,9 @@ class LoginRequest extends FormRequest
 
         $user = Auth::guard('member')->user();
 
-        // Check if created_at and updated_at are the same
         if ($user->pass == 'new') {
-            // Logout the user
             // Auth::guard('member')->logout();
     
-            // Redirect to change password page
             session(['change_password_required' => true]);
             throw ValidationException::withMessages([
                 'password' => trans('auth.change_password_required'),
@@ -66,10 +69,9 @@ class LoginRequest extends FormRequest
         }
 
         if ($user->member_status === 'inactive') {
-            // Logout the user
+
+            
             Auth::guard('member')->logout();
-    
-            // Redirect to login page or any other page you desire
             throw ValidationException::withMessages([
                 'email' => trans('you are not allowed to sign in'),
             ])->redirectTo(route('member.auth.login'));

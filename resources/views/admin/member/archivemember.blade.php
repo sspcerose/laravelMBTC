@@ -2,10 +2,10 @@
 
 @include('layouts.adminNav')
 
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 <link href="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.css" rel="stylesheet">
 <script src="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> -->
 
 <body class="font-inter">
     <div class="lg:pl-20 lg:pr-10">
@@ -29,10 +29,10 @@
                         <th class="py-3 px-4">Member Name</th>
                         <!-- <th class="py-3 px-4">Last Name</th> -->
                         <th class="py-3 px-4">TIN</th>
-                        <th class="py-3 px-4">Mobile Number</th>
+                        <th class="py-3 px-4">Contact Number</th>
                         <th class="py-3 px-4">Email</th>
                         <th class="py-3 px-4">Date of Registration</th>
-                        <th class="py-3 px-4">Type</th>
+                        <th class="py-3 px-4">Member Type</th>
                         <th class="py-3 px-4">Action</th>
                     </tr>
                 </thead>
@@ -49,7 +49,7 @@
                         <td class="py-3 px-4">{{ $viewmember->tin }}</td>
                         <td class="py-3 px-4">{{ $viewmember->mobile_num }}</td>
                         <td class="py-3 px-4">{{ $viewmember->email }}</td>
-                        <td class="py-3 px-4">{{ $viewmember->date_joined }}</td>
+                        <td class="py-3 px-4">{{\Carbon\Carbon::parse($viewmember->date_joined)->format('F d, Y')}}</td>
                         <td class="py-3 px-4">{{ $viewmember->type }}</td>
                         <td class="py-3 px-4" id="unarchiveTd">
                             <form action="{{url('admin/member/archivemember/' . $viewmember->id)}}" method="POST" class="unarchiveForm" style="display:inline-block;">
@@ -57,7 +57,7 @@
                                 <button type="button" class="font-bold text-orange-500 hover:text-orange-400 triggerUnarchive"> <i class="fas fa-archive"></i> Unarchive</button>
                             </form>
 
-                            <!-- Custom confirmation alert (initially hidden) -->
+                            <!-- Alert -->
                             <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-blue-100 border border-blue-600 rounded-md hidden unarchiveAlert">
                             <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
@@ -83,12 +83,60 @@
         </div>
     </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vfs-fonts/2.0.3/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#myTable').DataTable({
-                responsive: true
-            });
-        });
+         
+    $(document).ready(function () {
+    $('#myTable').DataTable({
+        responsive: true,
+        layout: {
+            topStart: {
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export As',
+                        buttons: [
+                            {
+                                extend: 'copy',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6]
+                                }
+                            },
+                            {
+                                extend: 'excel',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6]
+                                }
+                            },
+                            {
+                                extend: 'csv',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6]
+                                }
+                            },
+                            {
+                                extend: 'pdf',
+                                exportOptions: {
+                                    ccolumns: [1, 2, 3, 4, 5, 6]
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    });
+});
 
         document.addEventListener('click', function (e) {
     // Trigger archive confirmation

@@ -10,7 +10,7 @@
         
     </header>
 
-    <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('password.update1') }}" class="mt-6 space-y-6">
         @csrf
         @method('put')
 
@@ -30,6 +30,10 @@
             <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
             <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
             <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
+        </div>
+
+        <div>
+            <x-text-input id="changed" name="changed" type="hidden" class="mt-1 block w-full" value="changed" />
         </div>
 
         <p class="mt-1 text-sm text-gray-600">

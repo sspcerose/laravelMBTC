@@ -6,7 +6,8 @@
     <section class="bg-white md:flex-[3] lg:rounded-bl-none md:h-screen">
         <div class="p-5">
             <div class="font-bold text-gray-400 text-2xl pb-40 xl:pb-52">
-                <h1>MBTC</h1>
+                <!-- <h1>MBTC</h1> -->
+                <img width="65" height="65" src="{{ asset('img/system/18.png') }}" alt="User Icon" class="mr-2" /> 
             </div>
 
             <div class='px-0 sm:px-5 lg:px-10'>
@@ -45,9 +46,8 @@
 
                     <!-- Remember Me & Forgot Password -->
                     <div class="flex items-center justify-between pb-4">
-                       
                         @if (Route::has('member.password.request'))
-                            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
+                            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('member.password.request') }}">
                                 {{ __('Forgot your password?') }}
                             </a>
                         @endif

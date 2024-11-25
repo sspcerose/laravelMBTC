@@ -29,7 +29,7 @@
                     <a href="#" class="text-gray-900 hover:text-gray-500">Booking</a>
                     <button id="profile-toggle" class="text-gray-500 focus:outline-none">
                         <img width="20" height="20"
-                            src="{{ asset('img/userNav.png') }}"
+                            src="{{ asset('img/system/userNav.png') }}"
                             alt="user-male-circle" />
                     </button>
                 </div>

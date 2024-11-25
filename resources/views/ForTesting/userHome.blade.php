@@ -10,7 +10,7 @@
         </div>
 
         <div class="hidden lg:block rounded-3xl overflow-hidden h-[60vh]">
-            <img src="{{ asset('img/hero-bg-1.jpg') }}" alt="Description of image" class="w-full h-full object-cover" />
+            <img src="{{ asset('img/system/hero-bg-1.jpg') }}" alt="Description of image" class="w-full h-full object-cover" />
         </div>
 
         <div id="bookingCard"
@@ -117,12 +117,12 @@
                     <div class="flex flex-col">
                         <div class="flex flex-row justify-center space-x-5 mb-4">
                             <button>
-                                <img src="{{ asset('img/gcash.png') }}" alt="Gcash"
+                                <img src="{{ asset('img/system/gcash.png') }}" alt="Gcash"
                                     class="h-12 w-12 rounded-full bg-blue-200" />
                             </button>
 
                             <button>
-                                <img src="{{ asset('img/maya.jpg') }}" alt="Maya"
+                                <img src="{{ asset('img/system/maya.jpg') }}" alt="Maya"
                                     class="h-12 w-12 rounded-full" />
                             </button>
                         </div>

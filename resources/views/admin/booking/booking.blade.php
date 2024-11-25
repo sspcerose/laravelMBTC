@@ -2,37 +2,38 @@
 
 @include('layouts.adminNav')
 
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<link href="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.css" rel="stylesheet">
-<script src="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-
 <body class="font-inter">
     <div class="lg:pl-20 lg:pr-10">
         <div class="pt-24 lg:pt-28 flex justify-between items-center">
             <h1 class="text-black p-4 pl-4 text-center md:text-left font-extrabold text-3xl">Bookings</h1>
             <div class="px-4 lg:px-0 pt-4 lg:pr-5">
-                <!-- Notification Icon -->
+                 
                 <div class="relative">
+                @if($activeBookingCount == 0)
+                    <button id="notification-icon" class="relative p-4 bg-gray-500 text-white rounded-lg focus:outline-none">
+                    <i class="fa-solid fa-bell"></i>
+                @else
                     <button id="notification-icon" class="relative p-4 bg-blue-500 text-white rounded-lg focus:outline-none">
                     <i class="fa-solid fa-bell"></i>
-                        <span id="notification-badge" class="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">3</span>
+                    <span id="notification-badge" class="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $activeBookingCount }}</span>
+                @endif
                     </button>
 
-                    <!-- Notification Container -->
                     <div id="notification-container" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg overflow-hidden z-10 border-2 border-gray-500">
                     <ul class="p-4 max-h-96 overflow-y-auto" id="notification-list">
-                        @foreach($viewBookings as $viewBooking)
-                                <li class="text-sm text-gray-700 border-b p-2">
-                                <span class="font-bold">NEW RESERVATION</span><br>
-                                <span class="font-bold">{{ $viewBooking->user->name }} {{ $viewBooking->user->last_name }}</span><br>
-                                <span>Destination: {{ $viewBooking->destination }}</span><br>
-                                <span>Start Date: {{ \Carbon\Carbon::parse($viewBooking->start_date)->format('F d, Y') }}</span><br>
-                                <span>End Date: {{ \Carbon\Carbon::parse($viewBooking->end_date)->format('F d, Y') }}</span>
-                                </li>
-                            @endforeach
+                    <li class="text-sm text-gray-700 border-b p-2">
+                    @if($activeBookingCount == 0)
+                        <span class="font-bold text-center">No Notification</span><br>
+                    @else
+                        @foreach($viewactiveBookings as $activeBooking)
+                            <span class="font-bold">NEW RESERVATION</span><br>
+                            <span class="font-bold">{{ $activeBooking->user->name }} {{ $activeBooking->user->last_name }}</span><br>
+                            <span>Destination: {{ $activeBooking->destination }}</span><br>
+                            <span>Start Date: {{ \Carbon\Carbon::parse($activeBooking->start_date)->format('F d, Y') }}</span><br>
+                            <span>End Date: {{ \Carbon\Carbon::parse($activeBooking->end_date)->format('F d, Y') }}</span><br>
+                        @endforeach
                         </ul>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -46,16 +47,17 @@
         @else
         <table class="min-w-full" id="myTable">
             <thead>
-            <tr class="text-left text-sm text-neutral-950 uppercase tracking-wider">
+            <tr class="text-center text-sm text-neutral-950 uppercae tracking-wider">
                     <th class="py-3 px-4">ID</th>
                     <th class="py-3 px-4" style="width: 15%;">CUSTOMER NAME</th>
-                    <th class="py-3 px-4" style="width: 15%;">PICK UP LOCATION</th>
+                    <th class="py-3 px-4">PICK-UP TIME</th>
+                    <th class="py-3 px-4" style="width: 10%;">PICK-UP LOCATION</th>
                     <th class="py-3 px-4">DESTINATION</th>
                     <th class="py-3 px-4">NO. OF PASSENGERS</th>
                     <th class="py-3 px-4" style="width: 15%;">START DATE</th>
                     <th class="py-3 px-4" style="width: 15%;">END DATE</th>
                     <th class="py-3 px-4">Total Fare</th>
-                    <th class="py-3 px-4" style="width: 15%;">RECEIPT</th>
+                    <th class="py-3 px-4" style="width: 15%;">PROOF OF PAYMENT</th>
                     <th class="py-3 px-4">Status</th>
                     <th class="py-3 px-4">Action</th>
                 </tr>
@@ -72,6 +74,7 @@
                         <td class="py-3 px-4">
                             {{ $viewBooking->user->name }} {{ $viewBooking->user->last_name }}
                         </td>
+                        <td class="py-3 px-4">{{ $viewBooking->time }}</td>
                         <td class="py-3 px-4">{{ $viewBooking->location }}</td>
                         <td class="py-3 px-4">{{ $viewBooking->destination }}</td>
                         <td class="py-3 px-4">{{ $viewBooking->passenger }}</td>
@@ -82,7 +85,7 @@
                         <td class="py-3 px-4">₱{{ $viewBooking->price }}.00</td>
                         <td class="py-3 px-4">
                             <button type="button" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600"  data-receipt="{{ asset('img/' . $viewBooking->receipt) }}" onclick="openModal(this)">
-                                        View Receipt
+                                        View
                                     </button>
                         </td>
                         <td class="py-3 px-4">
@@ -95,12 +98,12 @@
                             @elseif($viewBooking->status == "rejected")
                             <span class="font-bold text-red-500">Rejected</span>
                             @elseif($viewBooking->status == "active")
-                            <span class="font-bold text-yellow-500">To be verified</span>
+                            <span class="font-bold text-yellow-500">Pending...</span>
                             @else
                             <span class="font-bold text-red-600">Customer Cancelled</span>
                             @endif
                             </td>
-                        <td class="py-3 px-4" style="width: 20%;">
+                        <td class="py-3 px-4" style="width: 30%;">
                             @if($viewBooking->status == "rejected")
                             <span class="font-bold text-red-600">Rejected</span>
                             @elseif($viewBooking->status == "accepted")
@@ -175,7 +178,7 @@
         </div>
     </div>
 
-<!-- JS for Exporting files -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vfs-fonts/2.0.3/vfs_fonts.js"></script>
@@ -189,16 +192,62 @@
         columnDefs: [
             { targets: 0, visible: false }
         ],
-        // dom: 'Bfrtip',  // This adds the buttons to the DataTable
-        // buttons: [
-        //     'copy',         // Copy to clipboard
-        //     'csv',          // Export as CSV
-        //     'excel',        // Export as Excel
-        //     'pdf',          // Export as PDF
-        //     'print'         // Print the table
-        // ]
+    layout: {
+            topStart: {
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export As',
+                        buttons: [
+                            {
+                                extend: 'copy',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6, 7, 8, 10] 
+                                }
+                            },
+                            {
+                                extend: 'excel',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6, 7, 8, 10]
+                                }
+                            },
+                            {
+                                extend: 'csv',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6, 7, 8, 10]
+                                }
+                            },
+                            {
+                                extend: 'pdf',
+                                exportOptions: {
+                                    ccolumns: [1, 2, 3, 4, 5, 6, 7, 8, 10]
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6, 7, 8, 10]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
     });
 });
+//                 buttons: [
+//                     {
+//                         extend: 'collection',
+//                         text: 'Export As',
+//                         buttons: ['copy', 'excel', 'csv', 'pdf', 'print']
+//                     }
+//                 ]
+//             }
+//         },
+//         // select: true
+//     });
+// });
 
         // Modal
         function openModal(button) {

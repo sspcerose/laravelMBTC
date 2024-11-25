@@ -32,6 +32,7 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // dd($request);
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
@@ -69,13 +70,13 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        event(new Registered($user));
+        // event(new Registered($user));
 
         // Auth::guard('admin')->login($user);
 
         // return redirect(RouteServiceProvider::ADMIN_DASHBOARD);
-        return redirect()->route('member.verification.notice');
+        // return redirect()->route('member.verification.notice');
 
-        // return redirect('admin/member/member');
+        return redirect('admin/member/member');
     }
 }

@@ -20,8 +20,6 @@
                     </svg>
                     <span class="ml-2">Successfully Updated the Tariff!</span>
                 </div>
-
-                <!-- Form -->
                 <form id="tariffForm" method="POST" action="{{ url('admin/tariff/updatetariff/' . $viewtariffs->id) }}" class="mx-10">
                     @csrf
                     <div class="flex flex-col justify-center">

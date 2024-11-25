@@ -1,7 +1,8 @@
 <nav class="bg-white shadow fixed w-full z-50">
-    <div class="mx-auto px-5 pt-5 pb-3 md:px-10 md:pb-5 xl:px-52">
+    <div class="mx-auto px-5 pt-3 pb-0 md:px-10 md:pb-3 xl:px-52">
         <div class="flex items-center justify-between">
-            <div class="text-xl lg:text-xl font-bold"><a href="{{ route('dashboard') }}">MBTC</a></div>
+            <!-- <div class="text-xl lg:text-xl font-bold"><a href="{{ route('dashboard') }}">2</a></div> -->
+            <img width="65" height="65" src="{{ asset('img/system/16.png') }}" alt="User Icon" class="mr-2" />
             <div class="lg:hidden">
                 <button id="menu-toggle" class="text-gray-500 focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +21,7 @@
                 <a href="{{ route('dashboard') }}" class="text-gray-900 hover:text-gray-500">Home</a>
                 <a href="{{ route('booking') }}" class="text-gray-900 hover:text-gray-500">Booking</a>
                 <button id="profile-toggle" class="text-gray-500 focus:outline-none flex items-center">
-                <img width="20" height="20" src="{{ asset('img/userNav.png') }}" alt="User Icon" />
+                <img width="20" height="20" src="{{ asset('img/system/userNav.png') }}" alt="User Icon" />
                     <span class="text-gray-900 ml-1">{{ Auth::user()->name }}</span>
                     <!-- You can use the icon below for a dropdown -->
                     <svg class="fill-current h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">

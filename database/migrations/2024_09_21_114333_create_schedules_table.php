@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('book_id'); 
             $table->unsignedBigInteger('driver_id'); 
-            $table->unsignedBigInteger('vehicle_id'); 
+            // $table->unsignedBigInteger('vehicle_id'); 
             $table->string('cust_status');
             $table->string('driver_status');
             $table->timestamps();
             $table->foreign('book_id')->references('id')->on('bookings')->onDelete('cascade');
             $table->foreign('driver_id')->references('id')->on('drivers')->onDelete('cascade');
-            $table->foreign('vehicle_id')->references('id')->on('vehicles')->onDelete('cascade');
+            // $table->foreign('vehicle_id')->references('id')->on('vehicles')->onDelete('cascade');
         });
     }
 

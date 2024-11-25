@@ -3,7 +3,7 @@
         <section class="lg:pt-32 lg:px-32 xl:px-52 relative">
             <div class="bg-landing h-[95vh] md:h-[100vh] flex items-center justify-center bg-cover bg-center lg:hidden"></div>
             <div class="hidden lg:block rounded-3xl overflow-hidden h-[60vh]">
-                <img src="{{ asset('img/hero-bg-1.jpg') }}" alt="Description of image" class="w-full h-full object-cover" />
+                <img src="{{ asset('img/system/hero-bg-1.jpg') }}" alt="Description of image" class="w-full h-full object-cover" />
             </div>
 
             <div id="bookingCard"

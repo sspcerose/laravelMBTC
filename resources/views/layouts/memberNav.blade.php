@@ -6,7 +6,7 @@
 </head>
 
 <nav class="bg-slate-900 shadow fixed w-full z-50">
-    <div class="py-5 px-4 md:px-10">
+    <div class="py-3 px-4 md:px-10">
         <div class="flex justify-start items-center space-x-4">
             <div>
                 <button id="menu-toggle" class="text-gray-500 focus:outline-none">
@@ -16,10 +16,16 @@
                 </button>
             </div>
             <div class="sidebar-brand flex items-center justify-between w-full">
-                <h1 class="text-xl font-bold text-white">MBTC</h1>
+                <!-- <h1 class="text-xl font-bold text-white">MBTC</h1> -->
+                <img width="65" height="65" src="{{ asset('img/system/17.png') }}" alt="User Icon" class="mr-2" />
                 <div class="flex items-center ml-auto">
-                    <img width="20" height="20" src="{{ asset('img/memNav.png') }}" alt="User Icon" class="mr-2" />
+                    <img width="20" height="20" src="{{ asset('img/system/memNav.png') }}" alt="User Icon" class="mr-2" />
+                    <!-- <p class="text-sm font-bold text-white">Driver {{ Auth::guard('member')->user()->name }}</p> -->
+                    @if($memberType->type != 'Owner')
                     <p class="text-sm font-bold text-white">Driver {{ Auth::guard('member')->user()->name }}</p>
+                    @else
+                    <p class="text-sm font-bold text-white">Owner {{ Auth::guard('member')->user()->name }}</p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -29,6 +35,7 @@
 <!-- Icon-Only Sidebar (Visible by Default on Medium Screens) -->
 <div id="icon-sidebar" class="hidden md:block fixed inset-y-0 left-0 z-40 bg-gray-800 bg-opacity-90 transition-opacity duration-300" style="top: 4rem;">
     <div class="absolute w-16 h-full bg-neutral-200 flex flex-col items-center pt-10 space-y-5">
+    @if($memberType->type != 'Owner')
         <a href="{{ route('member.dashboard') }}" class="tab-link text-slate-900 hover:text-slate-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg" data-tab="Home">
             <i class="fas fa-home fa-xl"></i>
         </a>
@@ -38,9 +45,18 @@
         <a href="{{ route('member.profile.edit') }}" class="tab-link text-slate-900 hover:text-slate-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg" data-tab="Profile">
             <i class="fas fa-user fa-xl"></i>
         </a>
-
         <a href="{{ route('member.logout') }}" class="tab-link text-slate-900 hover:text-slate-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg"
             onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fas fa-sign-out-alt fa-xl"></i></a>
+    @else
+        <a href="{{ route('member.membermonthlydues') }}" class="tab-link text-slate-900 hover:text-slate-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg" data-tab="Booking">
+            <i class="fas fa-calendar-check fa-xl"></i>
+        </a>
+        <a href="{{ route('member.profile.edit') }}" class="tab-link text-slate-900 hover:text-slate-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg" data-tab="Profile">
+            <i class="fas fa-user fa-xl"></i>
+        </a>
+        <a href="{{ route('member.logout') }}" class="tab-link text-slate-900 hover:text-slate-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fas fa-sign-out-alt fa-xl"></i></a>
+    @endif
     </div>
 </div>
 
@@ -52,18 +68,30 @@
 <div id="sidebar" class="fixed inset-y-0 left-0 z-40 bg-gray-800 bg-opacity-75 hidden transition-opacity duration-300" style="top: 4rem;">
     <div class="absolute text-xl font-semibold top-0 left-0 w-56 h-full bg-neutral-200 p-5">
         <ul class="mt-4 space-y-2">
+        @if($memberType->type != 'Owner')
             <li>
-                <a href="{{ route('member.dashboard') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Home">Home</a>
+                <a href="{{ route('member.dashboard') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Home"><i class="fas fa-home mr-4 w-5"></i>Home</a>
             </li>
             <li>
-                <a href="{{ route('member.membermonthlydues') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Booking">Monthly Dues</a>
+                <a href="{{ route('member.membermonthlydues') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Booking"><i class="fas fa-user mr-4 w-5"></i>Monthly Dues</a>
             </li>
             <li>
-                <a href="{{ route('member.profile.edit') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Profile">Profile</a>
+                <a href="{{ route('member.profile.edit') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Profile"><i class="fas fa-user mr-4 w-5"></i>Profile</a>
             </li>
             <li>
-                <a href="{{ route('member.logout') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" data-tab="Logout">Logout</a>
+                <a href="{{ route('member.logout') }}" class="tab-link text-red-700 hover:text-red-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" data-tab="Logout"><i class="fas fa-sign-out-alt fa-xl"></i></a>
             </li>
+        @else
+        <li>
+                <a href="{{ route('member.membermonthlydues') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Booking"><i class="fas fa-user mr-4 w-5"></i>Monthly Dues</a>
+            </li>
+            <li>
+                <a href="{{ route('member.profile.edit') }}" class="tab-link block text-slate-900 hover:text-slate-400 p-2 rounded-lg font-bold" data-tab="Profile"><i class="fas fa-user mr-4 w-5"></i>Profile</a>
+            </li>
+            <li>
+                <a href="{{ route('member.logout') }}" class="tab-link text-red-700 hover:text-red-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" data-tab="Logout"><i class="fas fa-sign-out-alt fa-xl"></i></a>
+            </li>
+        @endif
         </ul>
     </div>
 </div>

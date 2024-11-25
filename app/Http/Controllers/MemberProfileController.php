@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\Member;
 
 
 class MemberProfileController extends Controller
@@ -24,16 +25,22 @@ class MemberProfileController extends Controller
 
     public function edit(Request $request)
 {
-    // Check if the user's updated_at is equal to email_verified_at
+    // dd(Auth::guard('member')->user());
     if (Auth::guard('member')->user()->pass == 'new') {
-        // Redirect to the change password page if they haven't changed their password
         return Redirect::route('member.profile.changepassword1');
     }
 
     // If the user has updated their password, show the profile edit page
-    return view('member.profile.edit', [
-        'user' => $request->user('member'),
-    ]);
+    // return view('member.profile.edit', [
+    //     'user' => $request->user('member'),
+    // ]);
+
+        $member_id = Auth::guard('member')->user()->id;
+        $memberType = Member::find($member_id);
+        return view('member.profile.edit', [
+            'user' => Auth::guard('member')->user(),
+            'memberType' => $memberType,
+        ]);
 }
 
     /**
@@ -55,12 +62,11 @@ class MemberProfileController extends Controller
      //dagdag from here 
     public function showChangePasswordForm()
     {
-         // Ensure the change password page can only be accessed when required
         if (!session('change_password_required')) {
-             return redirect()->route('member.dashboard'); // Or another default page
+             return redirect()->route('member.dashboard'); 
         }
     
-        return view('member.profile.changepassword1'); // Show the change password form
+        return view('member.profile.changepassword1');
     }
      
     public function updatePassword(Request $request)
@@ -77,10 +83,8 @@ class MemberProfileController extends Controller
              'pass' => 'changed',
          ]);
      
-         // Clear the session marker
          session()->forget('change_password_required');
      
-         // Redirect to the dashboard or another secure page
          return redirect()->route('member.dashboard')->with('status', 'Password updated successfully!');
      }
      // to here

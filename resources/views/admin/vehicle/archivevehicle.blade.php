@@ -27,10 +27,11 @@
             <table class="min-w-full" id="myTable">
                 <thead>
                 <tr class="text-left text-sm text-neutral-950 uppercase tracking-wider">
-                        <th class="py-3 px-4">Owner</th>
-                        <th class="py-3 px-4">Type</th>
+                        <th class="py-3 px-4">ID</th>
+                        <th class="py-3 px-4">Owner Name</th>
+                        <th class="py-3 px-4">Vehicle Type</th>
                         <th class="py-3 px-4">Plate Number</th>
-                        <th class="py-3 px-4">Capacity</th>
+                        <th class="py-3 px-4">Seat Capacity</th>
                         <th class="py-3 px-4">Action</th>
                     </tr>
                 </thead>
@@ -42,6 +43,7 @@
                     @else
                         @foreach($viewVehicles as $viewVehicle)
                             <tr>
+                                <td class="py-3 px-4">{{ $viewVehicle->id }}</td>
                                 <td class="py-3 px-4">{{ $viewVehicle->member->name }} {{ $viewVehicle->member->last_name }}</td>
                                 <td class="py-3 px-4">{{ $viewVehicle->type }}</td>
                                 <td class="py-3 px-4">{{ $viewVehicle->plate_num }}</td>
@@ -80,12 +82,64 @@
     </div>
 </div>
 
+<!-- JS for Exporting files -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vfs-fonts/2.0.3/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
 <script>
         $(document).ready(function () {
             $('#myTable').DataTable({
-                responsive: true
-            });
-        });
+                responsive: true,
+                order: [[0, 'desc']],
+                columnDefs: [
+                    { targets: 0, visible: false }
+                ],
+                layout: {
+            topStart: {
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export As',
+                        buttons: [
+                            {
+                                extend: 'copy',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4] // Specify the column indices to export (starting at 0)
+                                }
+                            },
+                            {
+                                extend: 'excel',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4]
+                                }
+                            },
+                            {
+                                extend: 'csv',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4]
+                                }
+                            },
+                            {
+                                extend: 'pdf',
+                                exportOptions: {
+                                    ccolumns: [1, 2, 3, 4]
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    });
+});
 
         document.addEventListener('click', function (e) {
     // Trigger cancel confirmation

@@ -39,12 +39,10 @@
             </div>
         </div>
 
-        <!-- Add Tariff and Archive Buttons -->
         <!-- <div class="mb-4">
             <a href="{{ url('admin/tariff/addtariff') }}" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">Add Tariff</a>
             <a href="{{ url('admin/tariff/archivetariff') }}" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Archive</a>
         </div> -->
-        <!-- Tariff Table -->
         <div class="bg-neutral-300 mx-4 rounded-3xl p-2 items-center mb-4">
         <div class="overflow-x-auto bg-neutral-100 px-2 md:px-4 lg:py-2 rounded-2xl" id="largeTable">
         @if($viewtariffs->isEmpty())
@@ -52,7 +50,7 @@
         @else
             <table class="min-w-full" id="myTable">
                 <thead>
-                <tr class="text-left text-sm text-neutral-950 uppercase tracking-wider">
+                <tr class="text-center text-sm text-neutral-950 uppercase tracking-wider">
                         <th class="py-3 px-4">ID</th>
                         <th class="py-3 px-4">DESTINATION</th>
                         <th class="py-3 px-4">RATE</th>
@@ -120,6 +118,13 @@
         </div>
     </div>
     </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vfs-fonts/2.0.3/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+
     <script>
         $(document).ready(function () {
             $('#myTable').DataTable({
@@ -127,9 +132,51 @@
                 order: [[0, 'desc']],
                 columnDefs: [
                     { targets: 0, visible: false } 
+                ],
+                layout: {
+            topStart: {
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export As',
+                        buttons: [
+                            {
+                                extend: 'copy',
+                                exportOptions: {
+                                    columns: [1, 2, 3]
+                                }
+                            },
+                            {
+                                extend: 'excel',
+                                exportOptions: {
+                                    columns: [1, 2, 3]
+                                }
+                            },
+                            {
+                                extend: 'csv',
+                                exportOptions: {
+                                    columns: [1, 2, 3]
+                                }
+                            },
+                            {
+                                extend: 'pdf',
+                                exportOptions: {
+                                    ccolumns: [1, 2, 3]
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                exportOptions: {
+                                    columns: [1, 2, 3]
+                                }
+                            }
+                        ]
+                    }
                 ]
-            });
-        });
+            }
+        }
+    });
+});
 
         document.addEventListener('click', function (e) {
     // Trigger archive confirmation

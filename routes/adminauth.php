@@ -20,8 +20,8 @@ Route::middleware('guest:admin')->group(function () {
     Route::get('admin/login', [AuthenticatedSessionController::class, 'create'])
                 ->name('admin.auth.login');
                 
-    Route::get('admin', [AuthenticatedSessionController::class, 'create'])
-                ->name('admin.auth.login');
+    // Route::get('admin', [AuthenticatedSessionController::class, 'create'])
+    //             ->name('admin.auth.login');
 
     Route::post('admin/login', [AuthenticatedSessionController::class, 'store']);
 
@@ -34,10 +34,10 @@ Route::middleware('guest:admin')->group(function () {
                 ->name('admin.password.email');
 
     Route::get('admin/reset-password/{token}', [NewPasswordController::class, 'create'])
-                ->name('password.reset');
+                ->name('admin.password.reset');
 
     Route::post('admin/reset-password', [NewPasswordController::class, 'store'])
-                ->name('password.store');
+                ->name('admin.password.store');
 });
 
 Route::middleware('auth:admin')->group(function () {
@@ -53,11 +53,11 @@ Route::middleware('auth:admin')->group(function () {
                 ->name('admin.verification.send');
 
     Route::get('admin/confirm-password', [ConfirmablePasswordController::class, 'show'])
-                ->name('password.confirm');
+                ->name('admin.password.confirm');
 
     Route::post('admin/confirm-password', [ConfirmablePasswordController::class, 'store']);
 
-    Route::put('admin/password', [PasswordController::class, 'update'])->name('password.update');
+    Route::put('admin/password', [PasswordController::class, 'update'])->name('admin.password.update');
 
     Route::post('admin/logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('admin.logout');

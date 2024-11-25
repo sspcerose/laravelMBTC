@@ -12,7 +12,7 @@
 <body class="font-inter">
     <div class="lg:pl-20 lg:pr-10">
         <div class="pt-24 lg:pt-28 p-4 flex flex-col md:flex-row justify-between items-center">
-            <h1 class="text-black p-6 pl-4 text-center md:text-left font-extrabold text-3xl">Members List</h1>
+            <h1 class="text-black p-6 pl-4 text-center md:text-left font-extrabold text-3xl">Member List</h1>
             <div class="flex justify-between px-5">
                 <a href="{{ route('admin.member.auth.register') }}" class=" pt-4 mr-2">
                     <button class="bg-green-600 hover:bg-green-400 text-white flex items-center py-3 px-4 rounded-xl">
@@ -45,10 +45,10 @@
                         <th class="py-3 px-4">ID</th>
                         <th class="py-3 px-4">MEMBER NAME</th>
                         <th class="py-3 px-4">TIN</th>
-                        <th class="py-3 px-4">PHONE NUMBER</th>
+                        <th class="py-3 px-4">CONTACT NUMBER</th>
                         <th class="py-3 px-4">EMAIL</th>
                         <th class="py-3 px-4">DATE OF REGISTRATION</th>
-                        <th class="py-3 px-4">TYPE</th>
+                        <th class="py-3 px-4">MEMBER TYPE</th>
                         <th class="py-3 px-4">ACTION</th>
                     </tr>
                 </thead>
@@ -64,11 +64,12 @@
                         <td class="py-3 px-4">{{ $viewmember->name }} {{ $viewmember->last_name }}</td>
                         <td class="py-3 px-4">{{ $viewmember->tin }}</td>
                         <td class="py-3 px-4">{{ $viewmember->mobile_num }}</td>
-                        @if($viewmember->created_at == $viewmember->updated_at)
+                        <td class="py-3 px-4">{{ $viewmember->email }}</td>
+                        <!-- @if($viewmember->created_at == $viewmember->updated_at)
                         <td class="py-3 px-4">{{ $viewmember->email }}<span class="font-bold text-red-700"> (not yet verified)</span></td>
                         @else
                         <td class="py-3 px-4">{{ $viewmember->email }}<span class="font-bold text-green-700"> (verified)</td>
-                        @endif
+                        @endif -->
                         <td class="py-3 px-4">{{\Carbon\Carbon::parse($viewmember->date_joined)->format('F d, Y')}}</td>
                         <td class="py-3 px-4">{{ $viewmember->type }}</td>
                         <td class="py-3 px-4" id="archiveTd">
@@ -77,7 +78,7 @@
                                 <button type="button" class="font-bold text-orange-500 hover:text-orange-400 triggerArchive"><i class="fas fa-archive"></i> Archive</button>
                             </form>
 
-                            <!-- Custom confirmation alert (initially hidden) -->
+                            <!-- Alert  -->
                             <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-blue-100 border border-blue-600 rounded-md hidden archiveAlert">
                             <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
@@ -104,16 +105,64 @@
     </div>
     </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vfs-fonts/2.0.3/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#myTable').DataTable({
-                responsive: true,
-                order: [[0, 'asc']],
-                columnDefs: [
-                    { targets: 0, visible: false } 
+       
+    $(document).ready(function () {
+    $('#myTable').DataTable({
+        responsive: true,
+        order: [[0, 'asc']],
+        columnDefs: [
+            { targets: 0, visible: false } 
+        ],
+        layout: {
+            topStart: {
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export As',
+                        buttons: [
+                            {
+                                extend: 'copy',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6]
+                                }
+                            },
+                            {
+                                extend: 'excel',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6]
+                                }
+                            },
+                            {
+                                extend: 'csv',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6]
+                                }
+                            },
+                            {
+                                extend: 'pdf',
+                                exportOptions: {
+                                    ccolumns: [1, 2, 3, 4, 5, 6]
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5, 6]
+                                }
+                            }
+                        ]
+                    }
                 ]
-            });
-        });
+            }
+        }
+    });
+});
 
         document.addEventListener('click', function (e) {
     // Trigger archive confirmation

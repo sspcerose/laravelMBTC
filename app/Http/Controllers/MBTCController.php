@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Carbon\Carbon; 
 
 use Illuminate\Http\Request;
 use App\Models\Booking;
@@ -159,10 +161,16 @@ public function calculatePrice(Request $request) {
     
         $rate = $selectedTariff->rate;
         $succeeding = $selectedTariff->succeeding;
+        // dd($succeeding);
     
+        $calculated_succeeding = ($days > 1) ? $succeeding * ($days - 1) : 0;
         $price = ($days > 1) ? $rate + ($succeeding * ($days - 1)) : $rate;
 
-    return response()->json(['price' => $price]);
+        return response()->json([
+            'price' => $price,
+            'rate' => $rate,
+            'succeeding' => $calculated_succeeding,
+        ]);
 }
 
 
@@ -170,43 +178,39 @@ public function calculatePrice(Request $request) {
 ///////////////Admin dashboard///////////////////////////////////////////////
 public function dashboard() 
 {
-    // Existing counts
     $totalBookings = Booking::count();
     $totalUsers = User::count();
     $totalMembers = Member::count();
 
-    // Count bookings per month
-    $currentYear = now()->year;  // Get the current year
+    $currentYear = now()->year; 
     $monthlyBookings = Booking::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
-        ->whereYear('created_at', $currentYear)  // Filter for the current year
+        ->whereYear('created_at', $currentYear)
+        ->where('status', 'accepted')
         ->groupBy('year', 'month')
         ->orderBy('month')
         ->pluck('count', 'month')
         ->toArray();
 
-    // Fill data for all months (Jan to Dec)
     $bookingData = array_fill(1, 12, 0);
     foreach ($monthlyBookings as $month => $count) {
         $bookingData[$month] = $count;
     }
 
-    // Fetch top 5 most booked destinations using Eloquent
-    $currentYear = now()->year;  // Get the current year
+
+    $currentYear = now()->year; 
     $topDestinations = Booking::select('tariff_id')
         ->selectRaw('COUNT(*) as count')
-        ->whereYear('created_at', $currentYear)  // Filter bookings by the current year
+        ->whereYear('created_at', $currentYear) 
         ->groupBy('tariff_id')
         ->orderByDesc('count')
         ->limit(5)
         ->get();
 
-    // Fetch destination names from the Tariff model
     $tariffIds = $topDestinations->pluck('tariff_id')->toArray();
     $tariffs = Tariff::whereIn('id', $tariffIds)
         ->pluck('destination', 'id')
         ->toArray();
 
-    // Extract destination names and counts
     $destinationNames = [];
     $destinationCounts = [];
     foreach ($topDestinations as $destination) {
@@ -214,39 +218,101 @@ public function dashboard()
         $destinationCounts[] = $destination->count;
     }
 
-    // Calculate total sales per month for 'active' bookings
     $currentYear = now()->year;
     $monthlySales = Booking::selectRaw('YEAR(start_date) as year, MONTH(start_date) as month, SUM(price) as total_sales')
-        ->where('status', 'accepted')  // Filter for 'active' bookings
+        ->where('status', 'accepted') 
         ->whereYear('start_date', $currentYear)
         ->groupBy('year', 'month')
         ->orderBy('month')
         ->pluck('total_sales', 'month')
         ->toArray();
 
-    // Fill data for all months (Jan to Dec) if there are no bookings for a month
     $salesData = array_fill(1, 12, 0);
     foreach ($monthlySales as $month => $totalSales) {
         $salesData[$month] = $totalSales;
     }
 
-    // Count total members with 'paid' status in the payment table for the current month
     $currentMonth = now()->month;
     $paidMembersCount = Payment::whereMonth('created_at', $currentMonth)
                                 ->where('status', 'paid')
                                 ->distinct('member_id')
                                 ->count('member_id');
 
-    // Count total members with 'active' status
     $activeMembersCount = Member::where('member_status', 'active')->count();
+
+    $currentYear = now()->year;
+    $lastYear = $currentYear - 1;
+
+    // Count bookings per month for the current year with 'accepted' status
+    // $monthlyBookingsCurrentYear = Booking::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
+    //     ->whereYear('created_at', $currentYear)
+    //     ->where('status', 'accepted')
+    //     ->groupBy('year', 'month')
+    //     ->orderBy('month')
+    //     ->pluck('count', 'month')
+    //     ->toArray();
+
+    $monthlyBookingsLastYear = Booking::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
+        ->whereYear('created_at', $lastYear)
+        ->where('status', 'accepted')
+        ->groupBy('year', 'month')
+        ->orderBy('month')
+        ->pluck('count', 'month')
+        ->toArray();
+    
+    $monthlyBookingsCurrentYear = Booking::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
+            ->whereYear('created_at', $currentYear)
+            ->where('status', 'accepted')
+            ->groupBy('year', 'month')
+            ->orderBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
+    
+    $lastBookingData = array_fill(1, 12, 0);
+        foreach ($monthlyBookingsLastYear as $month => $count) {
+            $lastBookingData[$month] = $count;
+        }
+    
+    // $bookingDataCurrentYear = array_fill(1, 12, 0);
+    // $bookingDataLastYear = array_fill(1, 12, 0);
+
+    //     $chartData = [
+    //         'currentYear' => $bookingDataCurrentYear,
+    //         'lastYear' => $bookingDataLastYear,
+    //     ];
+    $today = now();
+
+    $scheduleCount = Schedule::whereHas('booking', function ($query) use ($today) {
+        $query->whereDate('start_date', '=', $today);
+    })->count();
 
     return view('admin.dashboard', compact(
         'totalBookings', 'totalUsers', 'totalMembers', 'bookingData', 'destinationNames', 'destinationCounts', 'salesData',
-        'paidMembersCount', 'activeMembersCount', 'currentMonth'
+        'paidMembersCount', 'activeMembersCount', 'currentMonth', 'monthlyBookingsCurrentYear', 'monthlyBookingsLastYear', 'lastBookingData', 'scheduleCount'
     ));
 }
 
+///////////////Customer///////////////////////////////////////////////
+public function viewCustomer(Request $request)
+{
+    // Step 1: Get all users
+    $users = User::all();
 
+    // Step 2: Count the bookings for each user
+    $bookingCounts = Booking::select('customer_id')
+        ->selectRaw('COUNT(*) as total_bookings')
+        ->groupBy('customer_id')
+        ->pluck('total_bookings', 'customer_id'); // [user_id => total_bookings]
+
+    // Step 3: Get the latest booking for each user
+    $latestBookings = Booking::select('customer_id', 'start_date', 'end_date')
+        ->orderBy('start_date', 'desc')
+        ->get()
+        ->unique('customer_id') // Keep only the latest for each user_id
+        ->keyBy('customer_id'); // [user_id => latest_booking]
+
+    return view('admin.customer.customer', compact('users', 'bookingCounts', 'latestBookings'));
+}
 
 
 ///////////////Member///////////////////////////////////////////////
@@ -627,9 +693,32 @@ public function addtariff(Request $request)
             } else {
                 $viewBookings  = Booking::all();
             }
+
+            $viewactiveBookings  = Booking::where('status', 'active')->get();
             
-        
-            return view('admin.booking.booking', compact('viewBookings'));
+            $activeBookingCount = Booking::where('status', 'active')->count();
+
+            $directory = public_path('img'); // Path to your images folder
+            // $files = File::files($directory);
+
+            // foreach ($files as $file) {
+            //     File::delete($file); // Delete each file
+            // }
+            $oldBookings = Booking::where('end_date', '<=', Carbon::now()->subMonth())
+                ->get();
+
+            foreach ($oldBookings as $booking) {
+                // Construct the full path to the image file
+                $imagePath = $directory . '/' . $booking->receipt;
+
+                // Check if the file exists before deleting
+                if (File::exists($imagePath)) {
+                    File::delete($imagePath);
+                }
+            }
+
+            // return response()->json(['message' => 'All images deleted successfully.']);
+            return view('admin.booking.booking', compact('viewBookings', 'activeBookingCount', 'viewactiveBookings'));
 
         }
 
@@ -640,8 +729,15 @@ public function addtariff(Request $request)
                 $payments = Payment::with('member', 'dues')
                     ->whereHas('dues')
                     ->get();
+                $paymentss = Payment::with(['member', 'dues'])
+                    ->where('status', 'update') 
+                    ->whereHas('dues') 
+                    ->orderBy('updated_at', 'desc')
+                    ->get();
+
+                $paymentnotifcount =  $paymentss->count();
         
-                return view('admin.monthlydues.viewallmonthlydues', compact('payments'));
+                return view('admin.monthlydues.viewallmonthlydues', compact('payments', 'paymentss', 'paymentnotifcount'));
         }
 
         public function viewMonthlyDues(Request $request)
@@ -657,7 +753,7 @@ public function addtariff(Request $request)
                     ->get();
             } else {
                 $currentMonth = now()->startOfMonth()->format('Y-m-d');
-                $amount = 500.00;
+                $amount = 600.00;
         
                 $existingDues = Dues::where('date', $currentMonth)->first();
         
@@ -693,12 +789,14 @@ public function addtariff(Request $request)
                     })
                     ->get();
                 
-                $paymentss = Payment::with('member', 'dues')
-                    ->whereHas('dues')
+                $paymentss = Payment::with(['member', 'dues'])
+                    ->where('status', 'update') 
+                    ->whereHas('dues') 
                     ->orderBy('updated_at', 'desc')
                     ->get();
+                $paymentnotifcount =  $paymentss->count();
         
-                return view('admin.monthlydues.monthlydues', compact('payments', 'paymentss'));
+                return view('admin.monthlydues.monthlydues', compact('payments', 'paymentss', 'paymentnotifcount'));
             }
         }
         
@@ -729,10 +827,15 @@ public function addtariff(Request $request)
 
 public function viewSchedule(Request $request) {
 
-    $vehiclesExist = Vehicle::exists();
+    // $vehiclesExist = Vehicle::exists();
+    
+    // $members = Member::where('type', 'Driver')
+    //     ->where('member_status', 'active')
+    //     ->with(['driver.schedule', 'payment']) 
+    //     ->get();
     $members = Member::where('type', 'Driver')
         ->where('member_status', 'active')
-        ->with(['driver.schedule', 'payment']) 
+        ->with(['driver.schedule', 'payment.dues']) // Ensure dues are eager-loaded
         ->get();
 
     $drivers = $members->filter(function ($member) {
@@ -765,88 +868,305 @@ public function viewSchedule(Request $request) {
         return false;
     });
 
+    // $drivers = $drivers->sortBy(function ($member) {
+    //     return $member->driver->first() ? $member->driver->first()->id : null; 
+    // });
+
+    // Sort payments within each driver by dues' month
+    foreach ($drivers as $driver) {
+        foreach ($driver->payment as $payment) {
+            // dump($payment->dues->date); // Check the date for each payment
+            if ($payment->dues && $payment->dues->date) {
+                $month = Carbon::parse($payment->dues->date)->format('F');
+                // dump($month); // Display the month for debugging
+            }
+        }
+    }
+
     $viewBookings = Booking::where('status', 'accepted')
         ->with(['schedule' => function ($query) {
             $query->orderBy('created_at', 'desc'); 
         }, 'schedule.driver.member', 'user'])
         ->get();
 
-    return view('Admin.schedule.schedule', compact('drivers', 'viewBookings', 'vehiclesExist'));
+    return view('Admin.schedule.schedule', compact('drivers', 'viewBookings'));
 }
+
+// public function viewSchedule(Request $request) {
+
+//     // Check if vehicles exist
+//     $vehiclesExist = Vehicle::exists();
+    
+//     // Fetch members (drivers) and eager load their related data
+//     $members = Member::where('type', 'Driver')
+//         ->where('member_status', 'active')
+//         ->with(['driver.schedule', 'payment.dues']) // Ensure dues are eager-loaded
+//         ->get();
+
+//     // Filter drivers based on payment and schedule criteria
+//     $drivers = $members->filter(function ($member) {
+//         if ($member->driver) {
+//             foreach ($member->driver as $driver) {
+
+//                 $scheduledCount = $driver->schedule()
+//                     ->where('driver_status', 'scheduled')
+//                     ->where('cust_status', '!=', 'inactive') 
+//                     ->count();
+
+//                 $acceptedCount = $driver->schedule()
+//                     ->where('driver_status', 'accepted')
+//                     ->where('cust_status', '!=', 'inactive') 
+//                     ->count();
+
+//                 $cancelledCount = $driver->schedule()
+//                     ->where('driver_status', 'cancelled')
+//                     ->count();
+
+//                 $count = $scheduledCount + $acceptedCount + $cancelledCount;
+
+//                 // Count the number of paid dues for each driver
+//                 $paidCount = $member->payment()->where('status', 'paid')->count();
+
+//                 // Only include drivers who have more paid dues than scheduled counts
+//                 if ($paidCount > $count) {
+//                     return true; 
+//                 }
+//             }
+//         }
+//         return false;
+//     });
+
+//   // Now process the drivers, sorting them and removing the first payment month if it conflicts with their schedule
+//   $sortedDrivers = $drivers->map(function ($driver) {
+//     // Filter and sort payments by dues date
+//     $paidPayments = $driver->payment->filter(function ($payment) {
+//         return $payment->status === 'paid' && $payment->dues && $payment->dues->date;
+//     })->sortBy(function ($payment) {
+//         return Carbon::parse($payment->dues->date);
+//     });
+
+//     // Get all months the driver has paid for
+//     $paidMonths = $paidPayments->map(function ($payment) {
+//         return Carbon::parse($payment->dues->date)->format('F');
+//     });
+
+//     // Get all months for which this driver has already scheduled
+//     $scheduledMonths = $driver->schedule()->where('driver_status', 'scheduled')
+//         ->where('cust_status', '!=', 'inactive')
+//         ->get()->map(function ($schedule) {
+//             return Carbon::parse($schedule->start_date)->format('F');
+//         });
+
+//     // Remove months from the list of paid months that are already scheduled
+//     $availableMonths = $paidMonths->diff($scheduledMonths);
+
+//     // If there are available months, return them
+//     if ($availableMonths->isNotEmpty()) {
+//         // Select the first available month
+//         $nextMonth = $availableMonths->first();
+
+//         // Get the payment associated with this month
+//         $nextPayment = $paidPayments->firstWhere(function ($payment) use ($nextMonth) {
+//             return Carbon::parse($payment->dues->date)->format('F') === $nextMonth;
+//         });
+
+//         return [
+//             'driver_id' => $driver->id,
+//             'driver' => $driver,
+//             'dues_date' => $nextPayment->dues->date,
+//             'payment_month' => $nextMonth,
+//         ];
+//     }
+
+//     return null;
+// })->filter()->sortBy(function ($entry) {
+//     return Carbon::parse($entry['dues_date']); // Sorting by the earliest available dues date
+// });
+//     // Now $drivers is sorted by their earliest payment date
+
+//     // Fetch accepted bookings
+//     $viewBookings = Booking::where('status', 'accepted')
+//         ->with(['schedule' => function ($query) {
+//             $query->orderBy('created_at', 'desc'); 
+//         }, 'schedule.driver.member', 'user'])
+//         ->get();
+
+//     // Pass the sorted drivers and bookings to the view
+//     return view('Admin.schedule.schedule', compact('drivers', 'viewBookings', 'vehiclesExist', 'sortedDrivers'));
+// }
+
 
 
 /////Assign a Driver
-    public function assignDriver(Request $request)
-    {
-        $bookingId = $request->input('booking_id');
-        $driverId = $request->input('driver_id');
+//     public function assignDriver(Request $request)
+//     {
+//         $bookingId = $request->input('booking_id');
+//         $driverId = $request->input('driver_id');
 
-        $booking = Booking::find($bookingId);
+//         $booking = Booking::find($bookingId);
 
-        if (!$booking) {
-            return redirect()->back()->with('error', 'Booking not found.');
-        }
+//         if (!$booking) {
+//             return redirect()->back()->with('error', 'Booking not found.');
+//         }
     
 
-        $driver = Driver::find($driverId);
+//         $driver = Driver::find($driverId);
 
-        if (!$driver) {
-            return redirect()->back()->with('error', 'Driver not found.');
-        }
+//         if (!$driver) {
+//             return redirect()->back()->with('error', 'Driver not found.');
+//         }
 
-        $member = $driver->member;
+//         $member = $driver->member;
 
-        $paidCount = $member->payment()->where('status', 'paid')->count();
-        $acceptedCount = $driver->schedule()->where('driver_status', 'accepted')->count();
+//         $paidCount = $member->payment()->where('status', 'paid')->count();
+//         $acceptedCount = $driver->schedule()->where('driver_status', 'accepted')->count();
 
-        if ($paidCount > $acceptedCount) {
+//         if ($paidCount > $acceptedCount) {
 
-            $vehicle = Vehicle::where('member_id', $member->id)
-                ->whereHas('member.payment', function ($query) {
-                    $query->where('status', 'paid');
-                })
-                ->whereNotIn('id', function ($query) {
-                    $query->select('vehicle_id')->from('schedules')->where('driver_status', 'accepted');
-                })
-                ->first();
+//             $vehicle = Vehicle::where('member_id', $member->id)
+//                 ->whereHas('member.payment', function ($query) {
+//                     $query->where('status', 'paid');
+//                 })
+//                 ->whereNotIn('id', function ($query) {
+//                     $query->select('vehicle_id')->from('schedules')->where('driver_status', 'accepted');
+//                 })
+//                 ->first();
 
-            if (!$vehicle) {
-                $vehicle = Vehicle::whereHas('member', function ($query) {
-                    $query->where('type', 'Owner')->whereHas('payment', function ($query) {
-                        $query->where('status', 'paid');
+//             if (!$vehicle) {
+//                 $vehicle = Vehicle::whereHas('member', function ($query) {
+//                     $query->where('type', 'Owner')->whereHas('payment', function ($query) {
+//                         $query->where('status', 'paid');
+//                     });
+//                 })
+//                 ->whereNotIn('id', function ($query) {
+//                     $query->select('vehicle_id')->from('schedules')->where('driver_status', 'accepted');
+//                 })
+//                 ->first();
+//             }
+
+//             if ($vehicle) {
+//                 $existingSchedule = Schedule::where('book_id', $bookingId)
+//                     ->where('driver_id', $driverId)
+//                     ->first();
+
+//                 if (!$existingSchedule) {
+//                     Schedule::create([
+//                         'book_id' => $booking->id,
+//                         'driver_id' => $driver->id,
+//                         'vehicle_id' => $vehicle->id,
+//                         'cust_status' => 'active',
+//                         'driver_status' => 'scheduled'
+//                     ]);
+
+//                     return redirect()->back()->with('success', 'Driver and vehicle assigned successfully.');
+//                 } else {
+//                     return redirect()->back()->with('error', 'This driver is already assigned to this booking.');
+//                 }
+//             } else {
+//                 return redirect()->back()->with('error', 'No available vehicles with valid payment status.');
+//             }
+//         } else {
+//             return redirect()->back()->with('error', 'Driver cannot be assigned due to insufficient paid dues.');
+//         }
+// }
+
+public function assignDriver(Request $request)
+{
+    $bookingId = $request->input('booking_id');
+    $driverId = $request->input('driver_id');
+
+    // Find the booking by ID
+    $booking = Booking::find($bookingId);
+
+    if (!$booking) {
+        return redirect()->back()->with('error', 'Booking not found.');
+    }
+
+    // Find the driver by ID
+    $driver = Driver::find($driverId);
+
+    if (!$driver) {
+        return redirect()->back()->with('error', 'Driver not found.');
+    }
+
+    // Get the member associated with the driver
+    $member = $driver->member;
+
+    // Check if the driver has sufficient paid dues
+    $paidCount = $member->payment()->where('status', 'paid')->count();
+    $acceptedCount = $driver->schedule()->where('driver_status', 'accepted')->count();
+
+    // If the driver has sufficient paid dues
+    if ($paidCount > $acceptedCount) {
+        // $vehicle = Vehicle::where('member_id', $member->id)
+        //         ->whereHas('member.payment', function ($query) {
+        //             $query->where('status', 'paid');
+        //         })
+        //         ->whereNotIn('id', function ($query) {
+        //             $query->select('vehicle_id')->from('schedules')->where('driver_status', 'accepted');
+        //         })
+        //         ->first();
+
+        //     if (!$vehicle) {
+        //         $vehicle = Vehicle::whereHas('member', function ($query) {
+        //             $query->where('type', 'Owner')->whereHas('payment', function ($query) {
+        //                 $query->where('status', 'paid');
+        //             });
+        //         })
+        //         ->whereNotIn('id', function ($query) {
+        //             $query->select('vehicle_id')->from('schedules')->where('driver_status', 'accepted');
+        //         })
+        //         ->first();
+        //     }
+
+        //     if ($vehicle) {
+
+        // Get the start and end date of the new booking
+        $newStartDate = Carbon::parse($booking->start_date);
+        $newEndDate = Carbon::parse($booking->end_date);
+
+        // Check for any existing schedules for this driver that conflict with the new booking's dates
+        $conflictingSchedules = Schedule::where('driver_id', $driver->id)
+            ->where('driver_status', 'accepted') // Only check accepted schedules
+            ->whereHas('booking', function ($query) use ($newStartDate, $newEndDate) {
+                // Find conflicting schedules based on start and end dates
+                $query->whereBetween('start_date', [$newStartDate, $newEndDate])
+                    ->orWhereBetween('end_date', [$newStartDate, $newEndDate])
+                    ->orWhere(function ($query) use ($newStartDate, $newEndDate) {
+                        $query->where('start_date', '<=', $newStartDate)
+                            ->where('end_date', '>=', $newEndDate);
                     });
-                })
-                ->whereNotIn('id', function ($query) {
-                    $query->select('vehicle_id')->from('schedules')->where('driver_status', 'accepted');
-                })
-                ->first();
-            }
+            })
+            ->get();
 
-            if ($vehicle) {
-                $existingSchedule = Schedule::where('book_id', $bookingId)
-                    ->where('driver_id', $driverId)
-                    ->first();
-
-                if (!$existingSchedule) {
-                    Schedule::create([
-                        'book_id' => $booking->id,
-                        'driver_id' => $driver->id,
-                        'vehicle_id' => $vehicle->id,
-                        'cust_status' => 'active',
-                        'driver_status' => 'scheduled'
-                    ]);
-
-                    return redirect()->back()->with('success', 'Driver and vehicle assigned successfully.');
-                } else {
-                    return redirect()->back()->with('error', 'This driver is already assigned to this booking.');
-                }
-            } else {
-                return redirect()->back()->with('error', 'No available vehicles with valid payment status.');
+        if ($conflictingSchedules->isNotEmpty()) {
+            // If there are conflicting schedules, create the new schedule with 'cancelled' status
+            foreach ($conflictingSchedules as $schedule) {
+                Schedule::create([
+                    'book_id' => $booking->id,
+                    'driver_id' => $driver->id,
+                    // 'vehicle_id' => $vehicle->id, // Assign vehicle if found, else null
+                    'cust_status' => 'active',
+                    'driver_status' => 'conflict'  // Mark as cancelled due to conflict
+                ]);
             }
         } else {
-            return redirect()->back()->with('error', 'Driver cannot be assigned due to insufficient paid dues.');
+            // If there are no conflicts, create the new schedule with 'scheduled' status
+            Schedule::create([
+                'book_id' => $booking->id,
+                'driver_id' => $driver->id,
+                // 'vehicle_id' => $vehicle->id,  // Assign vehicle if found, else null
+                'cust_status' => 'active',
+                'driver_status' => 'scheduled'  // Mark as scheduled
+            ]);
         }
+
+        return redirect()->back()->with('success', 'Driver and vehicle assigned successfully.');
+    } else {
+        return redirect()->back()->with('error', 'Driver cannot be assigned due to insufficient paid dues.');
+    }
 }
+
 
 // Option Assign
 public function optionAssignDriver(Request $request)
@@ -858,7 +1178,6 @@ public function optionAssignDriver(Request $request)
         return redirect()->back()->with('error', 'Booking not found.');
     }
 
-    // Retrieve only drivers with an active status in the members table
     $drivers = Driver::whereHas('member', function ($query) {
         $query->where('member_status', 'active');
     })->get();
@@ -868,7 +1187,6 @@ public function optionAssignDriver(Request $request)
     }
 
     foreach ($drivers as $driver) {
-        // Find an available vehicle for each active driver
         $vehicle = Vehicle::whereNotIn('id', function ($query) {
                 $query->select('vehicle_id')->from('schedules')->where('driver_status', 'accepted');
             })
@@ -877,14 +1195,12 @@ public function optionAssignDriver(Request $request)
         if (!$vehicle) {
             return redirect()->back()->with('error', 'No available vehicles for scheduling.');
         }
-
-        // Check if this driver is already assigned to this booking
+        
         $existingSchedule = Schedule::where('book_id', $bookingId)
             ->where('driver_id', $driver->id)
             ->first();
 
         if (!$existingSchedule) {
-            // Create a new schedule entry for this driver
             Schedule::create([
                 'book_id' => $booking->id,
                 'driver_id' => $driver->id,
@@ -894,9 +1210,12 @@ public function optionAssignDriver(Request $request)
             ]);
         }
     }
+    
 
     return redirect()->back()->with('success', 'All active drivers have been assigned to the booking with status "optionscheduled".');
 }
+
+
 
 
 
@@ -914,8 +1233,9 @@ public function memberdashboard()
     else{
     $member_id = Auth::guard('member')->user()->id;
     $memberType = Member::find($member_id);
+    $driver = Driver::where('member_id', $member_id)->first();
 
-    $schedules = Schedule::with(['booking', 'booking.user', 'driver.member', 'vehicle.member', 'booking.tariff'])
+    $schedules = Schedule::with(['booking', 'booking.user', 'driver.member', 'booking.tariff'])
         ->where('cust_status', 'active')
         ->where(function ($query) {
             $query->whereNull('driver_status')
@@ -924,29 +1244,74 @@ public function memberdashboard()
         ->where(function ($query) use ($member_id) {
             $query->whereHas('driver.member', function ($q) use ($member_id) {
                 $q->where('member_id', $member_id);
-            })
-            ->orWhereHas('vehicle.member', function ($q) use ($member_id) {
-                $q->where('member_id', $member_id);
             });
         })
         ->get();
 
-        $scheduless = Schedule::with(['booking', 'booking.user', 'driver.member', 'vehicle.member', 'booking.tariff'])
+        $scheduless = Schedule::with(['booking', 'booking.user', 'driver.member', 'booking.tariff'])
         ->where('cust_status', 'active')
-        ->where('driver_status', 'optionscheduled')  // Filter only for 'optionscheduled' status
+        ->where('driver_status', 'optionscheduled') 
         ->where(function ($query) use ($member_id) {
             $query->whereHas('driver.member', function ($q) use ($member_id) {
                 $q->where('member_id', $member_id);
-            })
-            ->orWhereHas('vehicle.member', function ($q) use ($member_id) {
-                $q->where('member_id', $member_id);
             });
         })
         ->get();
+        // dd($scheduless);
 
-    return view('member.dashboard', compact('schedules', 'memberType', 'scheduless'));
+        $schednotifcount = $scheduless->count();
+
+    return view('member.dashboard', compact('schedules', 'memberType', 'scheduless', 'schednotifcount'));
 }
 }
+
+// public function memberdashboard()
+// {
+//     if (Auth::guard('member')->user()->pass == 'new') {
+//         // Logout the user
+//         // Auth::guard('member')->logout();
+
+//         // Redirect to change password page
+//         return redirect()->route('member.profile.changepassword1');
+        
+//     }
+//     else{
+//     $member_id = Auth::guard('member')->user()->id;
+//     $memberType = Member::find($member_id);
+//     $driver = Driver::where('member_id', $member_id)->first();
+
+//     $schedules = Schedule::with(['booking', 'booking.user', 'driver.member', 'vehicle.member', 'booking.tariff'])
+//         ->where('cust_status', 'active')
+//         ->where(function ($query) {
+//             $query->whereNull('driver_status')
+//                 ->orWhere('driver_status', '!=', 'optionscheduled');
+//         })
+//         ->where(function ($query) use ($member_id) {
+//             $query->whereHas('driver.member', function ($q) use ($member_id) {
+//                 $q->where('member_id', $member_id);
+//             })
+//             ->orWhereHas('vehicle.member', function ($q) use ($member_id) {
+//                 $q->where('member_id', $member_id);
+//             });
+//         })
+//         ->get();
+
+//         $scheduless = Schedule::with(['booking', 'booking.user', 'driver.member', 'booking.tariff'])
+//         ->where('cust_status', 'active')
+//         ->where('driver_status', 'optionscheduled') 
+//         ->where(function ($query) use ($member_id) {
+//             $query->whereHas('driver.member', function ($q) use ($member_id) {
+//                 $q->where('member_id', $member_id);
+//             });
+//         })
+//         ->get();
+//         // dd($scheduless);
+
+//         $schednotifcount = $scheduless->count();
+
+//     return view('member.dashboard', compact('schedules', 'memberType', 'scheduless', 'schednotifcount'));
+// }
+// }
 
 
 //////Acceptbooking
@@ -994,27 +1359,21 @@ public function rejectBooking(Request $request, $bookingId)
 /////accept schedule
 public function optionSchedule(Request $request, $scheduleId)
 {
-    // Find the specific schedule to update
     $schedule = Schedule::find($scheduleId);
 
     if (!$schedule) {
         return redirect()->route('member.dashboard')->with('error', 'Schedule not found.');
     }
-
-    // Get the driver_id and book_id of the schedule you want to keep
     $driverId = $schedule->driver_id;
-    $bookId = $schedule->book_id;  // Assuming `book_id` is the column for the booking reference
+    $bookId = $schedule->book_id; 
 
-    // Update the driver status for this specific schedule
     $schedule->driver_status = 'accepted';
     $schedule->save();
 
-    // Delete all other schedules with the same book_id and 'driver_status' as 'optionscheduled',
-    // but exclude the specific schedule (based on schedule_id and driver_id)
-    Schedule::where('book_id', $bookId)  // Match schedules with the same book_id
-        ->where('driver_status', 'optionscheduled')  // Only delete those with 'optionscheduled' status
-        ->where('driver_id', '!=', $driverId)  // Exclude the current driver's schedule
-        ->where('id', '!=', $schedule->id)  // Exclude the updated schedule itself
+    Schedule::where('book_id', $bookId) 
+        ->where('driver_status', 'optionscheduled')
+        ->where('driver_id', '!=', $driverId)
+        ->where('id', '!=', $schedule->id)
         ->delete();
 
     return redirect()->route('member.dashboard')->with('success', 'Schedule accepted successfully, and conflicting schedules have been removed.');
@@ -1024,11 +1383,11 @@ public function optionSchedule(Request $request, $scheduleId)
 
 /////monthly dues
     public function memberMonthlyDues() {
+        $member_id = Auth::guard('member')->user()->id;
+        $memberType = Member::find($member_id);
         if (Auth::guard('member')->user()->pass == 'new') {
-            // Logout the user
             // Auth::guard('member')->logout();
     
-            // Redirect to change password page
             return redirect()->route('member.profile.changepassword1');
             
         }
@@ -1038,7 +1397,34 @@ public function optionSchedule(Request $request, $scheduleId)
             ->where('member_id', $member_id)
             ->get();
     
-        return view('member.membermonthlydues', compact('membermonthlydues'));
+        return view('member.membermonthlydues', compact('membermonthlydues', 'memberType'));
     }
     
+
+// public function deleteOldImages()
+//     {
+//         // $directory = public_path('img'); // Path to your images folder
+//         // $files = File::files($directory);
+
+//         // $now = Carbon::now();
+
+//         // foreach ($files as $file) {
+//         //     $lastModified = Carbon::createFromTimestamp(File::lastModified($file));
+//         //     $diffInMonths = $now->diffInMonths($lastModified);
+
+//         //     if ($diffInMonths >= 1) {
+//         //         File::delete($file);
+//         //     }
+//         // }
+//         $directory = public_path('img'); // Path to your images folder
+//         $files = File::files($directory);
+
+//         foreach ($files as $file) {
+//             File::delete($file); // Delete each file
+//         }
+
+//         return response()->json(['message' => 'All images deleted successfully.']);
+
+//         // return response()->json(['message' => 'Old images deleted successfully.']);
+//     }
 }

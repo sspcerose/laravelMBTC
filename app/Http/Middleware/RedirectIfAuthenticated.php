@@ -19,31 +19,38 @@ class RedirectIfAuthenticated
     {
         $guards = empty($guards) ? [null] : $guards;
 
-        // foreach ($guards as $guard) {
-        //     if ($guard=="admin" && Auth::guard($guard)->check()){
-        //         return redirect(RouteServiceProvider::ADMIN_DASHBOARD);
-        //     }
-        //     if ($guard=="member" && Auth::guard($guard)->check()){
-        //         return redirect(RouteServiceProvider::MEMBER_DASHBOARD);
-        //     }
-        //     if (Auth::guard($guard)->check()) {
-        //         return redirect(RouteServiceProvider::HOME);
-        //     }
-        // }
-
         foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                if ($guard === 'admin') {
-                    return redirect(RouteServiceProvider::ADMIN_DASHBOARD);
-                } elseif ($guard === 'member') {
-                    return redirect(RouteServiceProvider::MEMBER_DASHBOARD);
-                } else {
-                    return redirect(RouteServiceProvider::HOME);
+            if ($guard=="admin" && Auth::guard($guard)->check()){
+                return redirect(RouteServiceProvider::ADMIN_DASHBOARD);
+            }
+            if ($guard == "member" && Auth::guard($guard)->check()) {
+                $user = Auth::guard($guard)->user();
+        
+                if ($user->member_type === 'Owner') {
+                    return redirect()->route('member.membermonthlydues');
                 }
+        
+                return redirect(RouteServiceProvider::MEMBER_DASHBOARD);
+            }
+            if (Auth::guard($guard)->check()) {
+                return redirect(RouteServiceProvider::HOME);
             }
         }
+
+        // foreach ($guards as $guard) {
+        //     if (Auth::guard($guard)->check()) {
+        //         if ($guard === 'admin') {
+        //             return redirect(RouteServiceProvider::ADMIN_DASHBOARD);
+        //         } elseif ($guard === 'member') {
+        //             return redirect(RouteServiceProvider::MEMBER_DASHBOARD);
+        //         } else {
+        //             return redirect(RouteServiceProvider::HOME);
+        //         }
+        //     }
+        // }
         
 
         return $next($request);
     }
 }
+
