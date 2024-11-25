@@ -2,7 +2,7 @@
 
 @include('layouts.adminNav')
 
-<body class="font-inter">
+<body class="font-inter test">
     <div class="lg:pl-20 lg:pr-10">
         <div class="pt-24 lg:pt-28 flex justify-between items-center">
             <h1 class="text-black p-4 pl-4 text-center md:text-left font-extrabold text-3xl">Bookings</h1>
