@@ -5,8 +5,9 @@
     <!-- Left Section -->
     <section class="bg-gray-50 rounded-br-5xl rounded-bl-5xl md:flex-[3] lg:rounded-tr-5xl lg:rounded-bl-none">
 
-        <div class="p-1 font-bold text-gray-400 text-3xl pb-20">
-            <h1>MBTC</h1>
+        
+        <div class="font-bold text-white text-3xl pb-40 xl:pb-48">
+        <a href="{{ route('bookingdashboard') }}"><img width="65" height="65" src="{{ asset('img/system/19.png') }}" alt="User Icon" class="mr-2 mt-2 ml-2" /></a>
         </div>
 
         <div class='px-5 lg:px-10 xl:px-10'>

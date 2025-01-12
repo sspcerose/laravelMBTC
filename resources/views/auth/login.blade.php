@@ -8,7 +8,7 @@
         <section class="bg-slate-800 md:flex-[4] rounded-br-5xl rounded-bl-5xl lg:rounded-br-5xl lg:rounded-tr-5xl lg:rounded-bl-none md:h-screen">
             <div class="p-5">
                 <div class="font-bold text-white text-3xl pb-40 xl:pb-48">
-                    <a href="{{ route('dashboard') }}"><img width="65" height="65" src="{{ asset('img/system/19.png') }}" alt="User Icon" class="mr-2" /></a>
+                    <a href="{{ route('bookingdashboard') }}"><img width="65" height="65" src="{{ asset('img/system/19.png') }}" alt="User Icon" class="mr-2" /></a>
                 </div>
 
                 <div class='px-0 sm:px-5 lg:px-10'>

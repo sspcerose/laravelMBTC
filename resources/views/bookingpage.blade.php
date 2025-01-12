@@ -108,22 +108,7 @@
                                                     Cancel
                                                 </button>
                                             </form>
-                                            <!-- Alert  -->
-                                            <div class="mt-3 relative flex flex-col p-3 text-sm bg-blue-100 border border-blue-600 rounded-md hidden cancelAlert">
-                                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                                </svg>
-                                                Are you sure you want to cancel your trip to {{ $booking->destination }}? 
-                                                <span class="font-bold text-red-600">Please note that your payment is non-refundable.</span>
-                                                <div class="flex justify-end mt-2">
-                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
-                                                        Back
-                                                    </button>
-                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
-                                                        Yes
-                                                    </button>
-                                                </div>
-                                            </div>
+                                           
                                         @endif
                                     </td>
                                 </tr>
@@ -139,7 +124,7 @@
     </div>
 
     <!-- Modal -->
-    <div class="fixed inset-0 flex items-center justify-center z-50 hidden" id="imageModal" onclick="closeOnClickOutside(event)">
+    <!-- <div class="fixed inset-0 flex items-center justify-center z-50 hidden" id="imageModal" onclick="closeOnClickOutside(event)">
         <div class="bg-white rounded-lg overflow-hidden shadow-lg max-w-xl mx-4 w-full" id="modalContent">
             <div class="p-4">
                 <h5 class="text-lg font-bold mb-2">Proof of Payment</h5>
@@ -152,7 +137,16 @@
                 <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" onclick="closeModal()">Close</button>
             </div>
         </div>
-    </div>
+    </div> -->
+    <div id="imageModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50" onclick="closeOnClickOutside(event)">
+                                    <div class="bg-white p-2 rounded-lg w-80">
+                                        <h2 class="text-center text-lg mb-4">Receipt</h2>
+                                        <div class="p-4 text-center">
+                                            <img id="modalImage" src="" alt="Receipt" class="w-full h-auto mb-4"  />
+                                        </div>
+                                        <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="closeModal()">Close</button>
+                                    </div>
+                                </div>
 
     <script>
         $(document).ready(function () {
@@ -182,61 +176,33 @@
             }
         }
 
-        document.addEventListener('click', function (e) {
-    // Trigger cancel prompt
-    if (e.target.classList.contains('triggerCancel')) {
-        let cancelForm = e.target.closest('.cancelForm');
-        let cancelAlert = cancelForm.nextElementSibling;
-        cancelAlert.classList.remove('hidden');
-        document.getElementById('bookingTd').style.width = '30%'; 
-        e.target.style.display = 'none';
-    }
+        
+    </script>
 
-    // Close the cancel prompt
-    if (e.target.classList.contains('cancelButton')) {
-        let cancelAlert = e.target.closest('.cancelAlert');
-        cancelAlert.classList.add('hidden');
-        document.getElementById('bookingTd').style.width = '';
-        let cancelForm = cancelAlert.previousElementSibling;
-        let cancelButton = cancelForm.querySelector('.triggerCancel');
-        if (cancelButton) {
-            cancelButton.style.display = '';
-        }
-    }
-
-    // Confirm cancellation and display success message
-    if (e.target.classList.contains('yesButton')) {
-        let cancelAlert = e.target.closest('.cancelAlert');
-        let cancelForm = cancelAlert.previousElementSibling;
-
-        if (cancelForm) {
-            e.preventDefault(); 
-            
-            // Create a success alert if it doesn't exist yet
-            if (!cancelForm.querySelector('.successMessageAlert')) {
-                let successMessage = document.createElement('div');
-                successMessage.setAttribute('role', 'alert');
-                successMessage.className = 'successMessageAlert mt-3 relative flex w-full p-3 text-sm text-white bg-blue-500 rounded-md';
-                successMessage.innerHTML = `<svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                            </svg>
-                                            Successfully Cancelled the Booking!`;
-
-                let bookingTd = cancelForm.closest('td');
-                bookingTd.appendChild(successMessage); 
-                cancelAlert.classList.add('hidden');
-
-                
-                setTimeout(function () {
-                    successMessage.remove();
-                    cancelForm.submit(); 
-                    // cancelAlert.classList.add('hidden');
-                }, 1000);
+<script>
+    document.addEventListener('click', function (e) {
+     if (e.target.classList.contains('triggerCancel')) {
+        Swal.fire({
+            title: 'Are you sure?',
+            html: "You are about to cancel this reservation. <span style='color: red;'>Please note that the payment cannot be refunded.</span>",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.cancelForm').submit();
+                Swal.fire({
+                    title: "Cancelled!",
+                    text: "The reservation has been Cancelled.",
+                    icon: "error"
+                });
             }
-        }
+        });
     }
 });
-    </script>
+</script>
 
     <style>
         @media (max-width: 768px) {

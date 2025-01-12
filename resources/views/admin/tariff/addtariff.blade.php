@@ -5,9 +5,6 @@
 <link href="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-@if (session('success'))
-    <meta http-equiv="refresh" content="1;url={{ route('admin.tariff.tariff') }}">
-@endif
 
 <body class="font-inter">
     <div class="flex items-center justify-center min-h-screen">
@@ -16,33 +13,54 @@
             <div class="items-center">
 
             <!-- Success Message Container -->
-            @if (session('success'))
-                <div id="successMessage" class="successMessageAlert mt-3 mb-3 flex w-5/6 mx-auto p-3 text-sm text-white bg-blue-500 rounded-md">
-                    <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                    </svg>
-                    <span class="ml-2">{{ session('success') }}</span>
-                </div>
-            @endif
+            
 
-            <form id="tariffForm" action="{{ url('admin/tariff/addtariff') }}" method="POST" class="mx-10">
+            <form id="tariffForm" action="{{ url('admin/tariff/addtariff') }}" method="POST" class="mx-10 tariffAddForm">
                 @csrf
                 <div class="flex flex-col justify-center">
-                    <input type="text" id="destination" name="destination" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required placeholder="Destination">
-                    <input type="number" id="rate" name="rate" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required placeholder="Rate">
-                    <input type="number" id="succeeding" name="succeeding" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required placeholder="Succeeding Rate">
+                    <x-input-error :messages="$errors->get('destination')" class="" /> 
+                    <input type="text" id="destination" name="destination" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required placeholder="Destination" value="{{old('destination')}}">
+                    <input type="number" id="rate" name="rate" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required placeholder="Rate" value="{{old('rate')}}">
+                    <input type="number" id="succeeding" name="succeeding" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required placeholder="Succeeding Rate" value="{{old('succeeding')}}">
                 </div>
                 
                 <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 pb-40 lg:pb-0">
-                    <button class="w-full md:w-1/2 py-2 bg-red-600 text-gray-50 font-semibold rounded-lg hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400" type="button" onclick="window.history.back();">
+                    <button class="w-full md:w-1/2 py-2 bg-red-600 text-gray-50 font-semibold rounded-lg hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400" type="button" onclick="location.href='{{ route('admin.tariff.tariff') }}'">
                         Cancel
                     </button>
                     <input type="hidden" id="status" value="active" name="status">
-                    <button id="submitButton" class="w-full md:w-1/2 py-2 bg-green-400 text-gray-50 font-semibold rounded-lg hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-400" type="submit">
+                    <button id="submitButton" class="w-full md:w-1/2 py-2 bg-green-400 text-gray-50 font-semibold rounded-lg hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-400 triggerAddTariff" type="button">
                         Add
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
+    <script>
+         document.addEventListener('click', function (e) {
+    // Handle "Assign Driver" button click
+    if (e.target.classList.contains('triggerAddTariff')) {
+        const form = e.target.closest('.tariffAddForm'); // Get the form to submit
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to add this tariff.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Add it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.tariffAddForm').submit();
+                Swal.fire({
+                    title: "Added!",
+                    text: "The tariff has been added.",
+                    icon: "success"
+                });
+            }
+        });
+    }
+});
+    </script>
 </body>

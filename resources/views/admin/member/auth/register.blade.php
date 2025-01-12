@@ -181,7 +181,7 @@
 <div class="flex justify-between pb-40 lg:pb-0 space-x-2">
                     <button
                         class="w-full px-20 py-2 bg-red-600 text-gray-50 font-semibold rounded-lg hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
-                        type="button" onclick="window.history.back();">
+                        type="button" onclick="location.href='{{ route('admin.member.member') }}'">
                         Cancel
                     </button>
 

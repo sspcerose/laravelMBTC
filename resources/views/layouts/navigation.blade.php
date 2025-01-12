@@ -43,8 +43,6 @@
     <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">
         <a href="{{ route('login') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Login</a>
         <a href="{{ route('register') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Register</a>
-        <a href="{{ route('logout') }}" class="block px-4 pt-2 pb-6 text-gray-700 hover:bg-gray-200"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log Out</a>
     </div>
     @else
     <div id="mobile-menu" class="hidden lg:hidden fixed left-0 w-full bg-white z-50">

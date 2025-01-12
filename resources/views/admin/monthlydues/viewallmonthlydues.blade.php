@@ -100,7 +100,7 @@
                         <td class="py-3 px-4" id="monthlyduesTd">
                             @if($payment->status == 'paid')
                             <!-- <button class="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600">Undo</button> -->
-                            <span class="font-bold text-green-500">Payment Verified</span>
+                            <span class="">No Action Required</span>
                             @else
                             <form method="POST" action="{{ url('admin/monthlydues/monthlydues/' . $payment->id) }}" class="paidForm">
                                 @csrf
@@ -108,20 +108,6 @@
                                 <button type="button" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 triggerPaid">Paid</button>
                             </form>
 
-                            <div class="mt-3 relative flex flex-col p-3 text-sm bg-blue-100 border border-blue-600 rounded-md hidden paidAlert">
-                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                    </svg>
-                                                Are you sure that {{ $payment->member->name }} paid monthly due?
-                                                <div class="flex justify-end mt-2">
-                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
-                                                        Back
-                                                    </button>
-                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
-                                                        Yes
-                                                    </button>
-                                                </div>
-                                            </div>
                             @endif
                         </td>
                     </tr>
@@ -144,58 +130,6 @@
                 ]
             });
         });
-
-        document.addEventListener('click', function (e) {
-        // Trigger paid confirmation
-        if (e.target.classList.contains('triggerPaid')) {
-            let paidForm = e.target.closest('.paidForm');
-            let paidAlert = paidForm.nextElementSibling;
-            paidAlert.classList.remove('hidden'); 
-            document.getElementById('monthlyduesTd').style.width = '25%'; 
-            e.target.style.display = 'none'; 
-        }
-
-        // Close the paid confirmation (cancel button)
-        if (e.target.classList.contains('cancelButton')) {
-            let paidAlert = e.target.closest('.paidAlert');
-            paidAlert.classList.add('hidden'); 
-            document.getElementById('monthlyduesTd').style.width = '';
-            let paidForm = paidAlert.previousElementSibling;
-            let paidButton = paidForm.querySelector('.triggerPaid');
-            if (paidButton) {
-                paidButton.style.display = ''; 
-            }
-        }
-
-        // Confirm paid and display success message
-        if (e.target.classList.contains('yesButton')) {
-            let paidAlert = e.target.closest('.paidAlert');
-            let paidForm = paidAlert.previousElementSibling;
-
-            if (paidForm) {
-                e.preventDefault(); 
-                
-                if (!paidForm.querySelector('.successMessageAlert')) {
-                    let successMessage = document.createElement('div');
-                    successMessage.setAttribute('role', 'alert');
-                    successMessage.className = 'successMessageAlert mt-3 relative flex w-full p-3 text-sm text-white bg-blue-500 rounded-md';
-                    successMessage.innerHTML = `<svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                                </svg>
-                                                Payment Confirmed Successfully!`;
-
-                    let bookingTd = paidForm.closest('td');
-                    bookingTd.appendChild(successMessage); 
-                    paidAlert.classList.add('hidden'); 
-
-                    setTimeout(function () {
-                        successMessage.remove();
-                        paidForm.submit(); 
-                    }, 1000);
-                }
-            }
-        }
-    });
 
     let seenNotifications = [];
         let notificationCount = 0;
@@ -235,6 +169,32 @@
             fetchNotifications();
         });
 
+</script>
+
+<script>
+     document.addEventListener('click', function (e) {
+    // Accept action
+    if (e.target.classList.contains('triggerPaid')) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Update its status to paid.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Update it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.paidForm').submit();
+                Swal.fire({
+                    title: "Updated!",
+                    text: "The monthly due status has been updated.",
+                    icon: "success"
+                });
+            }
+        });
+    }
+});
 </script>
 
 </body>

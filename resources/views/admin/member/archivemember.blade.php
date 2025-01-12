@@ -57,21 +57,7 @@
                                 <button type="button" class="font-bold text-orange-500 hover:text-orange-400 triggerUnarchive"> <i class="fas fa-archive"></i> Unarchive</button>
                             </form>
 
-                            <!-- Alert -->
-                            <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-blue-100 border border-blue-600 rounded-md hidden unarchiveAlert">
-                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                    </svg>
-                                                Are you sure you want to unarchive this member?
-                                                <div class="flex justify-end mt-2">
-                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
-                                                        Back
-                                                    </button>
-                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
-                                                        Yes
-                                                    </button>
-                                                </div>
-                                            </div>
+                           
                         </td>
                     </tr>
                     @endforeach
@@ -137,61 +123,33 @@
         }
     });
 });
+        </script>
 
-        document.addEventListener('click', function (e) {
-    // Trigger archive confirmation
+<script>
+     document.addEventListener('click', function (e) {
+    // Accept action
     if (e.target.classList.contains('triggerUnarchive')) {
-        let unarchiveForm = e.target.closest('.unarchiveForm');
-        let unarchiveAlert = unarchiveForm.nextElementSibling;
-        document.getElementById('unarchiveTd').style.width = '25%'; 
-        unarchiveAlert.classList.remove('hidden'); 
-        e.target.style.display = 'none'; 
-    }
-
-    // Close the confirmation (cancel button)
-    if (e.target.classList.contains('cancelButton')) {
-        let unarchiveAlert = e.target.closest('.unarchiveAlert');
-        unarchiveAlert.classList.add('hidden'); 
-        document.getElementById('unarchiveTd').style.width = '';
-        let unarchiveTd = unarchiveAlert.closest('td');
-        let unarchiveForm = unarchiveAlert.previousElementSibling;
-
-        let archiveButton = unarchiveForm.querySelector('.triggerUnarchive');
-        if (archiveButton) {
-            archiveButton.style.display = ''; 
-        }
-
-    }
-
-    // Confirm archiving and display success message
-    if (e.target.classList.contains('yesButton')) {
-        let unarchiveAlert = e.target.closest('.unarchiveAlert');
-        let unarchiveForm = unarchiveAlert.previousElementSibling;
-        if (unarchiveForm) {
-            e.preventDefault(); 
-            
-            if (!unarchiveForm.querySelector('.successMessageAlert')) {
-                let successMessage = document.createElement('div');
-                successMessage.setAttribute('role', 'alert');
-                successMessage.className = 'successMessageAlert mt-3 relative flex w-full p-3 text-sm text-white bg-blue-500 rounded-md';
-                successMessage.innerHTML = `<svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                            </svg>
-                                            Successfully Unarchived the Member!`;
-
-                let unarchiveTd = unarchiveForm.closest('td');
-                unarchiveTd.appendChild(successMessage); 
-                unarchiveAlert.classList.add('hidden'); 
-
-                setTimeout(function () {
-                    successMessage.remove();
-                    unarchiveForm.submit(); 
-                }, 1000);
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to unarchive this member.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Unarchive it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.unarchiveForm').submit();
+                Swal.fire({
+                    title: "Unarchived!",
+                    text: "The member has been unarchived.",
+                    icon: "success"
+                });
             }
-        }
+        });
     }
 });
-        </script>
+</script>        
 </body>
 
 </html>

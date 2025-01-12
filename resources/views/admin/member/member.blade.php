@@ -13,6 +13,8 @@
     <div class="lg:pl-20 lg:pr-10">
         <div class="pt-24 lg:pt-28 p-4 flex flex-col md:flex-row justify-between items-center">
             <h1 class="text-black p-6 pl-4 text-center md:text-left font-extrabold text-3xl">Member List</h1>
+            
+
             <div class="flex justify-between px-5">
                 <a href="{{ route('admin.member.auth.register') }}" class=" pt-4 mr-2">
                     <button class="bg-green-600 hover:bg-green-400 text-white flex items-center py-3 px-4 rounded-xl">
@@ -23,7 +25,7 @@
                 <a href="{{ url('/admin/member/archivemember') }}" class="pt-4">
                 <div class="relative group">
                     <button class="bg-orange-400 hover:bg-orange-300 text-white flex items-center py-4 px-4 rounded-xl">
-                        <i class="fas fa-archive"></i> <!-- Notification icon -->
+                        <i class="fas fa-archive"></i> 
                     </button>
                     <!-- Tooltip -->
                         <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-white text-black text-xs rounded-lg px-3 py-1 shadow-lg whitespace-nowrap">
@@ -31,6 +33,18 @@
                         </div>
                     </div>
                 </a>
+                <a href="{{ route('downloadmemberPDF') }}" class="pt-4 mr-2 ml-2">
+                <button class="bg-blue-600 hover:bg-blue-400 text-white flex items-center py-3 px-4 rounded-xl">
+                <i class="fa-solid fa-file-export mr-2"></i>
+                        Report
+                    </button>
+                </a>
+
+                <p class="pt-4 mr-2">
+                <button class="bg-teal-600 hover:bg-teal-400 text-white flex items-center py-3 px-4 rounded-xl" onclick="printPage()">
+                    <i class="fa-solid fa-print mr-2"></i>Print
+                </button>
+                </p>
             </div>
         </div>
 
@@ -50,6 +64,7 @@
                         <th class="py-3 px-4">DATE OF REGISTRATION</th>
                         <th class="py-3 px-4">MEMBER TYPE</th>
                         <th class="py-3 px-4">ACTION</th>
+                        <th>VIEW DETAILS</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm text-gray-600" id="tableBody">
@@ -78,23 +93,8 @@
                                 <button type="button" class="font-bold text-orange-500 hover:text-orange-400 triggerArchive"><i class="fas fa-archive"></i> Archive</button>
                             </form>
 
-                            <!-- Alert  -->
-                            <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-blue-100 border border-blue-600 rounded-md hidden archiveAlert">
-                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                    </svg>
-
-                                                Are you sure you want to archive this member?
-                                                <div class="flex justify-end mt-2">
-                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
-                                                        Back
-                                                    </button>
-                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
-                                                        Yes
-                                                    </button>
-                                                </div>
-                                            </div>
                         </td>
+                        <td><a href="{{ url('admin/member/viewmember/' . $viewmember->id) }}" class="bg-amber-600 text-white py-1 px-3 rounded hover:bg-amber-600">More Details</a></td>
                     </tr>
                     @endforeach
                     @endif
@@ -163,62 +163,52 @@
         }
     });
 });
+        </script>
 
-        document.addEventListener('click', function (e) {
-    // Trigger archive confirmation
+<script>
+     document.addEventListener('click', function (e) {
+    // Accept action
     if (e.target.classList.contains('triggerArchive')) {
-        let archiveForm = e.target.closest('.archiveForm');
-        let archiveAlert = archiveForm.nextElementSibling;
-        document.getElementById('archiveTd').style.width = '25%'; 
-        archiveAlert.classList.remove('hidden');
-        e.target.style.display = 'none'; 
-    }
-
-    // Close the confirmation (cancel button)
-    if (e.target.classList.contains('cancelButton')) {
-        let archiveAlert = e.target.closest('.archiveAlert');
-        archiveAlert.classList.add('hidden');
-        document.getElementById('archiveTd').style.width = '';
-        let archiveTd = archiveAlert.closest('td');
-        let archiveForm = archiveAlert.previousElementSibling;
-
-        let archiveButton = archiveForm.querySelector('.triggerArchive');
-        if (archiveButton) {
-            archiveButton.style.display = ''; 
-        }
-
-    }
-
-    // Confirm archiving and display success message
-    if (e.target.classList.contains('yesButton')) {
-        let archiveAlert = e.target.closest('.archiveAlert');
-        let archiveForm = archiveAlert.previousElementSibling;
-
-        if (archiveForm) {
-            e.preventDefault(); 
-            
-            if (!archiveForm.querySelector('.successMessageAlert')) {
-                let successMessage = document.createElement('div');
-                successMessage.setAttribute('role', 'alert');
-                successMessage.className = 'successMessageAlert mt-3 relative flex w-full p-3 text-sm text-white bg-blue-500 rounded-md';
-                successMessage.innerHTML = `<svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                            </svg>
-                                            Successfully Archived the Member!`;
-
-                let archiveTd = archiveForm.closest('td');
-                archiveTd.appendChild(successMessage); 
-                archiveAlert.classList.add('hidden'); 
-
-                setTimeout(function () {
-                    successMessage.remove();
-                    archiveForm.submit(); 
-                }, 1000);
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to archive this member.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Archive it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.archiveForm').submit();
+                Swal.fire({
+                    title: "Archived!",
+                    text: "The member has been archived.",
+                    icon: "success"
+                });
             }
-        }
+        });
     }
 });
-        </script>
+</script>        
+
+<script>
+    function printPage() {
+            // Open the print view page in a new window
+            var width = 1000;
+            var height = 600;
+            var left = (window.innerWidth / 2) - (width / 2);
+            var top = (window.innerHeight / 2) - (height / 2);
+
+            // Open a new window with the calculated position and size
+            var printWindow = window.open("{{ route('printallMember') }}", "_blank", 
+                "width=" + width + ",height=" + height + ",left=" + left + ",top=" + top);
+
+            // Optionally, you can wait for the window to load and trigger the print functionality
+            printWindow.onload = function() {
+                printWindow.print();
+            };
+        }
+</script>
 </body>
 
 </html>

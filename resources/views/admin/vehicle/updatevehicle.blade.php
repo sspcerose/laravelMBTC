@@ -22,7 +22,7 @@
                 </div>
 
                 <!-- Form -->
-                <form id="vehicleForm" method="POST" action="{{ url('admin/vehicle/updatevehicle/' . $viewVehicles->id) }}" class="mx-10">
+                <form id="vehicleForm" method="POST" action="{{ url('admin/vehicle/updatevehicle/' . $viewVehicles->id) }}" class="mx-10 updateVehicleForm">
                     @csrf
                     <div class="flex flex-col justify-center">
                     <label for="owner">Owner:</label>
@@ -36,9 +36,11 @@
 
                         <label for="vehicletype">Vehicle Type:</label>
                         <input type="text" id="type" name="type" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" placeholder="Vehicle Type" required value="{{ $viewVehicles->type }}">
-                        <label for="rate">Rate:</label>
+                        <label for="plate_num">Plate Number:</label>
+                        <x-input-error :messages="$errors->get('plate_num')" class="" />
                         <input type="text" id="plate_num" name="plate_num" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" placeholder="Plate Number" required value="{{ $viewVehicles->plate_num }}">
-                        <label for="succeedingrate">Succeeding Rate:</label>
+                        <label for="capacity">Seat Capacity:</label>
+                        <x-input-error :messages="$errors->get('capacity')" class="" />
                         <input type="number" id="capacity" name="capacity" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" placeholder="Capacity" required value="{{ $viewVehicles->capacity }}">
                     </div>
 
@@ -47,7 +49,7 @@
 
                         <input type="hidden" id="status" value="active" name="status">
 
-                        <button id="submitButton" class="w-full md:w-1/2 py-2 bg-yellow-400 text-gray-50 font-semibold rounded-lg hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">Update</button>
+                        <button class="w-full md:w-1/2 py-2 bg-yellow-400 text-gray-50 font-semibold rounded-lg hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 triggerUpdateVehicle" type="button">Update</button>
                     </div>
                 </form>
             </div>
@@ -55,16 +57,30 @@
     </div>
 
     <script>
-        document.getElementById('submitButton').addEventListener('click', function(event) {
-            event.preventDefault(); 
-
-            var successMessage = document.getElementById('successMessage');
-            successMessage.classList.remove('hidden');
-
-            setTimeout(function() {
-                document.getElementById('vehicleForm').submit();
-            }, 3000); 
+        document.addEventListener('click', function (e) {
+    // Handle "Assign Driver" button click
+    if (e.target.classList.contains('triggerUpdateVehicle')) {
+        const form = e.target.closest('.updateVehicleForm'); // Get the form to submit
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to update this vehicle.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Update it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.updateVehicleForm').submit();
+                Swal.fire({
+                    title: "Updated!",
+                    text: "The vehicle has been updated.",
+                    icon: "success"
+                });
+            }
         });
+    }
+});  
     </script>
 </body>
 

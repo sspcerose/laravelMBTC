@@ -1,6 +1,6 @@
 @extends('layout.layout')
 
-@include('layouts.MemberNav')
+@include('layouts.memberNav')
 
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 <link href="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.css" rel="stylesheet">
@@ -58,7 +58,7 @@
                                     <td class="py-3 px-4">
                                     <form action="{{ url('member/membermonthlydues/' . $membermonthlydue->id) }}" method="POST" class="updateForm" style="display:inline;">
                                         @csrf
-                                        <button class="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600" type="submit">Send Update</button>
+                                        <button class="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 triggerUpdate" type="button" >Send Update</button>
                                     </form>
 
                                     @endif
@@ -84,6 +84,31 @@
         });
     });
     </script>
+<script>
+     document.addEventListener('click', function (e) {
+    // Accept action
+    if (e.target.classList.contains('triggerUpdate')) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to request status update for this monthly due?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Request!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.updateForm').submit();
+                Swal.fire({
+                    title: "Requested!",
+                    text: "The status update has been requested.",
+                    icon: "success"
+                });
+            }
+        });
+    }
+});
+</script>
 
 </body>
 

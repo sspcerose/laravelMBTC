@@ -1,6 +1,6 @@
 @extends('layout.layout')
 
-@include('layouts.MemberNav')
+@include('layouts.memberNav')
 
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 <link href="https://cdn.datatables.net/v/dt/dt-2.1.8/b-3.1.2/r-3.0.3/datatables.min.css" rel="stylesheet">
@@ -49,21 +49,6 @@
                                                 @csrf
                                                 <button type="button" class="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 triggerConfirm">Accept</button>
                                             </form>
-                                            <!-- Alert 1 -->
-                                            <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-green-100 border border-green-600 rounded-md hidden acceptAlert">
-                                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                            </svg>
-                                                    Are you sure you want to accept the schedule?
-                                                    <div class="flex justify-end mt-2">
-                                                        <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
-                                                            Back
-                                                        </button>
-                                                        <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
-                                                            Yes
-                                                        </button>
-                                                    </div>
-                                                </div>   
                                     </li>
                         @endforeach
                         </ul>
@@ -120,7 +105,7 @@
                                 @if($memberType->type != 'Owner')
                                 <td class="py-3 px-4" id="scheduleTd">
                                     @if ($schedule->driver_status == 'cancelled')
-                                        <span class="font-bold text-red-600">Cancelled</span>
+                                        <span class="font-bold text-red-600">Declined</span>
                                     @elseif ($schedule->driver_status == 'accepted')
                                         <span class="font-bold text-green-600">Accepted</span>
                                     @elseif ($schedule->cust_status == 'cancelled')
@@ -130,42 +115,14 @@
                                             @csrf
                                             <button type="button" class="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 triggerConfirm">Accept</button>
                                         </form>
-                                        <!-- Alert 1 -->
-                                        <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-green-100 border border-green-600 rounded-md hidden acceptAlert">
-                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                        </svg>
-                                                Are you sure you want to accept the schedule?
-                                                <div class="flex justify-end mt-2">
-                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
-                                                        Back
-                                                    </button>
-                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
-                                                        Yes
-                                                    </button>
-                                                </div>
-                                            </div>
+                                        
 
                                         <form action="{{ route('member.schedule.cancel', $schedule->id) }}" method="POST" class="cancelForm" style="display:inline;">
                                             @csrf
-                                            <button type="button" class="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 ml-2 triggerCancel">Cancel</button>
+                                            <button type="button" class="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 ml-2 triggerCancel">Decline</button>
                                         </form>
 
-                                        <!--prompt  -->
-                                        <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-red-100 border border-red-600 rounded-md hidden cancelAlert">
-                                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                            </svg>
-                                                Are you sure you want to decline the schedule?
-                                                <div class="flex justify-end mt-2">
-                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
-                                                        Back
-                                                    </button>
-                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
-                                                        Yes
-                                                    </button>
-                                                </div>
-                                            </div>
+                                        
                                     @endif
                                 </td>
                                 @endif
@@ -194,103 +151,7 @@ $(document).ready(function () {
     });
 });
 
-    document.addEventListener('click', function (e) {
-
-    // Trigger Confirm 
-    if (e.target.classList.contains('triggerConfirm')) {
-        let acceptForm = e.target.closest('.acceptForm');
-        let acceptAlert = acceptForm.nextElementSibling; 
-        acceptAlert.classList.remove('hidden'); 
-
-        // Hide both Confirm and Decline buttons
-        acceptForm.querySelector('.triggerConfirm').style.display = 'none';
-        acceptForm.closest('td').querySelector('.triggerCancel').style.display = 'none';
-        
-    }
-
-    // Trigger Decline
-    if (e.target.classList.contains('triggerCancel')) {
-        let cancelForm = e.target.closest('.cancelForm');
-        let cancelAlert = cancelForm.nextElementSibling;
-        cancelAlert.classList.remove('hidden'); 
-
-        // Hide both Cancel and Confirm buttons
-        cancelForm.querySelector('.triggerCancel').style.display = 'none';
-        cancelForm.closest('td').querySelector('.triggerConfirm').style.display = 'none';
-    }
-
-    // Back
-    if (e.target.classList.contains('cancelButton')) {
-        let alertBox = e.target.closest('.acceptAlert, .cancelAlert');
-        alertBox.classList.add('hidden'); 
-
-        let specificTd = alertBox.closest('td');
-        specificTd.querySelector('.triggerConfirm').style.display = '';
-        specificTd.querySelector('.triggerCancel').style.display = '';
-    }
-
-    // Submit form on "Yes" (decline)
-    if (e.target.classList.contains('yesButton') && e.target.closest('.cancelAlert')) {
-        let cancelAlert = e.target.closest('.cancelAlert');
-        let cancelForm = cancelAlert.previousElementSibling; 
-        
-        if (cancelForm) {
-            e.preventDefault(); 
-
-            // Success alert
-            if (!cancelForm.querySelector('.successMessageAlert')) {
-                let successMessage = document.createElement('div');
-                successMessage.setAttribute('role', 'alert');
-                successMessage.className = 'successMessageAlert mt-3 relative flex w-full p-3 text-sm text-white bg-blue-500 rounded-md';
-                successMessage.innerHTML = `<svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                            </svg>
-                                            Successfully Cancelled the Schedule!`;
-
-                let bookingTd = cancelForm.closest('td');
-                bookingTd.appendChild(successMessage); 
-                cancelAlert.classList.add('hidden');
-
-                
-                setTimeout(function () {
-                    successMessage.remove();
-                    cancelForm.submit(); 
-                }, 1000);
-            }
-        }
-    }
-
-    // Accept the action on "Yes" (accept)
-    if (e.target.classList.contains('yesButton') && e.target.closest('.acceptAlert')) {
-        let acceptAlert = e.target.closest('.acceptAlert');
-        let acceptForm = acceptAlert.previousElementSibling; 
-        
-        if (acceptForm) {
-            e.preventDefault(); 
-
-            // Success Alert
-            if (!acceptForm.querySelector('.successMessageAlert')) {
-                let successMessage = document.createElement('div');
-                successMessage.setAttribute('role', 'alert');
-                successMessage.className = 'successMessageAlert mt-3 relative flex w-full p-3 text-sm text-white bg-blue-500 rounded-md';
-                successMessage.innerHTML = `<svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                            </svg>
-                                            Successfully Accepted the Schedule!`;
-
-                let bookingTd = acceptForm.closest('td');
-                bookingTd.appendChild(successMessage); 
-                acceptAlert.classList.add('hidden'); 
-
-                
-                setTimeout(function () {
-                    successMessage.remove();
-                    acceptForm.submit(); 
-                }, 1000);
-            }
-        }
-    }
-});
+   
 
 let seenNotifications = [];
         let notificationCount = 0;
@@ -331,31 +192,52 @@ let seenNotifications = [];
         });
 
 
-        document.querySelectorAll('.triggerConfirm').forEach(button => {
-    button.addEventListener('click', function() {
-        // Show the confirmation modal
-        const alert = this.closest('li').querySelector('.acceptAlert');
-        alert.classList.remove('hidden');
-    });
+</script>
+
+<script>
+    document.addEventListener('click', function (e) {
+    // Accept action
+    if (e.target.classList.contains('triggerConfirm')) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to accept this schedule.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Accept'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.acceptForm').submit();
+                Swal.fire({
+                    title: "Accepted!",
+                    text: "The schedule has been accepted.",
+                    icon: "success"
+                });
+            }
+        });
+    }
+
+    // Reject action
+    if (e.target.classList.contains('triggerCancel')) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to decline this schedule.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Decline'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.cancelForm').submit();
+                Swal.fire({
+                    title: "Declined!",
+                    text: "The schedule has been declined.",
+                    icon: "error"
+                });
+            }
+        });
+    }
 });
-
-document.querySelectorAll('.cancelButton').forEach(button => {
-    button.addEventListener('click', function() {
-        // Hide the confirmation modal
-        const alert = this.closest('.acceptAlert');
-        alert.classList.add('hidden');
-    });
-});
-
-document.querySelectorAll('.yesButton').forEach(button => {
-    button.addEventListener('click', function() {
-        // Submit the form to accept the schedule
-        const form = this.closest('li').querySelector('.acceptForm');
-        form.submit();
-    });
-});
-
-
-
-
 </script>

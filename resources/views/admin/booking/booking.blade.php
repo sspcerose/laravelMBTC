@@ -4,40 +4,51 @@
 
 <body class="font-inter">
     <div class="lg:pl-20 lg:pr-10">
-        <div class="pt-24 lg:pt-28 flex justify-between items-center">
-            <h1 class="text-black p-4 pl-4 text-center md:text-left font-extrabold text-3xl">Bookings</h1>
-            <div class="px-4 lg:px-0 pt-4 lg:pr-5">
-                 
-                <div class="relative">
+    <div class="pt-24 lg:pt-28 p-4 flex flex-col md:flex-row justify-between items-center">
+        <h1 class="text-black p-6 pl-4 text-center md:text-left font-extrabold text-3xl">Bookings</h1>
+        <div class="px-4 lg:px-0 pt-4 lg:pr-5">
+
+            <div class="flex items-center space-x-2">
+                <a href="{{ route('downloadbookingPDF') }}" >
+                    <button class="bg-blue-600 hover:bg-blue-400 text-white flex items-center py-3 px-4 rounded-xl">
+                        <i class="fa-solid fa-file-export mr-2"></i>
+                        Report
+                    </button>
+                </a>
+                <button class="bg-teal-600 hover:bg-teal-400 text-white flex items-center py-3 px-4 rounded-xl" onclick="printPage()">
+                    <i class="fa-solid fa-print mr-2"></i>Print
+                </button>
                 @if($activeBookingCount == 0)
                     <button id="notification-icon" class="relative p-4 bg-gray-500 text-white rounded-lg focus:outline-none">
-                    <i class="fa-solid fa-bell"></i>
+                        <i class="fa-solid fa-bell"></i>
+                    </button>
                 @else
                     <button id="notification-icon" class="relative p-4 bg-blue-500 text-white rounded-lg focus:outline-none">
-                    <i class="fa-solid fa-bell"></i>
-                    <span id="notification-badge" class="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $activeBookingCount }}</span>
-                @endif
+                        <i class="fa-solid fa-bell"></i>
+                        <span id="notification-badge" class="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $activeBookingCount }}</span>
                     </button>
-
-                    <div id="notification-container" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg overflow-hidden z-10 border-2 border-gray-500">
-                    <ul class="p-4 max-h-96 overflow-y-auto" id="notification-list">
+                @endif
+            </div>
+            <div id="notification-container" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg overflow-hidden z-10 border-2 border-gray-500">
+                <ul class="p-4 max-h-96 overflow-y-auto" id="notification-list">
                     <li class="text-sm text-gray-700 border-b p-2">
-                    @if($activeBookingCount == 0)
-                        <span class="font-bold text-center">No Notification</span><br>
-                    @else
-                        @foreach($viewactiveBookings as $activeBooking)
-                            <span class="font-bold">NEW RESERVATION</span><br>
-                            <span class="font-bold">{{ $activeBooking->user->name }} {{ $activeBooking->user->last_name }}</span><br>
-                            <span>Destination: {{ $activeBooking->destination }}</span><br>
-                            <span>Start Date: {{ \Carbon\Carbon::parse($activeBooking->start_date)->format('F d, Y') }}</span><br>
-                            <span>End Date: {{ \Carbon\Carbon::parse($activeBooking->end_date)->format('F d, Y') }}</span><br>
-                        @endforeach
-                        </ul>
+                        @if($activeBookingCount == 0)
+                            <span class="font-bold text-center">No Notification</span><br>
+                        @else
+                            @foreach($viewactiveBookings as $activeBooking)
+                                <span class="font-bold">NEW RESERVATION</span><br>
+                                <span class="font-bold">{{ $activeBooking->user->name }} {{ $activeBooking->user->last_name }}</span><br>
+                                <span>Destination: {{ $activeBooking->destination }}</span><br>
+                                <span>Start Date: {{ \Carbon\Carbon::parse($activeBooking->start_date)->format('F d, Y') }}</span><br>
+                                <span>End Date: {{ \Carbon\Carbon::parse($activeBooking->end_date)->format('F d, Y') }}</span><br>
+                            @endforeach
                         @endif
-                    </div>
-                </div>
+                    </li>
+                </ul>
             </div>
         </div>
+    </div>
+
 
 
     <div class="bg-neutral-300 mx-4 rounded-3xl p-2 items-center mb-4">
@@ -60,6 +71,7 @@
                     <th class="py-3 px-4" style="width: 15%;">PROOF OF PAYMENT</th>
                     <th class="py-3 px-4">Status</th>
                     <th class="py-3 px-4">Action</th>
+                    <th>View Details</th>
                 </tr>
             </thead>
             <tbody class="text-sm text-gray-600" id="tableBody">
@@ -84,11 +96,11 @@
                         <td class="py-3 px-4">{{ \Carbon\Carbon::parse($viewBooking->end_date)->format('F d, Y') }}</td>
                         <td class="py-3 px-4">₱{{ $viewBooking->price }}.00</td>
                         <td class="py-3 px-4">
-                            <button type="button" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600"  data-receipt="{{ asset('img/' . $viewBooking->receipt) }}" onclick="openModal(this)">
+                            <button type="button" class="bg-cyan-500 text-white py-1 px-3 rounded hover:bg-cyan-600"  data-receipt="{{ asset('img/' . $viewBooking->receipt) }}" onclick="openModal(this)">
                                         View
                                     </button>
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-3 px-4 text-center">
                             @if($viewBooking->status == "accepted" && (\Carbon\Carbon::today()->lt($viewBooking->start_date)))
                             <span class="font-bold text-yellow-500">Upcoming</span>
                             @elseif($viewBooking->status == "accepted" && \Carbon\Carbon::today()->between($viewBooking->start_date, $viewBooking->end_date))
@@ -103,55 +115,31 @@
                             <span class="font-bold text-red-600">Customer Cancelled</span>
                             @endif
                             </td>
-                        <td class="py-3 px-4" style="width: 30%;">
+                            <td class="py-3 px-4" style="width: 30%;">
                             @if($viewBooking->status == "rejected")
-                            <span class="font-bold text-red-600">Rejected</span>
+                                <span class="font-bold text-red-600">Rejected</span>
                             @elseif($viewBooking->status == "accepted")
-                            <span class="font-bold text-green-600">Accepted</span>
+                                <span class="font-bold text-green-600">Accepted</span>
+                            @elseif($viewBooking->status == "cancelled")
+                                <span class="">No Action Required</span>
                             @else
-                            <form action="{{ route('booking.accept', $viewBooking->id) }}" method="POST" class="acceptForm" style="display:inline;">
-                                            @csrf
-                                            <button type="button" class="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 triggerConfirm">Accept</button>
-                                        </form>
-                                        <!-- Alert 1 -->
-                                        <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-green-100 border border-green-600 rounded-md hidden acceptAlert">
-                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                        </svg>
-                                                Are you sure you want to accept the reservation?
-                                                <div class="flex justify-end mt-2">
-                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
-                                                        Back
-                                                    </button>
-                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
-                                                        Yes
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                        <form action="{{ route('booking.reject', $viewBooking->id) }}" method="POST" class="cancelForm" style="display:inline;">
-                                            @csrf
-                                            <button type="button" class="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 ml-2 triggerCancel">Reject</button>
-                                        </form>
-
-                                        <!--prompt  -->
-                                        <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-red-100 border border-red-600 rounded-md hidden cancelAlert">
-                                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                            </svg>
-                                                Are you sure you want to reject the reservation?
-                                                <div class="flex justify-end mt-2">
-                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
-                                                        Back
-                                                    </button>
-                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
-                                                        Yes
-                                                    </button>
-                                                </div>
-                                            </div>
+                                <form action="{{ route('booking.accept', $viewBooking->id) }}" method="POST" class="acceptForm" style="display:inline;">
+                                    @csrf
+                                    <button type="button" class="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 triggerConfirm">Accept</button>
+                                </form>
+                                <br> <br><!-- Add a line break to move the Reject button to the next line -->
+                                <form action="{{ route('booking.reject', $viewBooking->id) }}" method="POST" class="cancelForm" style="display:inline;">
+                                    @csrf
+                                    <button type="button" class="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 triggerCancel">Reject</button>
+                                </form>
                             @endif
                         </td>
-
+                        <td style="width: 30%;">
+                            <a href="{{ url('admin/booking/view/' . $viewBooking->id) }}" class="bg-amber-600 text-white py-1 px-3 rounded hover:bg-amber-600 block text-center">
+                                More<br>Details
+                            </a>
+                        </td>
+                        
                     </tr>
                     @endforeach
                 @endif
@@ -160,17 +148,20 @@
         @endif
     </div>
 </div>
+
 </div>
+
+
 
 <!-- Modal -->
 <div class="fixed inset-0 flex items-center justify-center z-50 hidden" id="imageModal" onclick="closeOnClickOutside(event)">
-        <div class="bg-white rounded-lg overflow-hidden shadow-lg max-w-xl mx-4 w-full" id="modalContent">
+        <div class="bg-white rounded-lg overflow-hidden shadow-lg max-w-xl mx-1 w-full" id="modalContent">
             <div class="p-4">
                 <h5 class="text-lg font-bold mb-2">Receipt</h5>
                 <button type="button" class="absolute top-0 right-0 m-2 text-gray-500" onclick="closeModal()">&times;</button>
             </div>
             <div class="p-4 text-center">
-                <img id="modalImage" src="" alt="Receipt" class="max-w-full h-auto mx-auto" style="max-width: 90%;" />
+                <img id="modalImage" src="" alt="Receipt" class="max-w-48 max-h-6 mx-auto" style="max-width: 50%;" />
             </div>
             <div class="p-4 text-right">
                 <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" onclick="closeModal()">Close</button>
@@ -265,103 +256,6 @@
         }
 
 
-        document.addEventListener('click', function (e) {
-
-// Trigger Confirm 
-if (e.target.classList.contains('triggerConfirm')) {
-    let acceptForm = e.target.closest('.acceptForm');
-    let acceptAlert = acceptForm.nextElementSibling; 
-    acceptAlert.classList.remove('hidden'); 
-
-    // Hide both Confirm and Decline buttons
-    acceptForm.querySelector('.triggerConfirm').style.display = 'none';
-    acceptForm.closest('td').querySelector('.triggerCancel').style.display = 'none';
-    
-}
-
-// Trigger Decline
-if (e.target.classList.contains('triggerCancel')) {
-    let cancelForm = e.target.closest('.cancelForm');
-    let cancelAlert = cancelForm.nextElementSibling;
-    cancelAlert.classList.remove('hidden'); 
-
-    // Hide both Cancel and Confirm buttons
-    cancelForm.querySelector('.triggerCancel').style.display = 'none';
-    cancelForm.closest('td').querySelector('.triggerConfirm').style.display = 'none';
-}
-
-// Back
-if (e.target.classList.contains('cancelButton')) {
-    let alertBox = e.target.closest('.acceptAlert, .cancelAlert');
-    alertBox.classList.add('hidden'); 
-
-    let specificTd = alertBox.closest('td');
-    specificTd.querySelector('.triggerConfirm').style.display = '';
-    specificTd.querySelector('.triggerCancel').style.display = '';
-}
-
-// Submit form on "Yes" (decline)
-if (e.target.classList.contains('yesButton') && e.target.closest('.cancelAlert')) {
-    let cancelAlert = e.target.closest('.cancelAlert');
-    let cancelForm = cancelAlert.previousElementSibling; 
-    
-    if (cancelForm) {
-        e.preventDefault(); 
-
-        // Success alert
-        if (!cancelForm.querySelector('.successMessageAlert')) {
-            let successMessage = document.createElement('div');
-            successMessage.setAttribute('role', 'alert');
-            successMessage.className = 'successMessageAlert mt-3 relative flex w-full p-3 text-sm text-white bg-blue-500 rounded-md';
-            successMessage.innerHTML = `<svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                        </svg>
-                                        Successfully Rejected the Reservation!`;
-
-            let bookingTd = cancelForm.closest('td');
-            bookingTd.appendChild(successMessage); 
-            cancelAlert.classList.add('hidden');
-
-            
-            setTimeout(function () {
-                successMessage.remove();
-                cancelForm.submit(); 
-            }, 1000);
-        }
-    }
-}
-
-// Accept the action on "Yes" (accept)
-if (e.target.classList.contains('yesButton') && e.target.closest('.acceptAlert')) {
-    let acceptAlert = e.target.closest('.acceptAlert');
-    let acceptForm = acceptAlert.previousElementSibling; 
-    
-    if (acceptForm) {
-        e.preventDefault(); 
-
-        // Success Alert
-        if (!acceptForm.querySelector('.successMessageAlert')) {
-            let successMessage = document.createElement('div');
-            successMessage.setAttribute('role', 'alert');
-            successMessage.className = 'successMessageAlert mt-3 relative flex w-full p-3 text-sm text-white bg-blue-500 rounded-md';
-            successMessage.innerHTML = `<svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                        </svg>
-                                        Successfully Accepted the Reservation!`;
-
-            let bookingTd = acceptForm.closest('td');
-            bookingTd.appendChild(successMessage); 
-            acceptAlert.classList.add('hidden'); 
-
-            
-            setTimeout(function () {
-                successMessage.remove();
-                acceptForm.submit(); 
-            }, 1000);
-        }
-    }
-}
-});
 
 
 let seenNotifications = [];
@@ -406,5 +300,72 @@ let seenNotifications = [];
         
     </script>
 
+<script>
+    function printPage() {
+            // Open the print view page in a new window
+            var width = 1000;
+            var height = 600;
+            var left = (window.innerWidth / 2) - (width / 2);
+            var top = (window.innerHeight / 2) - (height / 2);
+
+            // Open a new window with the calculated position and size
+            var printWindow = window.open("{{ route('printBooking') }}", "_blank", 
+                "width=" + width + ",height=" + height + ",left=" + left + ",top=" + top);
+
+            // Optionally, you can wait for the window to load and trigger the print functionality
+            printWindow.onload = function() {
+                printWindow.print();
+            };
+        }
+</script>
+
+<script>
+   document.addEventListener('click', function (e) {
+    // Accept action
+    if (e.target.classList.contains('triggerConfirm')) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to accept this reservation.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Accept'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.acceptForm').submit();
+                Swal.fire({
+                    title: "Accepted!",
+                    text: "The reservation has been accepted.",
+                    icon: "success"
+                });
+            }
+        });
+    }
+
+    // Reject action
+    if (e.target.classList.contains('triggerCancel')) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to reject this reservation.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Reject'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.cancelForm').submit();
+                Swal.fire({
+                    title: "Rejected!",
+                    text: "The reservation has been rejected.",
+                    icon: "error"
+                });
+            }
+        });
+    }
+});
+
+</script>
 </body>
 

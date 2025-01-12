@@ -23,6 +23,7 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->integer('price');
+            $table->integer('remaining');
             $table->string('status');
             
             $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');

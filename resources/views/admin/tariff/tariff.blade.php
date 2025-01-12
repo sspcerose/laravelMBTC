@@ -93,21 +93,7 @@
                                 </div>
                                 </form>
 
-                                <!-- Custom confirmation alert (initially hidden) -->
-                                <div class="mt-3 relative flex flex-col p-3 text-sm text-gray-800 bg-blue-100 border border-blue-600 rounded-md hidden archiveAlert">
-                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                    </svg>
-                                                Are you sure you want to archive tariff for {{ $viewtariff->destination }}?
-                                                <div class="flex justify-end mt-2">
-                                                    <button class="bg-gray-600 text-white py-1 px-3 mr-2 rounded-lg hover:bg-gray-500 cancelButton">
-                                                        Back
-                                                    </button>
-                                                    <button class="bg-green-600 text-white py-1 px-3 rounded-lg hover:bg-green-500 yesButton">
-                                                        Yes
-                                                    </button>
-                                                </div>
-                                            </div>
+                                
                             </td>
                     </tr>
                     @endforeach
@@ -242,7 +228,32 @@
             }
         }
     });
-    </script>   
+    </script>  
+<script>
+     document.addEventListener('click', function (e) {
+    // Accept action
+    if (e.target.classList.contains('triggerArchive')) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to archive this tariff.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Archive it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.archiveForm').submit();
+                Swal.fire({
+                    title: "Archived!",
+                    text: "The tariff has been archived.",
+                    icon: "success"
+                });
+            }
+        });
+    }
+});
+</script> 
 </body>
 
 </html>

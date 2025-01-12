@@ -20,10 +20,11 @@
                     </svg>
                     <span class="ml-2">Successfully Updated the Tariff!</span>
                 </div>
-                <form id="tariffForm" method="POST" action="{{ url('admin/tariff/updatetariff/' . $viewtariffs->id) }}" class="mx-10">
+                <form id="tariffForm" method="POST" action="{{ url('admin/tariff/updatetariff/' . $viewtariffs->id) }}" class="mx-10 updateTariffform">
                     @csrf
                     <div class="flex flex-col justify-center">
                         <label for="destination">Destination:</label>
+                        <x-input-error :messages="$errors->get('destination')" class="" /> 
                         <input type="text" id="destination" name="destination" class="mb-6 bg-neutral-100 rounded-md px-3 py-2 w-full" required value="{{ $viewtariffs->destination }}">
 
                         <label for="rate">Rate:</label>
@@ -34,9 +35,9 @@
                     </div>
 
                     <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 pb-40 lg:pb-0">
-                        <button class="w-full md:w-1/2 py-2 bg-red-600 text-gray-50 font-semibold rounded-lg hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400" type="button" onclick="window.history.back();">Cancel</button>
+                        <button class="w-full md:w-1/2 py-2 bg-red-600 text-gray-50 font-semibold rounded-lg hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-400" type="button" onclick="location.href='{{ route('admin.tariff.tariff') }}'">Cancel</button>
 
-                        <button id="submitButton" class="w-full md:w-1/2 py-2 bg-yellow-400 text-gray-50 font-semibold rounded-lg hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400">Update</button>
+                        <button type="button" class="w-full md:w-1/2 py-2 bg-yellow-400 text-gray-50 font-semibold rounded-lg hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 triggerUpdateTariff">Update</button>
                     </div>
                 </form>
 
@@ -45,16 +46,30 @@
     </div>
 
     <script>
-        document.getElementById('submitButton').addEventListener('click', function(event) {
-            event.preventDefault(); 
-
-            var successMessage = document.getElementById('successMessage');
-            successMessage.classList.remove('hidden');
-
-            setTimeout(function() {
-                document.getElementById('tariffForm').submit();
-            }, 1000);
+       document.addEventListener('click', function (e) {
+    // Handle "Assign Driver" button click
+    if (e.target.classList.contains('triggerUpdateTariff')) {
+        const form = e.target.closest('.updateTariffform'); // Get the form to submit
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to update this tariff.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Update it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.closest('.updateTariffform').submit();
+                Swal.fire({
+                    title: "Updated!",
+                    text: "The tariff has been updated.",
+                    icon: "success"
+                });
+            }
         });
+    }
+});  
     </script>
 </body>
 

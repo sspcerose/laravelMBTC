@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MemberProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MBTCController;
+use App\Http\Controllers\pdfController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Controllers\MemberAuth\PasswordController;
@@ -22,6 +23,9 @@ use App\Http\Controllers\MemberAuth\PasswordController;
 |
 */
 
+
+// pdf
+Route::get('admin/PDF/generate-pdf', [pdfController::class, 'generatePDF'])->name('downloadbookingPDF');
 
 //////////////////////USER/////////////////////////////
 Route::get('/dashboard', [MBTCController::class, 'bookingform'])->middleware(['auth:web', 'verified'])->name('dashboard');
@@ -67,6 +71,7 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('/admin/member/member/{id}/archive', [MBTCController::class, 'archivemember'])->name('archivemember');
     Route::get('/admin/member/archivemember', [MBTCController::class, 'viewarchivemember']);
     Route::post('/admin/member/archivemember/{id}', [MBTCController::class, 'unarchivemember']);
+    Route::get('admin/member/viewmember/{id}', [MBTCController::class, 'viewSpecificMember']);
 
     // tariff page
     Route::get('admin/tariff/tariff', [MBTCController::class, 'viewtariff'])->name('admin.tariff.tariff');
@@ -92,6 +97,8 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::get('admin/booking/booking', [MBTCController::class, 'adminbookingpage'])->name('admin.booking.booking');
     Route::post('/booking/{bookingId}/accept', [MBTCController::class, 'acceptBooking'])->name('booking.accept');
     Route::post('/booking/{bookingId}/reject', [MBTCController::class, 'rejectBooking'])->name('booking.reject');
+    Route::get('admin/booking/view/{id}', [MBTCController::class, 'viewSpecificBooking']);
+    
 
     //monthlydues page
     Route::get('admin/monthlydues/monthlydues', [MBTCController::class, 'viewMonthlyDues'])->name('admin.monthlydues.monthlydues');
@@ -109,6 +116,12 @@ Route::middleware(['auth:admin'])->group(function () {
 
     // delete img
     // Route::get('admin/booking/booking', [MBTCCOntroller::class, 'deleteOldImages']);
+
+    // pdf
+    Route::get('admin/PDF/generate-pdf', [pdfController::class, 'generatePDF'])->name('downloadbookingPDF');
+    Route::get('admin/PDF/printbooking', [pdfController::class, 'printBooking'])->name('printBooking');
+    Route::get('admin/PDF/generate-allmemberpdf', [pdfController::class, 'generateallmemberPDF'])->name('downloadmemberPDF');
+    Route::get('admin/PDF/printallMember', [pdfController::class, 'printallMember'])->name('printallMember');
     
 });
 

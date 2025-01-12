@@ -2,7 +2,8 @@
 
     <body class="font-inter">
         <section class="lg:pt-32 lg:px-32 xl:px-52 relative">
-            <div class="bg-landing h-[95vh] md:h-[100vh] flex items-center justify-center bg-cover bg-center lg:hidden"></div>
+            <div class="bg-landing h-[75vh] md:h-[100vh] flex items-center justify-center bg-cover bg-center lg:hidden"> 
+                <img src="{{ asset('img/system/hero-bg-1.jpg') }}" alt="Description of image" class="w-full h-full object-cover" /></div>
             <div class="hidden lg:block rounded-3xl overflow-hidden h-[60vh]">
                 <img src="{{ asset('img/system/hero-bg-1.jpg') }}" alt="Description of image" class="w-full h-full object-cover" />
             </div>
@@ -17,76 +18,114 @@
                         <h1 class="text-black font-extrabold text-center text-4xl mb-8">Book Now</h1>
                         @if(!Auth::check())
                             <form id="firstPageForm" enctype="multipart/form-data">
-                                <label class="font-bold pb-2">Location</label>
-                                <div class="md:flex md:flex-row justify-center md:flex-grow md:space-x-3">
+                              
+                              <div class="md:flex md:flex-row justify-center md:flex-grow md:space-x-3">
+                                <div class="md:flex md:flex-row justify-center md:flex-grow md:space-x-3 md:pb-5">
+                              <div class="w-full">
+                                <label class="font-bold pb-2">Pick-up Location</label>
+                              
+                                <!--<div class="md:flex md:flex-row justify-center md:flex-grow md:space-x-3"> -->
+                                  
                                     <!-- <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="text" id="location" name="location" placeholder="From" required> -->
                                     <select name="location" id="location" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full">
-                                            <option value="A. Pascual">A. Pascual</option>
-                                            <option value="Abar 1st">Abar 1st</option>
-                                            <option value="Abar 2nd">Abar 2nd</option>
-                                            <option value="Bagong Sikat">Bagong Sikat</option>
-                                            <option value="Caanawan">Caanawan</option>
-                                            <option value="Calaocan">Calaocan</option>
-                                            <option value="Camanacsacan">Camanacsacan</option>
-                                            <option value="Canuto Ramos">Canuto Ramos</option>
-                                            <option value="Crisanto Sanchez">Crisanto Sanchez</option>
-                                            <option value="Culaylay">Culaylay</option>
-                                            <option value="Dizol">Dizol</option>
-                                            <option value="F.E. Marcos">F.E. Marcos</option>
-                                            <option value="Kaliwanagan">Kaliwanagan</option>
-                                            <option value="Kita-KIta">Kita-KIta</option>
-                                            <option value="Malasin">Malasin</option>
-                                            <option value="Manicla">Manicla</option>
-                                            <option value="Palestina">Palestina</option>
-                                            <option value="Parang Mangga">Parang Mangga</option>
-                                            <option value="Pinili">Pinili</option>
-                                            <option value="Polaris">Polaris</option>
-                                            <option value="Rafael Rueda, Sr.">Rafael Rueda, Sr.</option>
-                                            <option value="Raymundo Eugenio">Raymundo Eugenio</option>
-                                            <option value="San Agustin">San Agustin</option>
-                                            <option value="San Juan">San Juan</option>
-                                            <option value="San Mauricio">San Mauricio</option>
-                                            <option value="Santo Niño 1st">Santo Niño 1st</option>
-                                            <option value="Santo Niño 2nd">Santo Niño 2nd</option>
-                                            <option value="Santo Tomas">Santo Tomas</option>
-                                            <option value="Sibut">Sibut</option>
-                                            <option value="Sinipit Bubon">Sinipit Bubon</option>
-                                            <option value="Tabulac">Tabulac</option>
-                                            <option value="Tayabo">Tayabo</option>
-                                            <option value="Tondod">Tondod</option>
-                                            <option value="Tulat">Tulat</option>
-                                            <option value="Villa Joson">Villa Joson</option>
-                                            <option value="Villa Marina">Villa Marina</option>
+                                            <option value="A. Pascual, San Jose City">A. Pascual, San Jose City</option>
+                                            <option value="Abar 1st, San Jose City">Abar 1st, San Jose City</option>
+                                            <option value="Abar 2nd, San Jose City">Abar 2nd, San Jose City</option>
+                                            <option value="Bagong Sikat, San Jose City">Bagong Sikat, San Jose City</option>
+                                            <option value="Caanawan, San Jose City">Caanawan, San Jose City</option>
+                                            <option value="Calaocan, San Jose City">Calaocan, San Jose City</option>
+                                            <option value="Camanacsacan, San Jose City">Camanacsacan, San Jose City</option>
+                                            <option value="Canuto Ramos, San Jose City">Canuto Ramos, San Jose City</option>
+                                            <option value="Crisanto Sanchez, San Jose City">Crisanto Sanchez, San Jose City</option>
+                                            <option value="Culaylay, San Jose City">Culaylay, San Jose City</option>
+                                            <option value="Dizol, San Jose City">Dizol, San Jose City</option>
+                                            <option value="F.E. Marcos, San Jose City">F.E. Marcos, San Jose City</option>
+                                            <option value="Kaliwanagan, San Jose City">Kaliwanagan, San Jose City</option>
+                                            <option value="Kita-KIta, San Jose City">Kita-KIta, San Jose City</option>
+                                            <option value="Malasin, San Jose City">Malasin, San Jose City</option>
+                                            <option value="Manicla, San Jose City">Manicla, San Jose City</option>
+                                            <option value="Palestina, San Jose City">Palestina, San Jose City</option>
+                                            <option value="Parang Mangga, San Jose City">Parang Mangga, San Jose City</option>
+                                            <option value="Pinili, San Jose City">Pinili, San Jose City</option>
+                                            <option value="Polaris, San Jose City">Polaris, San Jose City</option>
+                                            <option value="Rafael Rueda, Sr., San Jose City">Rafael Rueda, Sr., San Jose City</option>
+                                            <option value="Raymundo Eugenio, San Jose City">Raymundo Eugenio, San Jose City</option>
+                                            <option value="San Agustin, San Jose City">San Agustin, San Jose City</option>
+                                            <option value="San Juan, San Jose City">San Juan, San Jose City</option>
+                                            <option value="San Mauricio, San Jose City">San Mauricio, San Jose City</option>
+                                            <option value="Santo Niño 1st, San Jose City">Santo Niño 1st, San Jose City</option>
+                                            <option value="Santo Niño 2nd, San Jose City">Santo Niño 2nd, San Jose City</option>
+                                            <option value="Santo Tomas, San Jose City">Santo Tomas, San Jose City</option>
+                                            <option value="Sibut, San Jose City">Sibut, San Jose City</option>
+                                            <option value="Sinipit Bubon, San Jose City">Sinipit Bubon, San Jose City</option>
+                                            <option value="Tabulac, San Jose City">Tabulac, San Jose City</option>
+                                            <option value="Tayabo, San Jose City">Tayabo, San Jose City</option>
+                                            <option value="Tondod, San Jose City">Tondod, San Jose City</option>
+                                            <option value="Tulat, San Jose City">Tulat, San Jose City</option>
+                                            <option value="Villa Joson, San Jose City">Villa Joson, San Jose City</option>
+                                            <option value="Villa Marina, San Jose City">Villa Marina, San Jose City</option>
                                     </select>
-
+                                	<p id="locationError" class="text-red-600 text-sm mt-1"></p>
+                                    </div>
+                                  
+									<div class="w-full">
+                                        <label for="end_date" class="font-bold pb-2">Destination</label>
                                     <select name="id" id="id" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full">
                                         @foreach($activetariffs as $activetariff)
                                             <option value="{{ $activetariff->id }}">{{ $activetariff->destination }}</option>
                                         @endforeach
                                     </select>
+                                    <p id="idError" class="text-red-600 text-sm mt-1"></p>
                                 </div>
-
-                                <label class="font-bold pb-2">Date</label>
+              				</div>
+							 </div>
+                               <!-- <label class="font-bold pb-2">Date and Time</label> -->
                                 <div class="md:flex md:flex-row justify-center md:flex-grow md:space-x-3 md:pb-5">
-                                    <input type="text" id="time" name="time" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" placeholder="pick-up time">
-                                    <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="start_date" name="start_date" min="{{ \Carbon\Carbon::now()->addDays(3)->format('Y-m-d') }}" required>
-                                    <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="end_date" name="end_date" min="{{ \Carbon\Carbon::now()->addDays(3)->format('Y-m-d') }}" required>
+                                  
+                                    <div class="w-full">
+                                        <label for="start_date" class="font-bold pb-2">Start Date</label>
+                                        <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="start_date" name="start_date" min="{{ \Carbon\Carbon::now()->addDays(3)->format('Y-m-d') }}" required>
+                                      	<p id="startDateError" class="text-red-900 text-lg mt-1"></p>
+                                    </div>
+                                  
+                                    <div class="w-full">
+                                        <label for="end_date" class="font-bold pb-2">End Date</label>
+                                        <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="end_date" name="end_date" min="{{ \Carbon\Carbon::now()->addDays(3)->format('Y-m-d') }}" required>
+                                      	<p id="endDateError" class="text-red-600 text-sm mt-1"></p>
+                                    </div>
+
                                 </div>
+                            
 
                                 <div class="md:flex justify-center md:flex-grow md:space-x-3 pb-4 md:pb-8">
-                                    <div class="mb-4 bg-gray-200 rounded-md w-full flex items-center space-x-3 py-1 pl-3 px-1 justify-between">
-                                    <label class="font-medium w-1/3">Passenger</label> 
+                                  
+                                  <div class="w-full">
+                                    <label for="start_date" class="font-bold pb-2">Pick-up time</label>
+                                        <input type="text" id="time" name="time" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" placeholder="time" required>
+                                    	<p id="timeError" class="text-red-600 text-sm mt-1"></p>
+                                    </div>
+                                  
+                                    <div class="w-full">
+                                        <label class="font-bold pb-2">No. of Passengers</label>
                                         <!-- <div class="flex items-center md:space-x-1"> -->
                                             <!-- <button type="button" id="decrement-button" class="font-bold w-8 h-8 rounded-md hover:bg-gray-300 text-1xl">−</button>
                                             <input type="text" id="counter-input" class="text-black bg-gray-50 text-sm rounded-md max-w-[2.5rem] h-7 text-center" placeholder="1" value="1" required id="passenger" name="passenger"/>
                                             <button type="button" id="increment-button" class="font-bold w-8 h-8 rounded-md hover:bg-gray-300 text-1xl">+</button> -->
-                                            <select name="passenger" id="passenger" class="bg-gray-200 rounded-md px-3 py-1 w-2/3">
-                                                @for ($i = 1; $i <= 15; $i++)
+                                            <select name="passenger" id="passenger" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full">
+                                                @for ($i = 1; $i <= 12; $i++)
                                                     <option value="{{ $i }}">{{ $i }}</option>
                                                 @endfor
                                         </select>
                                     </div>
-                                    <input class="mb-4 font-bold text-black bg-gray-200 rounded-md px-3 py-2 w-full" type="text" placeholder="Total Rate:" id="price" name="price">
+            
+                                </div>
+                      			<div class="md:flex md:flex-col md:items-end md:space-y-2 md:py-5 text-right">
+                                    <p class="font-bold hidden" id="topay">PAYMENT DETAILS</p>
+                                    <p class="text-gray-700 font-bold hidden" id="ratt">Rate Subtotal: <span id="rat" class="font-bold text-black hidden">₱0</span></p>
+                                    <p class="text-gray-700 font-bold hidden" id="succee">Succeeding Rate Subtotal: <span id="succ" class="font-bold text-black hidden">₱0</span></p>
+                                    <p class="text-green-700 font-bold hidden" id="inclusion">Inclusions: Vehicle, a Driver, and Gas</p>
+                                    <input class="mb-4 font-bold text-black bg-gray-200 rounded-md px-3 py-2 w-64" type="text" placeholder="Total Payment" id="price" name="price">
+                                    <p class="text-gray-700 font-bold hidden" id="minimum">Minimum down payment starts at: <span id="minAmount" class="font-bold text-black">₱1000.00</span></p>
                                 </div>
                                 
                                 <div class="flex justify-center md:flex-row md:w-full md:justify-end pb-4 md:pb-16 md:px-0">
@@ -152,6 +191,7 @@
                                             <option value="{{ $activetariff->id }}">{{ $activetariff->destination }}</option>
                                         @endforeach
                                     </select>
+                                    
                                 </div>
                                 </div>
                                 </div>
@@ -163,12 +203,17 @@
 
                                     <div class="w-full">
                                         <label for="start_date" class="font-bold pb-2">Start Date</label>
-                                        <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="start_date" name="start_date" min="{{ \Carbon\Carbon::now()->addDays(3)->format('Y-m-d') }}" required>
+                                        <!-- <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="start_date" name="start_date" min="{{ \Carbon\Carbon::now()->addDays(3)->format('Y-m-d') }}" required> -->
+                                        <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="text" id="start_date" name="start_date" required placeholder="Start Date">
+                                        <!-- <input type="text" id="datepicker" placeholder="Select a date"> -->
+                                      	<p id="startDateError" class="text-red-600 text-sm mt-1"></p>
                                     </div>
                                     
                                     <div class="w-full">
                                         <label for="end_date" class="font-bold pb-2">End Date</label>
-                                        <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="end_date" name="end_date" min="{{ \Carbon\Carbon::now()->addDays(3)->format('Y-m-d') }}" required>
+                                        <!-- <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="date" id="end_date" name="end_date" min="{{ \Carbon\Carbon::now()->addDays(3)->format('Y-m-d') }}" required> -->
+                                        <input class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" type="text" id="end_date" name="end_date" required placeholder="End Date">
+                                      	<p id="endDateError" class="text-red-600 text-sm mt-1"></p>
                                     </div>
 
                                 </div>
@@ -178,7 +223,11 @@
                                     <div class="md:flex md:flex-row justify-center md:flex-grow md:space-x-3 md:pb-5">
                                     <div class="w-full">
                                     <label for="start_date" class="font-bold pb-2">Pick-up time</label>
-                                        <input type="text" id="time" name="time" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" placeholder="time" required>
+                                        <input type="text" id="time" name="time" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" placeholder="Pick-up time" required>
+                                        <!-- <input type="text" id="time" name="time" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" placeholder="Pick-up time" required> -->
+                                        <!-- <input type="time" id="time" class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full" min="09:00" max="17:00" step="300" placeholder="Pick-up time" required> -->
+                                        <!-- <input type="text" id="time" placeholder="Pick-up time"> -->
+                                      	<p id="timeError" class="text-red-600 text-sm mt-1"></p>
                                     </div>
 
                                         <div class="w-full">
@@ -207,7 +256,7 @@
                                     <p class="text-gray-700 font-bold hidden" id="succee">Succeeding Rate Subtotal: <span id="succ" class="font-bold text-black hidden">₱0</span></p>
                                     <p class="text-green-700 font-bold hidden" id="inclusion">Inclusions: Vehicle, a Driver, and Gas</p>
                                     <input class="mb-4 font-bold text-black bg-gray-200 rounded-md px-3 py-2 w-64" type="text" placeholder="Total Payment" id="price" name="price">
-                                    <p class="text-gray-700 font-bold hidden" id="minimum">Minimum down payment starts at: <span id="minAmount" class="font-bold text-black">₱1000.00</span></p>
+                                    <p class="text-gray-700 font-bold hidden" id="">Minimum down payment starts at: <span id="minAmount" class="font-bold text-black">₱1000.00</span></p>
                                 </div>
                                 
                                 <div class="flex justify-center md:flex-row md:w-full md:justify-end pb-4 md:pb-16 md:px-0">
@@ -219,7 +268,16 @@
                 @endif
             </div>
         </section>
+		<!-- Dialog -->
+		<div id="customDialog" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-80">
+            <h2 class="text-xl font-bold mb-4 text-red-600">Error</h2>
+            <p id="dialogMessage" class="mb-4 text-gray-700"></p>
+            <button id="closeDialog" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Close</button>
+        </div>
+    </div>
     </body>
+    
 
     <script>
         // const decrementButton = document.getElementById('decrement-button');
@@ -267,38 +325,83 @@
             $('#bookButton').click(function(event) {
         event.preventDefault();
 
-        $('#errorMessages').remove();
+        //$('#errorMessages').remove();
 
-        var errors = [];
-        
+        //var errors = [];
+        $('#locationError, #idError, #timeError, #startDateErro, #endDateError').text("");
+
+        var errors = false;
+
         if ($('#location').val() === "") {
-            errors.push("Location is required.");
-        }
-        if ($('#id').val() === "") {
-            errors.push("Please select a destination.");
-        }
-        if ($('#time').val() === "") {
-            errors.push("Pick-up time is required.");
-        }
-        if ($('#start_date').val() === "") {
-            errors.push("Start date is required.");
-        }
-        if ($('#end_date').val() === "") {
-            errors.push("End date is required.");
-        }
-        if ($('#passenger').val() === "") {
-            errors.push("Passenger count is required.");
+            $('#locationError').text("Location is required.");
+            errors = true;
+        } else {
+            $('#locationError').text(""); 
         }
 
-        if (errors.length > 0) {
-            var errorHtml = '<div id="errorMessages" class="bg-red-300 text-red-800 p-4 rounded-md mb-4"><ul>';
-            errors.forEach(function(error) {
-                errorHtml += '<li>' + error + '</li>';
-            });
-            errorHtml += '</ul></div>';
-            $('#bookingCard').prepend(errorHtml);
-            return; 
+        if ($('#id').val() === "") {
+            $('#idError').text("Please select a destination.");
+            errors = true;
+        } else {
+            $('#idError').text("");
         }
+
+        if ($('#time').val() === "") {
+            $('#timeError').text("Pick-up time is required.");
+            errors = true;
+        } else {
+            $('#timeError').text("");
+        }
+
+        if ($('#start_date').val() === "") {
+            $('#startDateError').text("Start Date is required.");
+            errors = true;
+        } else {
+            $('#startDateError').text(""); 
+        }
+
+        if ($('#end_date').val() === "") {
+            $('#endDateError').text("End date is required.");
+            errors = true;
+          } else {
+              $('#endDateError').text(""); 
+          }
+
+        if ($('#start_date').val() && $('#end_date').val()) {
+            let startDate = new Date($('#start_date').val());
+            let endDate = new Date($('#end_date').val());
+
+            if (endDate < startDate) {
+                $('#endDateError').text("End Date cannot be earlier than Start Date.");
+                errors = true;
+            }
+        }
+   
+        if (errors) {
+    		return;
+		}    
+
+        //if (errors.length > 0) {
+            //var errorHtml = '<div id="errorMessages" class="bg-red-300 text-red-800 p-4 rounded-md mb-4"><ul>';
+            //errors.forEach(function(error) {
+            //    errorHtml += '<li>' + error + '</li>';
+          
+          	//var errorMessage = "Please fix the following errors:\n\n";
+          	//errors.forEach(function(error) {
+        	//errorMessage += "- " + error + "\n";
+          
+          	//var errorMessage = errors.map(error => `- ${error}`).join('\n');
+          	//document.getElementById('dialogMessage').textContent = errorMessage;
+          	//const dialog = document.getElementById('customDialog');
+    		//dialog.classList.remove('hidden');
+          	//document.getElementById('closeDialog').addEventListener('click', function () {
+        	//dialog.classList.add('hidden');
+            //});
+            //errorHtml += '</ul></div>';
+            //$('#bookingCard').prepend(errorHtml);
+          	//alert(errorMessage);
+            //return; 
+        //}
 
         firstPageData['customer_id'] = $('#customer_id').val();
         firstPageData['location'] = $('#location').val();
@@ -325,16 +428,17 @@
                         <hr class="border-1 border-gray-800">
                         <div class="md:flex md:flex-col md:items-end md:space-y-2 md:py-5 text-right">
                         <p class="text-gray-700 font-bold" id="topay">PAYMENT DETAILS</p>
-                        <p class="text-gray-700" id="ratt">Rate Subtotal: <span id="rat" class="font-bold text-black">${firstPageData.rat}</span></p>
-                        <p class="text-gray-700" id="succee">Succeeding rate Subtotal: <span id="succ" class="font-bold text-black">${firstPageData.succ}</span></p>
+                        <p class="text-gray-700 font-bold" id="ratt">Rate Subtotal: <span id="rat" class="font-bold text-black">${firstPageData.rat}</span></p>
+                        <p class="text-gray-700 font-bold" id="succee">Succeeding rate Subtotal: <span id="succ" class="font-bold text-black">${firstPageData.succ}</span></p>
                         <p class="text-green-700 font-bold" id="inclusion">Inclusions: Vehicle, a Driver, and Gas</p>
                         <input class="mb-4 font-bold text-black bg-gray-200 rounded-md px-3 py-2 w-64" type="text" placeholder="Total Rate:" id="price" name="price" value="${firstPageData.price}">
-                        <p class="text-gray-700 font-bold  id="minimum">Minimum down payment starts at: <span id="minAmount" class="font-bold text-black">₱1000.00</span></p>
+ 						<h1 class="text-black text-center text-sm font-bold pb-2">Please complete payment or down payment to confirm booking reservation</h1>
+                        <p class="text-black text-center text-sm pb-2 font-bold" id="minimum">Minimum down payment starts at: <span id="minAmount" class="font-bold text-black">₱1000.00</span></p>
                     </div>
                         
                         <hr class="border-1 border-gray-800">
                         <div class="flex justify-center mb-8 items-center">
-                            <h2 class="text-red-600 font-bold text-md">Please be advised that if you wish to cancel your reservation, your payment is NON-REFUNDABLE</h2>
+                            <h2 class="text-red-600 font-bold text-center">Please be informed that in the event of a reservation cancellation, all payments made are strictly NON-REFUNDABLE</h2>
                             <p class="text-black font-bold text-center text-md"></p>
                         <hr>
                         </div>
@@ -378,12 +482,34 @@
                                 <div class="h-[150px] min-h-[1em] w-0.5 bg-neutral-300 mx-4"></div>
                             </div>
 
-                            <div class="flex flex-col items-center">
-                                <form id="secondPageForm" enctype="multipart/form-data"">
-                                    <input type="file" id="receipt" class="w-full text-gray-400 font-medium text-sm bg-gray-200 file:cursor-pointer file:border-0 file:py-2 file:px-2 file:mr-2 file:bg-gray-300 file:hover:bg-gray-400 file:text-black rounded-md mb-4" />
+                        <div class="flex flex-col items-center">
+                                <!-- Form for Uploading Receipt -->
+                                <form id="secondPageForm" enctype="multipart/form-data">
+                                    <!-- File Input -->
+                                    <input
+                                        type="file"
+                                        id="receipt"
+                                        accept=".jpeg, .jpg, .png"
+                                        class="w-full text-gray-400 font-medium text-sm bg-gray-200 file:cursor-pointer file:border-0 file:py-2 file:px-2 file:mr-2 file:bg-gray-300 file:hover:bg-gray-400 file:text-black rounded-md mb-4"
+                                    />
+                                    <!-- Payment Amount Input -->
+                                    <label for="paymentAmount" class="font-bold pb-2">Full/Down Payment Amount</label>
+                                    <input
+                                        id="paymentAmount"
+                                         name="paymentAmount"
+                                        class="mb-4 bg-gray-200 rounded-md px-3 py-2 w-full"
+                                        type="number"
+                                        placeholder="Input Amount of your Full/Down Payment"
+                                    />
                                 </form>
+                                <!-- Upload Receipt Text -->
                                 <h1 class="text-center text-xs pb-10">Upload Payment Receipt</h1>
+                                <!-- Error Message -->
+                                <p id="receiptError" class="text-red-600 text-sm mt-1"></p>
+                                <p id="paymentAmountError" class="text-red-600 text-sm mt-1"></p>
                             </div>
+
+
                         </div>
 
                         <div class="flex justify-center md:flex-row md:w-full md:justify-end pb-4 md:pb-16 md:px-0">
@@ -391,34 +517,70 @@
                         </div>
                         
                     </div>
+
+                    <!-- success -->
+                    <div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 hidden">
+                        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                            <div class="flex justify-between items-center">
+                                <h5 class="text-lg font-semibold text-green-500">Booking Success!</h5>
+                                <button onclick="location.reload();" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="mt-4 text-sm text-gray-600">Your reservation was successfully created! Your booking is under review. Please wait for confirmation and the driver to be assigned.</p>
+                            <p class="mt-4 text-sm text-gray-600">Thank you!</p>
+                            <div class="mt-6 flex justify-end space-x-4">
+                                <button onclick="location.reload();" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">OK</button>
+                            </div>
+                        </div>
+                    </div>
                 `);
 
                 $('#goBackButton').click(function() {
                     location.reload(); 
                 });
-                
 
-            
+               
+                            
                 $('#submitButton').click(function() {
                     event.preventDefault();
 
                     $('#errorMessages').remove(); 
 
                     var errors = []; 
+                  	$('#receiptError').text("");
+                    $('#paymentAmountError').text("");
+
+                    var errors = false;
 
                     if ($('#receipt')[0].files.length === 0) {
-                        errors.push("Receipt upload is required.");
+                        //errors.push("Receipt upload is required.");
+                      	$('#receiptError').text("Proof of payment is required");
+                        errors = true;
+                    } else {
+                        $('#receiptError').text(""); 
                     }
+                    if ($('#paymentAmount').val() === "") {
+                        $('#paymentAmountError').text("FUll/Down payment amount is required.");
+                        errors = true;
+                    } else {
+                        $('#paymentAmountError').text(""); 
+                    }
+                  	 if (errors) {
+                        return;
+                    } 
 
-        if (errors.length > 0) {
-            var errorHtml = '<div id="errorMessages" class="bg-red-300 text-red-800 p-4 rounded-md mb-4"><ul>';
-            errors.forEach(function(error) {
-                errorHtml += '<li>' + error + '</li>';
-            });
-            errorHtml += '</ul></div>';
-            $('#bookingCard').prepend(errorHtml);
-            return; 
-        }
+        //if (errors.length > 0) {
+            //var errorHtml = '<div id="errorMessages" class="bg-red-300 text-red-800 p-4 rounded-md mb-4"><ul>';
+            //errors.forEach(function(error) {
+              //  errorHtml += '<li>' + error + '</li>';
+            //});
+            //errorHtml += '</ul></div>';
+            //$('#bookingCard').prepend(errorHtml);
+            //return; 
+        //}
 
                     var formData = new FormData();
                     formData.append('customer_id', firstPageData.customer_id);
@@ -430,6 +592,15 @@
                     formData.append('passenger', firstPageData.passenger);
                     formData.append('price', firstPageData.price);
                     formData.append('receipt', $('#receipt')[0].files[0]);
+                    formData.append('paymentAmount', $('#paymentAmount').val());
+
+                    function showModal() {
+                        document.getElementById('successModal').classList.remove('hidden');
+                    }
+
+                    function closeModal() {
+                        document.getElementById('successModal').classList.add('hidden');
+                    }
 
                     $.ajax({
                         url: '{{ url("bookingform") }}',
@@ -438,24 +609,24 @@
                         contentType: false,
                         processData: false,
                         success: function(response) {
-                            $('#bookingCard').prepend(`
-                                <div role="alert" class="mt-3 relative flex w-full p-3 text-sm text-white bg-green-500 rounded-md">
-                                    Booking Success! 
-                                    <button class="flex items-center justify-center transition-all w-8 h-8 rounded-md text-white hover:bg-green/10 active:bg-green/10 absolute top-1.5 right-1.5" type="button" onclick="location.reload();">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    </button>
-                                </div>
+            //                 $('#bookingCard').prepend(`
+            //                     <div role="alert" class="mt-3 relative flex w-full p-3 text-sm text-white bg-green-500 rounded-md">
+            //                         Booking Success! 
+            //                         <button class="flex items-center justify-center transition-all w-8 h-8 rounded-md text-white hover:bg-green/10 active:bg-green/10 absolute top-1.5 right-1.5" type="button" onclick="location.reload();">
+            //                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5" stroke-width="2">
+            //                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+            //                             </svg>
+            //                         </button>
+            //                     </div>
 
-            `);
-
+            // `);
+            showModal();       
             $('#submitButton').prop('disabled', true).text('Confirmed');
 
             // $('html, body').animate({ scrollTop: 0 }, 'slow');
         },
                                     error: function(xhr, status, error) {
-                                alert('Error occurred during booking confirmation:\n\n' +
+                                	alert('An error occurred during booking confirmation. Please check your bookings page to see if your reservation was saved. \n\n' + 
                                     'Status: ' + status + '\n' +
                                     'Error: ' + error + '\n' +
                                     'Response: ' + xhr.responseText);
@@ -490,8 +661,8 @@
                         end_date: end_date,
                     },
                     success: function(response) {
-                        $('#price').val('TOTAL PAYMENT: ₱' + response.price + '.00'); // Set total price
-                        $('#succ').text('₱' + response.succeeding + '.00'); // Set succeeding rate
+                        $('#price').val('TOTAL PAYMENT: ₱' + response.price + '.00'); 
+                        $('#succ').text('₱' + response.succeeding + '.00'); 
                         $('#rat ').text('₱' + response.rate);
                         $('#rat').removeClass('hidden');
                         $('#succ').removeClass('hidden');
@@ -537,6 +708,30 @@ flatpickr("#time", {
             isChangingDate = false;
         }
     }
+});
+
+$(function () {
+    $("#start_date").datepicker({
+        dateFormat: "yy/mm/dd", 
+        changeMonth: true,
+        changeYear: true,
+        minDate: +3, // Minimum date constraint for start date
+        showButtonPanel: true,
+        onSelect: function (selectedDate) {
+            // When a date is selected for start_date
+            var startDate = $(this).datepicker('getDate');
+            
+            // Set the start date to be the minimum date for the end date
+            $("#end_date").datepicker("option", "minDate", startDate);
+        }
+    });
+
+    $("#end_date").datepicker({
+        dateFormat: "yy/mm/dd", 
+        changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true
+    });
 });
 
 

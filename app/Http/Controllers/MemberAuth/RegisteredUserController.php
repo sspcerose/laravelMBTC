@@ -36,7 +36,7 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'tin' => ['required', 'string', 'max:255'],
+            'tin' => ['required', 'string', 'max:255', 'unique:members,tin'],
             'mobile_num' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.Member::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -44,6 +44,8 @@ class RegisteredUserController extends Controller
             'type' => ['required', 'string', 'max:255'],
             'member_status' => ['required', 'string', 'max:255'],
             
+        ], [
+            'tin.unique' => 'TIN is already exists'
         ]);
 
         $user = Member::create([
