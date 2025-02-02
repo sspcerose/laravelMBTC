@@ -34,11 +34,12 @@
                     <!-- Notification Container -->
                     <div id="notification-container" class="hidden absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg overflow-hidden z-10 border-2 border-gray-500">
                     <ul class="p-4 max-h-96 overflow-y-auto" id="notification-list">
-                    <li class="text-sm text-gray-700 border-b p-2">
+                    
                     @if($paymentss->isEmpty()) 
                         <span class="font-bold text-center">No Notification</span><br>
                     @else
                         @foreach($paymentss as $paymentts)
+                        <li class="text-sm text-gray-700 border-b p-2">
                             @if($paymentts->status == 'update')
                                     
                                     <span class="font-bold">{{ $paymentts->member->name }} {{ $paymentts->member->last_name }}</span> wants an update on its <span class="font-bold">{{ \Carbon\Carbon::parse($paymentts->dues->date)->format('F Y') }} due</span>

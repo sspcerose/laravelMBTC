@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class declinedDriverSchedule extends Notification
+class cancelledReservation extends Notification
 {
     use Queueable;
 
@@ -35,11 +35,9 @@ class declinedDriverSchedule extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('The driver you assigned to the schedule has declined the assignment.')
-            ->line('Please log in to your account and assign another driver to the schedule.')
-            ->action('More Details', route('admin.auth.login'))
-            ->line('Thank you!');
-
+                    ->line('A customer has cancelled their reservation.')
+                    ->action('More Details', route('admin.auth.login'))
+                    ->line('Thank you!');
     }
 
     /**

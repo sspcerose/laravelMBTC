@@ -133,7 +133,7 @@
                                     @elseif($latestSchedule->cust_status == 'inactive')
                                         <span class="font-bold text-red-500">Customer Cancelled</span>
                                     @elseif($latestSchedule->driver_status == 'cancelled')
-                                        <span class="font-bold text-red-500">Driver Cancelled, Schedule New One</span>
+                                        <span class="font-bold text-red-500">Driver Cancelled</span>
                                     @elseif($latestSchedule->driver_status == 'conflict')
                                         <span class="font-bold text-red-500">Cannot Schedule Driver <span class="text-red-500 underline uppercase">{{ $driver->name }} {{ $driver->last_name }}</span> because of conflicting date</span>
                                     @elseif($latestSchedule->driver_status == 'optionscheduled')

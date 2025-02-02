@@ -35,11 +35,16 @@ class reservationDeclined extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('We regret to inform you that your reservation has been declined.')
-            ->line('Please double-check the booking details you provided and try again.')
+            ->line('We regret to inform you that your car rental reservation has been rejected.')
+            ->line('This may be due to the following reasons:')
+            ->line('- Submission of a fake payment receipt.')
+            ->line('- Unrealistic or invalid booking dates.')
+            ->line('- Missing or incomplete required information.')
+            ->line('- Violation of our booking policies or terms of service.')
+            ->line('Please double-check the booking details you provided and try again if necessary.')
             ->action('More Details', route('login'))
-            ->line('If you need further assistance, you can email us through this email address: mbtransportcooperative@gmail.com.')
-            ->line('Thank you!');
+            ->line('If you need further assistance, you can reach us at: mbtransportcooperative@gmail.com.')
+            ->line('Thank you!.');
 
     }
 

@@ -30,6 +30,7 @@
                             <th class="py-3 px-4">Start Date</th>
                             <th class="py-3 px-4">End Date</th>
                             <th class="py-3 px-4">Total Fare</th>
+                            <th class="py-3 px-4">Remaining Bal.</th>
                             <th class="py-3 px-4">Proof of Payment</th>
                             <th class="py-3 px-4">Action</th>
                         </tr>
@@ -87,7 +88,8 @@
                                     <td class="py-3 px-4">{{ $booking->destination }}</td>
                                     <td class="py-3 px-4">{{ \Carbon\Carbon::parse($booking->start_date)->format('F d, Y') }}</td>
                                     <td class="py-3 px-4">{{ \Carbon\Carbon::parse($booking->end_date)->format('F d, Y') }}</td>
-                                    <td class="py-3 px-4">₱{{ $booking->price }}</td>
+                                    <td class="py-3 px-4">₱{{ $booking->price }}.00</td>
+                                    <td class="py-3 px-4">₱{{ $booking->remaining }}.00</td>
                                     <td class="py-3 px-4" >
                                         <button type="button" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600" data-receipt="{{ asset('img/' . $booking->receipt) }}" onclick="openModal(this)">
                                             View

@@ -33,15 +33,21 @@
                         </div>
                     </div>
                 </a>
-                <a href="{{ route('downloadmemberPDF') }}" class="pt-4 mr-2 ml-2">
+                <!-- <a href="" class="pt-4 mr-2 ml-2">
                 <button class="bg-blue-600 hover:bg-blue-400 text-white flex items-center py-3 px-4 rounded-xl">
                 <i class="fa-solid fa-file-export mr-2"></i>
                         Report
                     </button>
-                </a>
+                </a> -->
+
+                <p class="pt-4 mr-2 ml-2">
+                <button class="bg-blue-600 hover:bg-blue-400 text-white flex items-center py-3 px-4 rounded-xl" onclick="openFilterModal('export')">
+                    <i class="fa-solid fa-file-export mr-2"></i>
+                    Report
+                </button> </p>
 
                 <p class="pt-4 mr-2">
-                <button class="bg-teal-600 hover:bg-teal-400 text-white flex items-center py-3 px-4 rounded-xl" onclick="printPage()">
+                <button class="bg-teal-600 hover:bg-teal-400 text-white flex items-center py-3 px-4 rounded-xl" onclick="openFilterModal('print')">
                     <i class="fa-solid fa-print mr-2"></i>Print
                 </button>
                 </p>
@@ -104,6 +110,30 @@
         </div>
     </div>
     </div>
+
+<!-- Tailwind Modal -->
+<!-- Modal Background and Content -->
+<div id="filterModal" class="fixed inset-0 hidden z-50 flex items-center justify-center">
+    <!-- Background Overlay -->
+    <div class="absolute inset-0 bg-gray-800 bg-opacity-50"></div>
+
+    <!-- Modal Content -->
+    <div class="relative z-10 bg-white rounded-lg p-6 w-96 mx-auto mt-20">
+        <h3 class="text-lg font-bold mb-4">Filter by Date</h3>
+        <div class="mb-4">
+            <label for="filter_start_date" class="block text-sm font-medium">Start Date</label>
+            <input type="date" id="filter_start_date" class="w-full border rounded-md p-2" />
+        </div>
+        <div class="mb-4">
+            <label for="filter_end_date" class="block text-sm font-medium">End Date</label>
+            <input type="date" id="filter_end_date" class="w-full border rounded-md p-2" />
+        </div>
+        <div class="flex justify-end space-x-2">
+            <button class="bg-gray-500 hover:bg-gray-400 text-white px-4 py-2 rounded-md" onclick="closeFilterModal()">Cancel</button>
+            <button id="filterConfirmBtn" class="bg-blue-600 hover:bg-blue-400 text-white px-4 py-2 rounded-md">Confirm</button>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
@@ -191,7 +221,7 @@
 });
 </script>        
 
-<script>
+<!-- <script>
     function printPage() {
             // Open the print view page in a new window
             var width = 1000;
@@ -208,6 +238,61 @@
                 printWindow.print();
             };
         }
+</script> -->
+
+<script>
+    let actionType = '';
+
+    function openFilterModal(type) {
+        actionType = type; // 'export' or 'print'
+        document.getElementById('filterModal').classList.remove('hidden');
+    }
+
+    function closeFilterModal() {
+        document.getElementById('filterModal').classList.add('hidden');
+    }
+
+   document.getElementById('filterConfirmBtn').addEventListener('click', function () {
+    const startDate = document.getElementById('filter_start_date').value;
+    const endDate = document.getElementById('filter_end_date').value;
+
+    console.log("Start Date:", startDate); // Log the start date
+    console.log("End Date:", endDate);
+
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates.');
+        return;
+    }
+
+    // URL encode the date parameters to ensure proper handling
+    const encodedStartDate = encodeURIComponent(startDate);
+    const encodedEndDate = encodeURIComponent(endDate);
+
+    if (actionType === 'export') {
+        // Ensure the URL query parameters are properly encoded
+        window.location.href = `{{ route('downloadmemberPDF') }}?startDate=${encodedStartDate}&endDate=${encodedEndDate}`;
+    } else if (actionType === 'print') {
+        printPage(encodedStartDate, encodedEndDate);
+    }
+
+    closeFilterModal();
+});
+
+function printPage(startDate, endDate) {
+    var width = 1000;
+    var height = 600;
+    var left = (window.innerWidth / 2) - (width / 2);
+    var top = (window.innerHeight / 2) - (height / 2);
+
+    // Use the encoded date parameters
+    var printUrl = `{{ route('printallMember') }}?startDate=${startDate}&endDate=${endDate}`;
+    var printWindow = window.open(printUrl, "_blank", 
+        "width=" + width + ",height=" + height + ",left=" + left + ",top=" + top);
+
+    printWindow.onload = function () {
+        printWindow.print();
+    };
+}
 </script>
 </body>
 

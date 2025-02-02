@@ -23,111 +23,258 @@ use App\Models\Admin;
 class pdfController extends Controller
 {
 
-public function generatePDF()
+public function generatePDF(Request $request)
 {
-    $currentMonth = Carbon::now()->month;
-    $currentYear = Carbon::now()->year;
+     $filterStartDate = $request->input('startDate');
+        $filterEndDate = $request->input('endDate');
+    
+        // Parse the filtered start and end dates
+        $startDate = $filterStartDate ? Carbon::parse($filterStartDate) : null;
+        $endDate = $filterEndDate ? Carbon::parse($filterEndDate) : null;
+    
+        // Adjust query filters based on provided dates
+        $baseQuery = Booking::query();
+        if ($startDate && $endDate) {
+            $baseQuery->whereBetween('start_date', [$startDate, $endDate]);
+        }
+    
+        // Individual Queries for Metrics
+        $totalMonthlyBookings = (clone $baseQuery)
+            ->whereMonth('start_date', $startDate?->month ?? now()->month)
+            ->count();
+    
+        // total no. of Bookings
+        $totalYearlyBookings = (clone $baseQuery)->count();
+            // ->whereYear('start_date', $startDate?->year ?? now()->year)
+            
+    
+        $totalRevenue = (clone $baseQuery)
+            ->whereNotIn('status', ['cancelled', 'rejected'])
+            ->sum('price');
+    
+        $cancelledRevenue = (clone $baseQuery)
+            ->where('status', ['cancelled'])
+            ->selectRaw('SUM(price - remaining) as revenue')
+            ->value('revenue');
 
-    $totalMonthlyBookings = Booking::whereMonth('start_date', $currentMonth)->count();
+        $overallTotalRevenue = $totalRevenue + $cancelledRevenue;
 
-    $totalYearlyBookings = Booking::whereYear('start_date', $currentYear)->count();
+    
+        $cancelledCount = (clone $baseQuery)
+            ->where('status', 'cancelled')
+            ->count();
 
-    $totalRevenue = Booking::where('status', '!=', 'Cancelled')
-                            ->where('status', '!=', 'rejected')
-                            ->sum('price');
+        $acceptedCount = (clone $baseQuery)
+            ->where('status', 'accepted')
+            ->count();
 
-    $cancelledRevenue = Booking::where('status', 'Cancelled')
-        ->selectRaw('SUM(price - remaining) as revenue')
-        ->value('revenue');
+        $rejectedCount = (clone $baseQuery)
+            ->where('status', 'rejected')
+            ->count();
 
-    $cancelledCount = Booking::where('status', 'Cancelled')->count();
+    
+        // Top Destinations
+        $topDestinations = (clone $baseQuery)
+            ->select('destination', Booking::raw('COUNT(*) as count'))
+            ->groupBy('destination')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get();
+    
+        // Monthly Revenue
+        $monthlyBookings = (clone $baseQuery)
+            ->selectRaw('MONTH(start_date) as month, COUNT(*) as count')
+            ->groupByRaw('MONTH(start_date)')
+            ->pluck('count', 'month');
+    
+        $monthlySales = (clone $baseQuery)
+            ->whereIn('status', ['accepted', 'active'])
+            ->selectRaw('MONTH(start_date) as month, SUM(price) as total_sales')
+            ->groupByRaw('MONTH(start_date)')
+            ->pluck('total_sales', 'month');
 
-    $topDestinations = Booking::select('destination', Booking::raw('COUNT(*) as count'))
-        ->groupBy('destination')
-        ->orderByDesc('count')
-        ->limit(5)
-        ->get();
+        $topCustomers = (clone $baseQuery)
+            ->with('user') // Load customer relationship
+            ->select('customer_id', Booking::raw('COUNT(*) as booking_count'))
+            ->groupBy('customer_id')
+            ->orderByDesc('booking_count')
+            ->limit(5)
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'name' => $booking->user->name ?? 'Unknown',
+                    'last_name' => $booking->user->last_name ?? 'Unknown',
+                    'booking_count' => $booking->booking_count,
+                ];
+            });
+
+        $topStartDates = (clone $baseQuery)
+            ->select('start_date', Booking::raw('COUNT(*) as booking_count'))
+            ->groupBy('start_date')
+            ->orderByDesc('booking_count')
+            ->limit(5)
+            ->get();
         
-    $monthlyBookings = Booking::selectRaw('MONTH(start_date) as month, COUNT(*) as count')
-        ->whereYear('start_date', $currentYear)
-        ->groupByRaw('MONTH(start_date)')
-        ->pluck('count', 'month');
 
-    $monthlySales = Booking::where('status', 'Accepted')
-        ->selectRaw('MONTH(start_date) as month, SUM(price) as total_sales')
-        ->whereYear('start_date', $currentYear)
-        ->groupByRaw('MONTH(start_date)')
-        ->pluck('total_sales', 'month');
-
+        $topPickUpLocations = (clone $baseQuery)
+            ->select('location', Booking::raw('COUNT(*) as booking_count'))
+            ->groupBy('location')
+            ->orderByDesc('booking_count')
+            ->limit(5)
+            ->get();
+       
+            
     
-
-    $data = [
-        'title' => 'MANIBELA NG BUHAY TRANSPORT COOPERATIVE',
-        'date' => date('m/d/Y'),
-        'totalMonthlyBookings' => $totalMonthlyBookings,
-        'totalYearlyBookings' => $totalYearlyBookings,
-        'totalRevenue' => $totalRevenue,
-        'cancelledRevenue' => $cancelledRevenue,
-        'cancelledCount' => $cancelledCount,
-        'topDestinations' => $topDestinations,
-        'monthlyBookings' => $monthlyBookings,
-        'monthlySales' => $monthlySales,
-    ];
-
-
-    $pdf = Pdf::loadView('admin.PDFFolder.bookingPDF', $data);
-    return $pdf->download('invoice.pdf');
+        // Data for the PDF
+        $data = [
+            'title' => 'MANIBELA NG BUHAY TRANSPORT COOPERATIVE',
+            'date' => date('m/d/Y'),
+            'totalMonthlyBookings' => $totalMonthlyBookings,
+            'totalYearlyBookings' => $totalYearlyBookings,
+            'totalRevenue' => $totalRevenue,
+            'cancelledRevenue' => $cancelledRevenue,
+            'cancelledCount' => $cancelledCount,
+            'topDestinations' => $topDestinations,
+            'monthlyBookings' => $monthlyBookings,
+            'monthlySales' => $monthlySales,
+            'overallTotalRevenue' => $overallTotalRevenue,
+            'acceptedCount' => $acceptedCount,
+            'rejectedCount' => $rejectedCount,
+            'topCustomers' =>  $topCustomers,
+            'topStartDates' =>  $topStartDates,
+            'topPickUpLocations' => $topPickUpLocations,
+            'filterStartDate' => $filterStartDate,
+            'filterEndDate' => $filterEndDate, 
+        ];
     
-}
-    public function printBooking()
+        // Generate PDF
+        $pdf = Pdf::loadView('admin.PDFFolder.bookingPDF', $data);
+        return $pdf->download('invoice.pdf');
+    }
+    
+    public function printBooking(Request $request)
     {
-    $currentMonth = Carbon::now()->month;
-    $currentYear = Carbon::now()->year;
+        $filterStartDate = $request->input('startDate');
+        $filterEndDate = $request->input('endDate');
+    
+        // Parse the filtered start and end dates
+        $startDate = $filterStartDate ? Carbon::parse($filterStartDate) : null;
+        $endDate = $filterEndDate ? Carbon::parse($filterEndDate) : null;
+    
+        // Adjust query filters based on provided dates
+        $baseQuery = Booking::query();
+        if ($startDate && $endDate) {
+            $baseQuery->whereBetween('start_date', [$startDate, $endDate]);
+        }
+    
+        // Individual Queries for Metrics
+        $totalMonthlyBookings = (clone $baseQuery)
+            ->whereMonth('start_date', $startDate?->month ?? now()->month)
+            ->count();
+    
+        // total no. of Bookings
+        $totalYearlyBookings = (clone $baseQuery)->count();
+            // ->whereYear('start_date', $startDate?->year ?? now()->year)
+            
+    
+        $totalRevenue = (clone $baseQuery)
+            ->whereNotIn('status', ['cancelled', 'rejected'])
+            ->sum('price');
+    
+        $cancelledRevenue = (clone $baseQuery)
+            ->where('status', ['cancelled'])
+            ->selectRaw('SUM(price - remaining) as revenue')
+            ->value('revenue');
+
+        $overallTotalRevenue = $totalRevenue + $cancelledRevenue;
 
     
-    $totalMonthlyBookings = Booking::whereMonth('start_date', $currentMonth)->count();
+        $cancelledCount = (clone $baseQuery)
+            ->where('status', 'cancelled')
+            ->count();
 
-    $totalYearlyBookings = Booking::whereYear('start_date', $currentYear)->count();
+        $acceptedCount = (clone $baseQuery)
+            ->where('status', 'accepted')
+            ->count();
 
-    $totalRevenue = Booking::where('status', '!=', 'Cancelled')
-                            ->where('status', '!=', 'rejected')
-                            ->sum('price');
+        $rejectedCount = (clone $baseQuery)
+            ->where('status', 'rejected')
+            ->count();
 
-    $cancelledRevenue = Booking::where('status', 'Cancelled')
-        ->selectRaw('SUM(price - remaining) as revenue')
-        ->value('revenue');
+    
+        // Top Destinations
+        $topDestinations = (clone $baseQuery)
+            ->select('destination', Booking::raw('COUNT(*) as count'))
+            ->groupBy('destination')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get();
+    
+        // Monthly Revenue
+        $monthlyBookings = (clone $baseQuery)
+            ->selectRaw('MONTH(start_date) as month, COUNT(*) as count')
+            ->groupByRaw('MONTH(start_date)')
+            ->pluck('count', 'month');
+    
+        $monthlySales = (clone $baseQuery)
+            ->whereIn('status', ['accepted', 'active'])
+            ->selectRaw('MONTH(start_date) as month, SUM(price) as total_sales')
+            ->groupByRaw('MONTH(start_date)')
+            ->pluck('total_sales', 'month');
 
-    $cancelledCount = Booking::where('status', 'Cancelled')->count();
+        $topCustomers = (clone $baseQuery)
+            ->with('user') // Load customer relationship
+            ->select('customer_id', Booking::raw('COUNT(*) as booking_count'))
+            ->groupBy('customer_id')
+            ->orderByDesc('booking_count')
+            ->limit(5)
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'name' => $booking->user->name ?? 'Unknown',
+                    'last_name' => $booking->user->last_name ?? 'Unknown',
+                    'booking_count' => $booking->booking_count,
+                ];
+            });
 
-    $topDestinations = Booking::select('destination', Booking::raw('COUNT(*) as count'))
-        ->groupBy('destination')
-        ->orderByDesc('count')
-        ->limit(5)
-        ->get();
+        $topStartDates = (clone $baseQuery)
+            ->select('start_date', Booking::raw('COUNT(*) as booking_count'))
+            ->groupBy('start_date')
+            ->orderByDesc('booking_count')
+            ->limit(5)
+            ->get();
         
-    $monthlyBookings = Booking::selectRaw('MONTH(start_date) as month, COUNT(*) as count')
-        ->whereYear('start_date', $currentYear)
-        ->groupByRaw('MONTH(start_date)')
-        ->pluck('count', 'month');
 
-    $monthlySales = Booking::where('status', 'Accepted')
-        ->selectRaw('MONTH(start_date) as month, SUM(price) as total_sales')
-        ->whereYear('start_date', $currentYear)
-        ->groupByRaw('MONTH(start_date)')
-        ->pluck('total_sales', 'month');
-
-    $data = [
-        'title' => 'MANIBELA NG BUHAY TRANSPORT COOPERATIVE',
-        'date' => date('m/d/Y'),
-        'totalMonthlyBookings' => $totalMonthlyBookings,
-        'totalYearlyBookings' => $totalYearlyBookings,
-        'totalRevenue' => $totalRevenue,
-        'cancelledRevenue' => $cancelledRevenue,
-        'cancelledCount' => $cancelledCount,
-        'topDestinations' => $topDestinations,
-        'monthlyBookings' => $monthlyBookings,
-        'monthlySales' => $monthlySales,
-    ];
+        $topPickUpLocations = (clone $baseQuery)
+            ->select('location', Booking::raw('COUNT(*) as booking_count'))
+            ->groupBy('location')
+            ->orderByDesc('booking_count')
+            ->limit(5)
+            ->get();
+       
+            
+    
+        // Data for the PDF
+        $data = [
+            'title' => 'MANIBELA NG BUHAY TRANSPORT COOPERATIVE',
+            'date' => date('m/d/Y'),
+            'totalMonthlyBookings' => $totalMonthlyBookings,
+            'totalYearlyBookings' => $totalYearlyBookings,
+            'totalRevenue' => $totalRevenue,
+            'cancelledRevenue' => $cancelledRevenue,
+            'cancelledCount' => $cancelledCount,
+            'topDestinations' => $topDestinations,
+            'monthlyBookings' => $monthlyBookings,
+            'monthlySales' => $monthlySales,
+            'overallTotalRevenue' => $overallTotalRevenue,
+            'acceptedCount' => $acceptedCount,
+            'rejectedCount' => $rejectedCount,
+            'topCustomers' =>  $topCustomers,
+            'topStartDates' =>  $topStartDates,
+            'topPickUpLocations' => $topPickUpLocations,
+            'filterStartDate' => $filterStartDate,
+            'filterEndDate' => $filterEndDate, 
+        ];
 
     // $pdf = Pdf::loadView('admin.PDFFolder.printBooking', $data);
     // // return $pdf->download('invoice.pdf');
@@ -136,519 +283,442 @@ public function generatePDF()
     // return $pdf->stream(); 
     }
 
-public function generateallmemberPDF()
-    {
-        $currentMonth = now()->month;
-        $currentYear = now()->year;
 
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+public function generateallmemberPDF(Request $request)
+    {
+        $filterStartDate = $request->input('startDate');
+        $filterEndDate = $request->input('endDate');
+        
+        
+        // Parse dates
+        $startDate = $filterStartDate ? Carbon::parse($filterStartDate) : null;
+        $endDate = $filterEndDate ? Carbon::parse($filterEndDate)->endOfDay() : null;
+        
+        $currentMonth = $startDate?->month ?? now()->month;
+        $endDateMonth = $endDate?->month ?? now()->month;
+        $currentYear = $startDate?->year ?? now()->year;
+        $endcurrentYear = $endDate?->year ?? now()->year;
+        
+        // Total Members
+        $baseQuery = Member::query();
+        if ($startDate && $endDate) {
+            $baseQuery->whereBetween('created_at', [$startDate, $endDate]);
+        }
 
         $totalMembers = Member::count();
-        $activeMembers = Member::where('member_status', 'active')->count();
-        $inactiveMembers = Member::where('member_status', 'inactive')->count();
+        
+        // Active Members
+        // $activeMembers = $baseQuery->clone()->where('member_status', 'active')->count();
+        $allactiveMembers = Member::where('member_status', 'active')->count();
+        
+        // Inactive Members
+        // $inactiveMembers = $baseQuery->clone()->where('member_status', 'inactive')->count();
+        $allinactiveMembers = Member::where('member_status', 'inactive')->count();
+        
+        // Members by Type
         $membersByType = Member::select('type')
-        ->selectRaw('count(*) as members_count') 
-        ->groupBy('type') 
+        ->selectRaw('COUNT(*) as total_count') // Total members count regardless of status
+        ->selectRaw("SUM(CASE WHEN member_status = 'active' THEN 1 ELSE 0 END) as active_count") // Count active members
+        ->groupBy('type')
         ->get();
-        
-        $tripsPerDriver = Driver::withCount('schedule')->get();
 
+        $allmembersByType = Member::select('type')
+            ->selectRaw('count(*) as members_count')
+            ->groupBy('type')
+            ->get();
+        
+        // Trips Per Driver
+        $tripsPerDriver = Driver::query();
+
+        if ($startDate && $endDate) {
+            $tripsPerDriver->whereHas('schedule.booking', function ($query) use ($startDate, $endDate) {
+                $query->where(function ($subQuery) use ($startDate, $endDate) {
+                    $subQuery->whereBetween('start_date', [$startDate, $endDate])
+                            ->orWhereBetween('end_date', [$startDate, $endDate])
+                            ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                                $nestedQuery->where('start_date', '<=', $startDate)
+                                            ->where('end_date', '>=', $endDate);
+                            });
+                });
+            });
+        }
+
+        $tripsPerDriver = $tripsPerDriver->withCount('schedule')->get();
+
+        
+        // Total Vehicles   
+        // $totalVehiclesQuery = Vehicle::query();
+        // if ($startDate && $endDate) {
+        //     $totalVehiclesQuery->whereBetween('created_at', [$startDate, $endDate]);
+        // }
         $totalVehicles = Vehicle::count();
+      
 
-        $totalPaidDues = Payment::where('status', 'paid')
-    ->join('dues', 'payments.dues_id', '=', 'dues.id')
-    ->whereYear('payments.created_at', $currentYear)
-    ->select(
-        DB::raw('MONTH(payments.created_at) as month'),
-        DB::raw('COUNT(DISTINCT payments.member_id) as members_paid'),
-        DB::raw('SUM(dues.amount) as total_paid')
-    )
-    ->groupBy(DB::raw('MONTH(payments.created_at)'))
-    ->get();
-
-$allMonths = collect([
-    'January', 'February', 'March',
-    'April', 'May', 'June',
-    'July', 'August', 'September',
-    'October', 'November', 'December',
-]);
-
-$tableData = $allMonths->mapWithKeys(function ($monthName) {
-    return [$monthName => ['members_paid' => 0, 'total_paid' => 0.00]];
-});
-
-foreach ($totalPaidDues as $item) {
-    $monthName = \Carbon\Carbon::create()->month($item->month)->format('F');
-    $tableData[$monthName] = [
-        'members_paid' => $item->members_paid,
-        'total_paid' => $item->total_paid,
-    ];
-}
-
-$overallTotalMembers = $tableData->sum('members_paid');
-$overallTotalAmount = $tableData->sum('total_paid');
-    
-   
-
-$membersWithPaidDues = DB::table('payments')
-    ->join('members', 'payments.member_id', '=', 'members.id')
-    ->where('payments.status', 'paid')
-    ->whereYear('payments.created_at', $currentYear)
-    ->select('payments.member_id', 'members.name', 'members.last_name', DB::raw('count(DISTINCT payments.dues_id) as paid_dues_count'))
-    ->groupBy('payments.member_id', 'members.name', 'members.last_name')
-    ->get();
-
-$membersWithPaidDues = $membersWithPaidDues->map(function ($item) {
-    return [
-        'member_name' => $item->name . ' ' . $item->last_name, 
-        'paid_dues_count' => $item->paid_dues_count
-    ];
-});
-
-        // Total dues
-        // $totalDuesAmount = Dues::sum('amount');
-        // $paidMonthlyDues = Payment::whereMonth('last_payment', $currentMonth)
-        //     ->where('status', 'Paid')
-        //     ->count();
-
-        // // Total collected dues
-        // $totalCollectedDues = Payment::where('status', 'paid')
-        //     ->sum('dues.amount');
-
-        // $totalDuesAmount = Dues::sum('amount');
-
-    // $monthlyPaidDues = Payment::selectRaw('MONTH(last_payment) as month, YEAR(last_payment) as year, COUNT(*) as paid_count')
-    // ->where('status', 'paid')
-    // ->whereYear('last_payment', $currentYear)  // Optionally filter by the current year
-    // ->groupBy('month', 'year')
-    // ->get();
-
-    // // Now, for each month, multiply the paid count by 600
-    // $monthlyTotalDues = $monthlyPaidDues->map(function ($payment) {
-    //     $payment->total_due_amount = $payment->paid_count * 600;
-    //     return $payment;
-    // });
-
-    // // Output the result for testing
-    // dd($monthlyTotalDues);
-
-    //     // 2. Count the number of members who have paid in the current month
-    //     $paidMonthlyDues = Payment::whereMonth('created_at', $currentMonth)
-    //         ->whereYear('created_at', $currentYear)
-    //         ->where('status', 'paid')
-    //         ->distinct('member_id') // Ensure unique member_id
-    //         ->count();
-
-    //     // 3. Count the total collected dues (sum of dues amount for paid status)
-    //     $totalCollectedDues = Payment::where('status', 'paid')
-    //         ->whereMonth('created_at', $currentMonth)
-    //         ->whereYear('created_at', $currentYear)
-    //         ->join('dues', 'payments.dues_id', '=', 'dues.id') // Join with dues table
-    //         ->sum('dues.amount'); // Sum the amount from dues table
-
-    //     // Output for testing
-    //     dd($monthlyTotalDues, $paidMonthlyDues, $totalCollectedDues);
         
-
-        $totalBookingsAssigned = Schedule::count();
-
-        $currentMonth = now()->month;
-$currentYear = now()->year;
-
-$members = Member::with(['vehicle', 'payment', 'driver.schedule', 'owner'])
-    ->get()
-    ->map(function ($member) use ($currentMonth, $currentYear) {
-        $paidPayments = $member->payment->where('status', 'paid')->count();
-
-        $currentMonthPayment = $member->payment->filter(function ($payment) use ($currentMonth, $currentYear) {
-            return $payment->status === 'paid' &&
-                   $payment->created_at->month === $currentMonth &&
-                   $payment->created_at->year === $currentYear;
-        })->isNotEmpty();
-
-        $member->paid_payments_count = $paidPayments;
-        $member->current_month_status = $currentMonthPayment ? 'Paid' : 'Unpaid';
-
-        return $member;
+        
+        // Total Paid Dues
+        $totalPaidDuesQuery = Payment::query()
+            ->where('status', 'paid')
+            ->join('dues', 'payments.dues_id', '=', 'dues.id')
+            ->whereBetween('payments.created_at', [
+                Carbon::create($currentYear, $currentMonth, 1),
+                Carbon::create($endcurrentYear, $endDateMonth, 1)->endOfMonth()
+            ]);
+    
+        $totalPaidDues = $totalPaidDuesQuery
+            ->select(
+                DB::raw('MONTH(payments.created_at) as month'),
+                DB::raw('COUNT(DISTINCT payments.member_id) as members_paid'),
+                DB::raw('SUM(dues.amount) as total_paid')
+            )
+            ->groupBy(DB::raw('MONTH(payments.created_at)'))
+            ->orderBy(DB::raw('MONTH(payments.created_at)'), 'desc') // Ordering by month in descending order
+            ->get();
+    
+    // Generate table data dynamically based on actual months with data
+    $tableData = $totalPaidDues->mapWithKeys(function ($item) {
+        $monthName = Carbon::create()->month($item->month)->format('F');
+        return [
+            $monthName => [
+                'members_paid' => $item->members_paid,
+                'total_paid' => $item->total_paid,
+            ],
+        ];
     });
+        
+        $overallTotalMembers = $tableData->sum('members_paid');
+        $overallTotalAmount = $tableData->sum('total_paid');
+        
+        // Members
+        $members = Member::with(['vehicle', 'payment', 'driver.schedule', 'owner'])->get()
+            ->map(function ($member) use ($currentMonth, $currentYear, $endDateMonth, $endcurrentYear) {
+                // Filter payments based on startDate and endDate for paid and unpaid counts
+                $paidPayments = $member->payment->filter(function ($payment) use ($currentMonth, $currentYear, $endDateMonth, $endcurrentYear) {
+                    // Check if the payment is 'paid' and if its created_at month/year is between the current and end date range
+                    return $payment->status === 'paid' &&
+                           (
+                               ($payment->created_at->year > $currentYear || 
+                                ($payment->created_at->year === $currentYear && $payment->created_at->month >= $currentMonth)) &&
+                               ($payment->created_at->year < $endcurrentYear || 
+                                ($payment->created_at->year === $endcurrentYear && $payment->created_at->month <= $endDateMonth))
+                           );
+                })->count();
+                
+                $unpaidPayments = $member->payment->filter(function ($payment) use ($currentMonth, $currentYear, $endDateMonth, $endcurrentYear) {
+                    // Check if the payment is 'unpaid' and if its created_at month/year is between the current and end date range
+                    return $payment->status === 'unpaid' &&
+                           (
+                               ($payment->created_at->year > $currentYear || 
+                                ($payment->created_at->year === $currentYear && $payment->created_at->month >= $currentMonth)) &&
+                               ($payment->created_at->year < $endcurrentYear || 
+                                ($payment->created_at->year === $endcurrentYear && $payment->created_at->month <= $endDateMonth))
+                           );
+                })->count();
 
-    $topDrivers = Driver::with(['member', 'schedule' => function ($query) {
-        $query->whereIn('driver_status', ['Scheduled', 'Accepted', 'Cancelled']);
-    }])
+                // Filter payments based on the specific end date month and year
+                $currentMonthPayment = $member->payment->filter(function ($payment) use ($endDateMonth, $endcurrentYear) {
+                    return $payment->status === 'paid' &&
+                        $payment->created_at->month === $endDateMonth &&
+                        $payment->created_at->year === $endcurrentYear;
+                })->isNotEmpty();
+        
+                $member->paid_payments_count = $paidPayments;
+                $member->unpaid_payments_count = $unpaidPayments;
+                $member->current_month_status = $currentMonthPayment ? 'Paid' : 'Unpaid';
+        
+                return $member;
+            });
+        
+        // Top Drivers
+        $topDrivers = Driver::with(['member', 'schedule' => function ($query) use ($startDate, $endDate) {
+            $query->whereHas('booking', function($query) use ($startDate, $endDate) {
+                // Filter bookings based on start_date
+                if ($startDate && $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate]);
+                }
+            })
+            ->whereIn('driver_status', ['scheduled', 'accepted', 'cancelled'])
+            ->where('cust_status', '!=', 'inactive'); // Add the filter on schedule's cust_status
+        }])
         ->get()
-        ->sortByDesc(function ($driver) {
-            return $driver->schedule->count();
-        })
+        ->sortByDesc(fn($driver) => $driver->schedule->count())
         ->take(5);
-
-    $topPaid = Payment::with('member')
-        ->whereHas('member', function ($query) {
-            $query->where('type', 'driver'); 
-        }) 
-        ->whereYear('created_at', $currentYear)  
-        ->where('status', 'Paid') 
-        ->selectRaw('member_id, COUNT(*) as paid_count') 
-        ->groupBy('member_id') 
-        ->orderByDesc('paid_count') 
-        ->take(5) 
-        ->get();
-
+        
+        // Top Paid Members
+        $topPaid = Payment::with('member')
+            ->whereHas('member', function ($query) {
+                $query->where('type', 'driver');
+            })
+            ->whereBetween('created_at', [
+                \Carbon\Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth(),
+                \Carbon\Carbon::createFromDate($endcurrentYear, $endDateMonth, 1)->endOfMonth()
+            ]) 
+            ->where('status', 'paid')
+            ->selectRaw('member_id, COUNT(*) as paid_count') 
+            ->groupBy('member_id') // Group by member_id
+            ->orderByDesc('paid_count') // Sort by paid count in descending order
+            ->take(5) // Get the top 5
+            ->get();
+        
+                
+        // Total Bookings Assigned
+        $totalBookingsAssigned = Schedule::query()
+            ->whereHas('booking', function($query) use ($startDate, $endDate) {
+                // Filter bookings based on start_date
+                if ($startDate && $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate]);
+                }
+            })
+            ->count();
+        
+        // Final Data
         $data = [
             'title' => 'MANIBELA NG BUHAY TRANSPORT COOPERATIVE',
             'date' => date('m/d/Y'),
-            'members' => $members,
             'totalMembers' => $totalMembers,
-            'activeMembers' => $activeMembers,
-            'inactiveMembers' => $inactiveMembers,
+            // 'activeMembers' => $activeMembers,
+            // 'inactiveMembers' => $inactiveMembers,
             'membersByType' => $membersByType,
             'tripsPerDriver' => $tripsPerDriver,
             'totalVehicles' => $totalVehicles,
-            // 'amountPerPaidDues' => $amountPerPaidDues,
-            // 'totalDuesAmount' => $totalDuesAmount,
-            // 'paidMonthlyDues' => $paidMonthlyDues,
-            // 'totalCollectedDues' => $totalCollectedDues,
-            'totalBookingsAssigned' => $totalBookingsAssigned,
-            'currentYear' => $currentYear,
-            // 'finalResults' => $finalResults,
-            'tableData' => $tableData, // Add this line
-            'overallTotalMembers' => $overallTotalMembers, // Add this line
+            'totalPaidDues' => $totalPaidDues,
+            'tableData' => $tableData,
+            'overallTotalMembers' => $overallTotalMembers,
             'overallTotalAmount' => $overallTotalAmount,
+            'members' => $members,
             'topDrivers' => $topDrivers,
             'topPaid' => $topPaid,
+            'totalBookingsAssigned' => $totalBookingsAssigned,
+            'filterStartDate' => $filterStartDate,
+            'filterEndDate' => $filterEndDate,
+            'currentYear' => $currentYear,
+            'allactiveMembers' => $allactiveMembers,
+            'allinactiveMembers' => $allinactiveMembers,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ];
-
-//         $pdf = Pdf::loadView('admin.PDFFolder.allmemberPDF', $data);
-//         return $pdf->download('all_member_report.pdf');
-
-$currentYear = now()->year;
-
-    // Fetch members with related data
-    // $members = Member::with(['vehicle', 'driver.schedule', 'payment'])
-    //     ->get()
-    //     ->map(function ($member) use ($currentYear) {
-    //         $totalSchedules = $member->driver->first()
-    //             ? $member->driver->first()->schedule()->whereYear('created_at', $currentYear)->count()
-    //             : 'Not Applicable';
-
-    //         $acceptedSchedules = $member->driver->first()
-    //             ? $member->driver->first()->schedule()->where('driver_status', 'Accepted')->count()
-    //             : 'Not Applicable';
-
-    //         $notAcceptedSchedules = $member->driver->first()
-    //             ? $member->driver->first()->schedule()->where('driver_status', 'Cancelled')->count()
-    //             : 'Not Applicable';
-
-    //         $totalVehicles = $member->vehicle->count();
-    //         $vehiclePlateNumbers = $totalVehicles > 0
-    //             ? $member->vehicle->pluck('plate_number')->implode(', ')
-    //             : 'Not Applicable';
-
-    //         $totalPaidDues = $member->payment
-    //             ->filter(function ($payment) use ($currentYear) {
-    //                 return $payment->status === 'paid' && $payment->created_at->year == $currentYear;
-    //             })
-    //             ->sum('amount');
-
-    //         $currentDueStatus = $totalPaidDues > 0 ? 'Paid' : 'Unpaid';
-
-    //         return [
-    //             'name' => $member->name . ' ' . $member->last_name,
-    //             'type' => $member->type,
-    //             'member_status' => $member->member_status,
-    //             'total_schedules' => $totalSchedules,
-    //             'accepted_schedules' => $acceptedSchedules,
-    //             'not_accepted_schedules' => $notAcceptedSchedules,
-    //             'total_vehicles' => $totalVehicles,
-    //             'vehicle_plate_numbers' => $vehiclePlateNumbers,
-    //             'total_paid_dues' => $totalPaidDues,
-    //             'current_due_status' => $currentDueStatus,
-    //         ];
-    //     });
-
-    //     $totalMembers = Member::count();
-    //             $activeMembers = Member::where('member_status', 'active')->count();
-    //             $inactiveMembers = Member::where('member_status', 'inactive')->count();
-    //             $membersByType = Member::select('type')
-    //             ->selectRaw('count(*) as members_count') // Count members per type
-    //             ->groupBy('type') // Group by member type
-    //             ->get();
-
-    //     $tripsPerDriver = Driver::withCount('schedule')->get();
-    //     $totalVehicles = Vehicle::count();
-
-    // // Data for the PDF
-    // $data = [
-    //     'title' => 'MANIBELA NG BUHAY TRANSPORT COOPERATIVE',
-    //     'date' => now()->format('m/d/Y'),
-    //     'members' => $members,
-    //     'totalMembers' => Member::count(),
-    //     'activeMembers' => Member::where('member_status', 'active')->count(),
-    //     'inactiveMembers' => Member::where('member_status', 'inactive')->count(),
-    //     'membersByType' => $membersByType,
-    //     'tripsPerDriver' => $tripsPerDriver,
-    //     'totalVehicles' => $totalVehicles,
-    // ];
-
+        
     $pdf = Pdf::loadView('admin.PDFFolder.allmemberPDF', $data);
     return $pdf->download('all_member_report.pdf');
 
     }
 
-    public function printallMember()
+    public function printallMember(Request $request)
     {
-        $currentMonth = now()->month;
-        $currentYear = now()->year;
+        $filterStartDate = $request->input('startDate');
+        $filterEndDate = $request->input('endDate');
+        
+        
+        // Parse dates
+        $startDate = $filterStartDate ? Carbon::parse($filterStartDate) : null;
+        $endDate = $filterEndDate ? Carbon::parse($filterEndDate)->endOfDay() : null;
+        
+        $currentMonth = $startDate?->month ?? now()->month;
+        $endDateMonth = $endDate?->month ?? now()->month;
+        $currentYear = $startDate?->year ?? now()->year;
+        $endcurrentYear = $endDate?->year ?? now()->year;
+        
+        // Total Members
+        $baseQuery = Member::query();
+        if ($startDate && $endDate) {
+            $baseQuery->whereBetween('created_at', [$startDate, $endDate]);
+        }
 
         $totalMembers = Member::count();
-        $activeMembers = Member::where('member_status', 'active')->count();
-        $inactiveMembers = Member::where('member_status', 'inactive')->count();
+        
+        // Active Members
+        // $activeMembers = $baseQuery->clone()->where('member_status', 'active')->count();
+        $allactiveMembers = Member::where('member_status', 'active')->count();
+        
+        // Inactive Members
+        // $inactiveMembers = $baseQuery->clone()->where('member_status', 'inactive')->count();
+        $allinactiveMembers = Member::where('member_status', 'inactive')->count();
+        
+        // Members by Type
         $membersByType = Member::select('type')
-        ->selectRaw('count(*) as members_count') 
-        ->groupBy('type') 
+        ->selectRaw('COUNT(*) as total_count') // Total members count regardless of status
+        ->selectRaw("SUM(CASE WHEN member_status = 'active' THEN 1 ELSE 0 END) as active_count") // Count active members
+        ->groupBy('type')
         ->get();
-        
-        $tripsPerDriver = Driver::withCount('schedule')->get();
 
-       
+        $allmembersByType = Member::select('type')
+            ->selectRaw('count(*) as members_count')
+            ->groupBy('type')
+            ->get();
+        
+        // Trips Per Driver
+        $tripsPerDriver = Driver::query();
+
+        if ($startDate && $endDate) {
+            $tripsPerDriver->whereHas('schedule.booking', function ($query) use ($startDate, $endDate) {
+                $query->where(function ($subQuery) use ($startDate, $endDate) {
+                    $subQuery->whereBetween('start_date', [$startDate, $endDate])
+                            ->orWhereBetween('end_date', [$startDate, $endDate])
+                            ->orWhere(function ($nestedQuery) use ($startDate, $endDate) {
+                                $nestedQuery->where('start_date', '<=', $startDate)
+                                            ->where('end_date', '>=', $endDate);
+                            });
+                });
+            });
+        }
+
+        $tripsPerDriver = $tripsPerDriver->withCount('schedule')->get();
+
+        
+        // Total Vehicles   
+        // $totalVehiclesQuery = Vehicle::query();
+        // if ($startDate && $endDate) {
+        //     $totalVehiclesQuery->whereBetween('created_at', [$startDate, $endDate]);
+        // }
         $totalVehicles = Vehicle::count();
+      
 
-        $totalPaidDues = Payment::where('status', 'paid')
-    ->join('dues', 'payments.dues_id', '=', 'dues.id')
-    ->whereYear('payments.created_at', $currentYear)
-    ->select(
-        DB::raw('MONTH(payments.created_at) as month'),
-        DB::raw('COUNT(DISTINCT payments.member_id) as members_paid'),
-        DB::raw('SUM(dues.amount) as total_paid')
-    )
-    ->groupBy(DB::raw('MONTH(payments.created_at)'))
-    ->get();
-
-$allMonths = collect([
-    'January', 'February', 'March',
-    'April', 'May', 'June',
-    'July', 'August', 'September',
-    'October', 'November', 'December',
-]);
-
-
-$tableData = $allMonths->mapWithKeys(function ($monthName) {
-    return [$monthName => ['members_paid' => 0, 'total_paid' => 0.00]];
-});
-
-foreach ($totalPaidDues as $item) {
-    $monthName = \Carbon\Carbon::create()->month($item->month)->format('F');
-    $tableData[$monthName] = [
-        'members_paid' => $item->members_paid,
-        'total_paid' => $item->total_paid,
-    ];
-}
-
-$overallTotalMembers = $tableData->sum('members_paid');
-$overallTotalAmount = $tableData->sum('total_paid');
+        
+        
+        // Total Paid Dues
+        $totalPaidDuesQuery = Payment::query()
+            ->where('status', 'paid')
+            ->join('dues', 'payments.dues_id', '=', 'dues.id')
+            ->whereBetween('payments.created_at', [
+                Carbon::create($currentYear, $currentMonth, 1),
+                Carbon::create($endcurrentYear, $endDateMonth, 1)->endOfMonth()
+            ]);
     
-   
+        $totalPaidDues = $totalPaidDuesQuery
+            ->select(
+                DB::raw('MONTH(payments.created_at) as month'),
+                DB::raw('COUNT(DISTINCT payments.member_id) as members_paid'),
+                DB::raw('SUM(dues.amount) as total_paid')
+            )
+            ->groupBy(DB::raw('MONTH(payments.created_at)'))
+            ->orderBy(DB::raw('MONTH(payments.created_at)'), 'desc') // Ordering by month in descending order
+            ->get();
     
-
-$membersWithPaidDues = DB::table('payments')
-    ->join('members', 'payments.member_id', '=', 'members.id')
-    ->where('payments.status', 'paid')
-    ->whereYear('payments.created_at', $currentYear)
-    ->select('payments.member_id', 'members.name', 'members.last_name', DB::raw('count(DISTINCT payments.dues_id) as paid_dues_count'))
-    ->groupBy('payments.member_id', 'members.name', 'members.last_name')
-    ->get();
-
-$membersWithPaidDues = $membersWithPaidDues->map(function ($item) {
-    return [
-        'member_name' => $item->name . ' ' . $item->last_name, 
-        'paid_dues_count' => $item->paid_dues_count
-    ];
-});
-
-        // Total dues
-        // $totalDuesAmount = Dues::sum('amount');
-        // $paidMonthlyDues = Payment::whereMonth('last_payment', $currentMonth)
-        //     ->where('status', 'Paid')
-        //     ->count();
-
-        // // Total collected dues
-        // $totalCollectedDues = Payment::where('status', 'paid')
-        //     ->sum('dues.amount');
-
-        // $totalDuesAmount = Dues::sum('amount');
-
-    // $monthlyPaidDues = Payment::selectRaw('MONTH(last_payment) as month, YEAR(last_payment) as year, COUNT(*) as paid_count')
-    // ->where('status', 'paid')
-    // ->whereYear('last_payment', $currentYear)  // Optionally filter by the current year
-    // ->groupBy('month', 'year')
-    // ->get();
-
-    // // Now, for each month, multiply the paid count by 600
-    // $monthlyTotalDues = $monthlyPaidDues->map(function ($payment) {
-    //     $payment->total_due_amount = $payment->paid_count * 600;
-    //     return $payment;
-    // });
-
-    // // Output the result for testing
-    // dd($monthlyTotalDues);
-
-    //     // 2. Count the number of members who have paid in the current month
-    //     $paidMonthlyDues = Payment::whereMonth('created_at', $currentMonth)
-    //         ->whereYear('created_at', $currentYear)
-    //         ->where('status', 'paid')
-    //         ->distinct('member_id') // Ensure unique member_id
-    //         ->count();
-
-    //     // 3. Count the total collected dues (sum of dues amount for paid status)
-    //     $totalCollectedDues = Payment::where('status', 'paid')
-    //         ->whereMonth('created_at', $currentMonth)
-    //         ->whereYear('created_at', $currentYear)
-    //         ->join('dues', 'payments.dues_id', '=', 'dues.id') // Join with dues table
-    //         ->sum('dues.amount'); // Sum the amount from dues table
-
-    //     // Output for testing
-    //     dd($monthlyTotalDues, $paidMonthlyDues, $totalCollectedDues);
-        
-
-        // Number of bookings assigned
-        $totalBookingsAssigned = Schedule::count();
-
-        
-        $currentMonth = now()->month;
-$currentYear = now()->year;
-
-$members = Member::with(['vehicle', 'payment', 'driver.schedule', 'owner'])
-    ->get()
-    ->map(function ($member) use ($currentMonth, $currentYear) {
-        
-        $paidPayments = $member->payment->where('status', 'paid')->count();
-
-        $currentMonthPayment = $member->payment->filter(function ($payment) use ($currentMonth, $currentYear) {
-            return $payment->status === 'paid' &&
-                   $payment->created_at->month === $currentMonth &&
-                   $payment->created_at->year === $currentYear;
-        })->isNotEmpty();
-
-        $member->paid_payments_count = $paidPayments;
-        $member->current_month_status = $currentMonthPayment ? 'Paid' : 'Unpaid';
-
-        return $member;
+    // Generate table data dynamically based on actual months with data
+    $tableData = $totalPaidDues->mapWithKeys(function ($item) {
+        $monthName = Carbon::create()->month($item->month)->format('F');
+        return [
+            $monthName => [
+                'members_paid' => $item->members_paid,
+                'total_paid' => $item->total_paid,
+            ],
+        ];
     });
+        
+        $overallTotalMembers = $tableData->sum('members_paid');
+        $overallTotalAmount = $tableData->sum('total_paid');
+        
+        // Members
+        $members = Member::with(['vehicle', 'payment', 'driver.schedule', 'owner'])->get()
+            ->map(function ($member) use ($currentMonth, $currentYear, $endDateMonth, $endcurrentYear) {
+                // Filter payments based on startDate and endDate for paid and unpaid counts
+                $paidPayments = $member->payment->filter(function ($payment) use ($currentMonth, $currentYear, $endDateMonth, $endcurrentYear) {
+                    // Check if the payment is 'paid' and if its created_at month/year is between the current and end date range
+                    return $payment->status === 'paid' &&
+                           (
+                               ($payment->created_at->year > $currentYear || 
+                                ($payment->created_at->year === $currentYear && $payment->created_at->month >= $currentMonth)) &&
+                               ($payment->created_at->year < $endcurrentYear || 
+                                ($payment->created_at->year === $endcurrentYear && $payment->created_at->month <= $endDateMonth))
+                           );
+                })->count();
+                
+                $unpaidPayments = $member->payment->filter(function ($payment) use ($currentMonth, $currentYear, $endDateMonth, $endcurrentYear) {
+                    // Check if the payment is 'unpaid' and if its created_at month/year is between the current and end date range
+                    return $payment->status === 'unpaid' &&
+                           (
+                               ($payment->created_at->year > $currentYear || 
+                                ($payment->created_at->year === $currentYear && $payment->created_at->month >= $currentMonth)) &&
+                               ($payment->created_at->year < $endcurrentYear || 
+                                ($payment->created_at->year === $endcurrentYear && $payment->created_at->month <= $endDateMonth))
+                           );
+                })->count();
 
-    $topDrivers = Driver::with(['member', 'schedule' => function ($query) {
-        $query->whereIn('driver_status', ['scheduled', 'accepted', 'cancelled']);
-    }])
+                // Filter payments based on the specific end date month and year
+                $currentMonthPayment = $member->payment->filter(function ($payment) use ($endDateMonth, $endcurrentYear) {
+                    return $payment->status === 'paid' &&
+                        $payment->created_at->month === $endDateMonth &&
+                        $payment->created_at->year === $endcurrentYear;
+                })->isNotEmpty();
+        
+                $member->paid_payments_count = $paidPayments;
+                $member->unpaid_payments_count = $unpaidPayments;
+                $member->current_month_status = $currentMonthPayment ? 'Paid' : 'Unpaid';
+        
+                return $member;
+            });
+        
+        // Top Drivers
+        $topDrivers = Driver::with(['member', 'schedule' => function ($query) use ($startDate, $endDate) {
+            $query->whereHas('booking', function($query) use ($startDate, $endDate) {
+                // Filter bookings based on start_date
+                if ($startDate && $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate]);
+                }
+            })
+            ->whereIn('driver_status', ['scheduled', 'accepted', 'cancelled'])
+            ->where('cust_status', '!=', 'inactive'); // Add the filter on schedule's cust_status
+        }])
         ->get()
-        ->sortByDesc(function ($driver) {
-            return $driver->schedule->count();
-        })
+        ->sortByDesc(fn($driver) => $driver->schedule->count())
         ->take(5);
-
-    $topPaid = Payment::with('member')
-        ->whereHas('member', function ($query) {
-            $query->where('type', 'driver'); 
-        }) 
-        ->whereYear('created_at', $currentYear) 
-        ->where('status', 'Paid') 
-        ->selectRaw('member_id, COUNT(*) as paid_count') 
-        ->groupBy('member_id') 
-        ->orderByDesc('paid_count') 
-        ->take(5) 
-        ->get();
-
+        
+        // Top Paid Members
+        $topPaid = Payment::with('member')
+            ->whereHas('member', function ($query) {
+                $query->where('type', 'driver');
+            })
+            ->whereBetween('created_at', [
+                \Carbon\Carbon::createFromDate($currentYear, $currentMonth, 1)->startOfMonth(),
+                \Carbon\Carbon::createFromDate($endcurrentYear, $endDateMonth, 1)->endOfMonth()
+            ]) 
+            ->where('status', 'paid')
+            ->selectRaw('member_id, COUNT(*) as paid_count') 
+            ->groupBy('member_id') // Group by member_id
+            ->orderByDesc('paid_count') // Sort by paid count in descending order
+            ->take(5) // Get the top 5
+            ->get();
+        
+                
+        // Total Bookings Assigned
+        $totalBookingsAssigned = Schedule::query()
+            ->whereHas('booking', function($query) use ($startDate, $endDate) {
+                // Filter bookings based on start_date
+                if ($startDate && $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate]);
+                }
+            })
+            ->count();
+        
+        // Final Data
         $data = [
             'title' => 'MANIBELA NG BUHAY TRANSPORT COOPERATIVE',
             'date' => date('m/d/Y'),
-            'members' => $members,
             'totalMembers' => $totalMembers,
-            'activeMembers' => $activeMembers,
-            'inactiveMembers' => $inactiveMembers,
+            // 'activeMembers' => $activeMembers,
+            // 'inactiveMembers' => $inactiveMembers,
             'membersByType' => $membersByType,
             'tripsPerDriver' => $tripsPerDriver,
             'totalVehicles' => $totalVehicles,
-            // 'amountPerPaidDues' => $amountPerPaidDues,
-            // 'totalDuesAmount' => $totalDuesAmount,
-            // 'paidMonthlyDues' => $paidMonthlyDues,
-            // 'totalCollectedDues' => $totalCollectedDues,
-            'totalBookingsAssigned' => $totalBookingsAssigned,
-            'currentYear' => $currentYear,
-            // 'finalResults' => $finalResults,
-            'tableData' => $tableData, // Add this line
-            'overallTotalMembers' => $overallTotalMembers, // Add this line
+            'totalPaidDues' => $totalPaidDues,
+            'tableData' => $tableData,
+            'overallTotalMembers' => $overallTotalMembers,
             'overallTotalAmount' => $overallTotalAmount,
+            'members' => $members,
             'topDrivers' => $topDrivers,
             'topPaid' => $topPaid,
+            'totalBookingsAssigned' => $totalBookingsAssigned,
+            'filterStartDate' => $filterStartDate,
+            'filterEndDate' => $filterEndDate,
+            'currentYear' => $currentYear,
+            'allactiveMembers' => $allactiveMembers,
+            'allinactiveMembers' => $allinactiveMembers,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ];
-
-//         $pdf = Pdf::loadView('admin.PDFFolder.allmemberPDF', $data);
-//         return $pdf->download('all_member_report.pdf');
-
-$currentYear = now()->year;
-
-    // Fetch members with related data
-    // $members = Member::with(['vehicle', 'driver.schedule', 'payment'])
-    //     ->get()
-    //     ->map(function ($member) use ($currentYear) {
-    //         $totalSchedules = $member->driver->first()
-    //             ? $member->driver->first()->schedule()->whereYear('created_at', $currentYear)->count()
-    //             : 'Not Applicable';
-
-    //         $acceptedSchedules = $member->driver->first()
-    //             ? $member->driver->first()->schedule()->where('driver_status', 'Accepted')->count()
-    //             : 'Not Applicable';
-
-    //         $notAcceptedSchedules = $member->driver->first()
-    //             ? $member->driver->first()->schedule()->where('driver_status', 'Cancelled')->count()
-    //             : 'Not Applicable';
-
-    //         $totalVehicles = $member->vehicle->count();
-    //         $vehiclePlateNumbers = $totalVehicles > 0
-    //             ? $member->vehicle->pluck('plate_number')->implode(', ')
-    //             : 'Not Applicable';
-
-    //         $totalPaidDues = $member->payment
-    //             ->filter(function ($payment) use ($currentYear) {
-    //                 return $payment->status === 'paid' && $payment->created_at->year == $currentYear;
-    //             })
-    //             ->sum('amount');
-
-    //         $currentDueStatus = $totalPaidDues > 0 ? 'Paid' : 'Unpaid';
-
-    //         return [
-    //             'name' => $member->name . ' ' . $member->last_name,
-    //             'type' => $member->type,
-    //             'member_status' => $member->member_status,
-    //             'total_schedules' => $totalSchedules,
-    //             'accepted_schedules' => $acceptedSchedules,
-    //             'not_accepted_schedules' => $notAcceptedSchedules,
-    //             'total_vehicles' => $totalVehicles,
-    //             'vehicle_plate_numbers' => $vehiclePlateNumbers,
-    //             'total_paid_dues' => $totalPaidDues,
-    //             'current_due_status' => $currentDueStatus,
-    //         ];
-    //     });
-
-    //     $totalMembers = Member::count();
-    //             $activeMembers = Member::where('member_status', 'active')->count();
-    //             $inactiveMembers = Member::where('member_status', 'inactive')->count();
-    //             $membersByType = Member::select('type')
-    //             ->selectRaw('count(*) as members_count') // Count members per type
-    //             ->groupBy('type') // Group by member type
-    //             ->get();
-
-    //     $tripsPerDriver = Driver::withCount('schedule')->get();
-    //     $totalVehicles = Vehicle::count();
-
-    // // Data for the PDF
-    // $data = [
-    //     'title' => 'MANIBELA NG BUHAY TRANSPORT COOPERATIVE',
-    //     'date' => now()->format('m/d/Y'),
-    //     'members' => $members,
-    //     'totalMembers' => Member::count(),
-    //     'activeMembers' => Member::where('member_status', 'active')->count(),
-    //     'inactiveMembers' => Member::where('member_status', 'inactive')->count(),
-    //     'membersByType' => $membersByType,
-    //     'tripsPerDriver' => $tripsPerDriver,
-    //     'totalVehicles' => $totalVehicles,
-    // ];
 
         return view('admin.PDFFolder.printallMember', $data);
     }

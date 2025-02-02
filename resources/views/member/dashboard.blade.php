@@ -80,6 +80,7 @@
                         <th class="py-3 px-4">Contact Number</th>
                         <th class="py-3 px-4">Start Date</th>
                         <th class="py-3 px-4">End Date</th>
+                        <th class="py-3 px-4">Remaining Bal.</th>
                         @if($memberType->type != 'Owner')
                             <th class="py-3 px-4">Action</th>
                         @endif
@@ -101,9 +102,10 @@
                                 <td class="py-6 px-4">{{ $schedule->booking->user->mobile_num }}</td>   
                                 <td class="py-6 px-4">{{ \Carbon\Carbon::parse($schedule->booking->start_date)->format('F d, Y') }}</td>
                                 <td class="py-6 px-4">{{ \Carbon\Carbon::parse($schedule->booking->end_date)->format('F d, Y') }}</td>
+                                <td class="py-6 px-4">₱{{ $schedule->booking->remaining}}.00</td>
 
                                 @if($memberType->type != 'Owner')
-                                <td class="py-3 px-4" id="scheduleTd">
+                                <td class="py-3 px-4" id="scheduleTd" style="width: 15%">
                                     @if ($schedule->driver_status == 'cancelled')
                                         <span class="font-bold text-red-600">Declined</span>
                                     @elseif ($schedule->driver_status == 'accepted')

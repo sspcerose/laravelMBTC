@@ -12,6 +12,8 @@ use App\Notifications\reservationDriverNotification;
 use App\Notifications\declinedDriverSchedule;
 use App\Notifications\optionalSchedule;
 use App\Notifications\newMonthlyDue;
+use App\Notifications\cancelledReservation;
+use App\Notifications\newReservation;
 
 use Illuminate\Http\Request;
 use App\Models\Booking;
@@ -94,6 +96,14 @@ class MBTCController extends Controller
             'remaining' => $remaining,
             'receipt' => $bookReceipt, 
         ]);
+
+        $admin = Admin::where('email', 'mbtransportcooperative@gmail.com')->first();
+        
+        if ($admin) {
+            $admin->notify(new newReservation());
+        }
+
+
     
         return redirect()->back()->with('success', 'Booking has been submitted successfully.');
     }
@@ -122,24 +132,38 @@ class MBTCController extends Controller
 {
     $booking = Booking::find($id);
 
-    if ($booking) {
+if ($booking) {
+    // Update booking status to 'cancelled'
+    $booking->status = 'cancelled';
+    $booking->save();
 
-        $booking->status = 'cancelled';
-        $booking->save();
+    // Find the latest schedule for this booking
+    $schedule = Schedule::where('book_id', $booking->id)->latest()->first();
 
-        $schedule = Schedule::where('book_id', $booking->id)->latest()->first();
+    if ($schedule) {
+        // Update schedule statuses if necessary
+        if ($schedule->driver_status !== 'cancelled') {
+            $schedule->update([
+                'driver_status' => 'active', 
+                'cust_status' => 'inactive'
+            ]);
+        }
 
-        if ($schedule) {
-    
-            if ($schedule->driver_status !== 'cancelled') {
-                $schedule->update([
-                    'driver_status' => 'active',  
-                    'cust_status' => 'inactive'  
-                ]);
+        // Retrieve the associated driver
+        $driver = Driver::with('member')->find($schedule->driver_id);
+
+        if ($driver && $driver->member) {
+            // Notify the driver
+            $driver->member->notify(new cancelledReservation());
+
+            // Notify the admin
+            $admin = Admin::where('email', 'mbtransportcooperative@gmail.com')->first();
+            if ($admin) {
+                $admin->notify(new cancelledReservation());
             }
         }
-        
     }
+}
 
     return redirect()->back()->with('success', 'Booking has been cancelled and schedule updated successfully.');
 }

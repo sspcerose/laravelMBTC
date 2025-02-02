@@ -78,11 +78,11 @@
             data-tab="Vehicle">
             <i class="fas fa-car fa-xl"></i> <!-- Vehicle -->
         </a>
-        <a href="{{ route('admin.customer.customer') }}"
+        <!-- <a href="{{ route('admin.customer.customer') }}"
             class="tab-link text-slate-900 hover:text-slate-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg"
             data-tab="Customers">
-            <i class="fa-solid fa-user-group fa-xl"></i> <!-- Customers -->
-        </a>
+            <i class="fa-solid fa-user-group fa-xl"></i> Customers
+        </a> -->
 
         <a href="{{ route('admin.logout') }}" class="tab-link text-red-700 hover:text-red-400 transition-colors duration-300 flex items-center justify-center w-10 h-10 rounded-lg" data-tab="Logout"
             onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fas fa-sign-out-alt fa-xl"></i> </a>

@@ -3,72 +3,135 @@
 @include('layouts.adminNav')
 
 <body class="font-inter">
-    <div class="lg:pl-20 lg:pr-10">
-        <div class="pt-24 lg:pt-28 flex justify-between items-center">
-            <h1 class="text-black p-4 pl-4 text-center md:text-left text-3xl"><span class="font-extrabold">Bookings</span>/{{ $viewSpecific->user->name }} {{ $viewSpecific->user->last_name }} </h1>
-            
-            <div class="px-4 lg:px-0 pt-4 lg:pr-5">
-            <div class="flex">
+    <div class="lg:pl-28 lg:pr-10 px-2">
+        <div class="pt-20 flex justify-between items-center">
+            <h1 class="text-black p-4 pl-4 text-center md:text-left text-sm md:text-xl"><span class="font-extrabold">Booking</span>/ {{ $viewSpecific->user->name }} {{ $viewSpecific->user->last_name }} </h1>
+
+            <div class="px-4 lg:px-0 pt-4  pb-4">
+                <div class="flex">
                     <button class="bg-red-600 hover:bg-red-400 text-white flex items-center py-3 px-4 rounded-xl" onclick="window.location.href='{{ route('admin.booking.booking') }}';">
                         Back
                     </button>
-            </div>
-
-            
-              
-        </div>
-        </div>
-        <div class="bg-neutral-300 mx-4 md:mx-auto max-w-4xl rounded-3xl p-2 md:p-3 items-center mb-4">
-            <div class="overflow-x-auto bg-neutral-100 px-2 md:px-4 lg:py-2 rounded-2xl" id="largeTable">
-            <div class="bg-neutral-100 p-4 rounded-2xl flex flex-col md:flex-row gap-6">
-           
-            <div class="w-full md:w-1/3">
-                    <img src="{{ asset('img/' . $viewSpecific->receipt) }}" alt="Proof of Payment" class="rounded-lg w-full h-96">
-                    <p class="font-bold text-center mt-2">Proof of Payment</p>
                 </div>
+            </div>
+        </div>
+        <div class="bg-neutral-300 p-2 rounded-3xl md:p-3 items-center mb-4">
+
+            <div class=" bg-neutral-100 px-2 md:px-4 lg:py-2 rounded-2xl" id="largeTable">
+
+                <div class="bg-neutral-100 rounded-2xl flex flex-col md:flex-row gap-6 pt-6 p-4 xl:pt-16 xl:p-10">
+           
+            <div class="w-full md:w-1/2 flex-1 ">
+            <div class="bg-neutral-500 p-8 rounded-2xl">
+                            <img src="{{ asset('img/' . $viewSpecific->receipt) }}" alt="Proof of Payment"
+                                class="rounded-2xl h-96 object-cover cursor-pointer mx-auto"
+                                onclick="openModal('{{ asset('img/' . $viewSpecific->receipt) }}')">
+                            <!-- Modal -->
+                            <div id="imageModal"
+                                class="fixed inset-0 z-50 hidden bg-black bg-opacity-75 items-center justify-center">
+                                <div class="relative">
+                                    <img id="modalImage" src="" alt="Expanded Proof of Payment" class="rounded-lg p-10">
+                                    <button class="absolute top-4 right-4 text-white text-xl bg-gray-800 bg-opacity-50 rounded-full px-2 py-1"
+                                        onclick="closeModal()">✕</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="font-bold text-center pt-2">Proof of Payment</p>
+
+                    </div>
                 
-                            <!-- Booking Details -->
+                     <!-- Right Section: Booking Details -->
                     <div class="w-full md:w-2/3 space-y-2">
-                    <p><span class="font-bold">Customer Name: </span>{{ $viewSpecific->user->name }} {{ $viewSpecific->user->last_name }}</p>
-                    <p><span class="font-bold">Start Date: </span>{{ \Carbon\Carbon::parse( $viewSpecific->start_date)->format('F d, Y') }}</p>
-                    <p><span class="font-bold">End Date: </span>{{ \Carbon\Carbon::parse( $viewSpecific->start_date)->format('F d, Y') }}</p>
-                    <p><span class="font-bold">Pick-up Time: </span>{{ $viewSpecific->time }}</p>
-                    <p><span class="font-bold">Pick-up Location: </span>{{ $viewSpecific->location }}</p>
-                    <p><span class="font-bold">Destination: </span>{{ $viewSpecific->destination }}</p>
-                    <p><span class="font-bold">Total Fare: </span>{{ $viewSpecific->price }}</p>
-                   
-                    <p><span class="font-bold">Status: </span> @if($viewSpecific->status == "accepted" && (\Carbon\Carbon::today()->lt($viewSpecific->start_date)))
-                            <span class="font-bold text-yellow-500">Upcoming</span>
-                            @elseif($viewSpecific->status == "accepted" && \Carbon\Carbon::today()->between($viewSpecific->start_date, $viewSpecific->end_date))
-                            <span class="font-bold text-blue-500">On going</span>
-                            @elseif($viewSpecific->status == "accepted" && \Carbon\Carbon::today()->gt($viewSpecific->end_date))
-                            <span class="font-bold text-green-500">Completed</span>
-                            @elseif($viewSpecific->status == "rejected")
-                            <span class="font-bold text-red-500">Rejected</span>
-                            @elseif($viewSpecific->status == "active")
-                            <span class="font-bold text-yellow-500">Pending...</span>
-                            @else
-                            <span class="font-bold text-red-600">Customer Cancelled</span>
-                            @endif</p>
-                    <hr class="border-t-4 border-neutral-700 mt-4">
+                    <div class="text-left grid grid-cols-1 lg:grid-cols-2 gap-2 w-full flex-1">
+                        <!-- Customer Name -->
+                        <div class="flex flex-col">
+                            <label class="font-bold text-neutral-700 w-full">Customer Name:</label>
+                            <p class="bg-neutral-50 rounded-lg p-2 w-full">{{ $viewSpecific->user->name }} {{ $viewSpecific->user->last_name }}</p>
+                        </div>
+
+                        <!-- Pick-up Time -->
+                        <div class="flex flex-col">
+                            <label class="font-bold text-neutral-700 w-full">Pick-up Time:</label>
+                            <p class="bg-neutral-50 rounded-lg p-2 w-full">{{ $viewSpecific->time }}</p>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="flex flex-col">
+                            <label class="font-bold text-neutral-700 w-full">Start Date:</label>
+                            <p class="bg-neutral-50 rounded-lg p-2 w-full">{{ \Carbon\Carbon::parse($viewSpecific->start_date)->format('F d, Y') }}</p>
+                        </div>
+
+                        <!-- End Date -->
+                        <div class="flex flex-col">
+                            <label class="font-bold text-neutral-700 w-full">End Date:</label>
+                            <p class="bg-neutral-50 rounded-lg p-2 w-full">{{ \Carbon\Carbon::parse($viewSpecific->end_date)->format('F d, Y') }}</p>
+                        </div>
+
+                        <!-- Pick-up Location -->
+                        <div class="flex flex-col">
+                            <label class="font-bold text-neutral-700 w-full">Pick-up Location:</label>
+                            <p class="bg-neutral-50 rounded-lg p-2 w-full">{{ $viewSpecific->location }}</p>
+                        </div>
+
+                        <!-- Destination -->
+                        <div class="flex flex-col">
+                            <label class="font-bold text-neutral-700 w-full">Destination:</label>
+                            <p class="bg-neutral-50 rounded-lg p-2 w-full">{{ $viewSpecific->destination }}</p>
+                        </div>
+
+                        <!-- Total Fare -->
+                        <div class="flex flex-col">
+                            <label class="font-bold text-neutral-700 w-full">Total Fare:</label>
+                            <p class="bg-neutral-50 rounded-lg p-2 w-full">₱{{ $viewSpecific->price }}.00</p>
+                        </div>
+                        
+                        <!-- Remaining -->
+                        <div class="flex flex-col">
+                            <label class="font-bold text-neutral-700 w-full">Remaining Balance:</label>
+                            <p class="bg-neutral-50 rounded-lg p-2 w-full">₱{{ $viewSpecific->remaining }}.00</p>
+                        </div>
+                    
+                    <!-- Status -->
+                    <div class="flex flex-col gap-2 lg:col-span-2">
+                    <label class="font-bold text-neutral-700 w-full">Status:</label>
+                    <p class="bg-neutral-50 rounded-lg p-2 w-full">
+                               @if($viewSpecific->status == "accepted" && (\Carbon\Carbon::today()->lt($viewSpecific->start_date)))
+                                <span class="font-bold text-yellow-500">Upcoming</span>
+                                @elseif($viewSpecific->status == "accepted" && \Carbon\Carbon::today()->between($viewSpecific->start_date, $viewSpecific->end_date))
+                                <span class="font-bold text-blue-500">On going</span>
+                                @elseif($viewSpecific->status == "accepted" && \Carbon\Carbon::today()->gt($viewSpecific->end_date))
+                                <span class="font-bold text-green-500">Completed</span>
+                                @elseif($viewSpecific->status == "rejected")
+                                <span class="font-bold text-red-500">Rejected</span>
+                                @elseif($viewSpecific->status == "active")
+                                <span class="font-bold text-yellow-500">Pending...</span>
+                                @else
+                                <span class="font-bold text-red-600">Customer Cancelled</span>
+                                @endif
+                            </p>
+                    <hr class="border-t-4 border-neutral-700 mt-4 lg:col-span-2">
 
                     <!-- Driver Assignment -->
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-col gap-2 w-full lg:col-span-2">
+                        
                         
                         @foreach ($viewBookings as $viewBooking)
                         
                          @if($viewBooking->status == "accepted")
-                         <label for="driver" class="font-bold">Driver:</label>
+                         <div class="flex flex-col items-center gap-2">
+                                <label for="driver" class="text-neutral-700 font-bold self-center w-full md:text-left">Driver:</label>
                                 @if($viewBooking->schedule->isNotEmpty())
                                     @php
                                         $latestSchedule = $viewBooking->schedule->first();
                                     @endphp
+                                    
                                     @if($latestSchedule->driver_status == 'cancelled' || $latestSchedule->driver_status == 'conflict')
                                         @if($drivers->isEmpty())
                                         <form action="{{ url('admin/schedule/optionschedule') }}" method="POST" class="findDriverForm">
                                             @csrf
                                             <input type="hidden" name="booking_id" value="{{ $viewBooking->id }}">
-                                            <button type="button" class="bg-green-500 text-white py-1 px-2 rounded triggerFindDriver">Find A Driver</button>
+                                            <button type="button" class="bg-neutral-50 rounded-lg p-2 w-full text-center triggerFindDriver">Find A Driver</button>
                                         </form>
                                                 
                                         @else
@@ -85,22 +148,21 @@
                                                         @endforeach
                                                     @endforeach
                                                 </select>
-                                                <button type="button" class="bg-green-500 text-white py-1 px-2 rounded triggerAssign">Assign Driver</button>
+                                                <button type="button" class="bg-neutral-50 rounded-lg p-2 w-full text-center triggerAssign">Assign Driver</button>
                                             </form>
                                         @endif
+
                                     @elseif(!empty($latestSchedule->driver))
-                                    <div class="flex items-center space-x-2">
+                                   <div class="flex flex-col md:flex-row items-center gap-4 w-full">
                                         @if($latestSchedule->cust_status == 'inactive')
-                                        <p class="border rounded p-1 mb-1">
+                                        <p class="bg-neutral-50 rounded-lg p-2 w-full md:w-3/4 bg-gray-100 self-center">
                                             {{ $latestSchedule->driver->member->name }} {{ $latestSchedule->driver->member->last_name }}
                                         </p>
                                         @elseif($latestSchedule->driver_status == 'optionscheduled')
-                                        <p class="">
-                                            <span class="font-bold text-blue-500">Finding a Driver...</span>
-                                        </p>
+                                        <p class="text-blue-500 font-bold self-center">Finding a Driver...</p>
                                         @else
                                         <!-- <p class="border rounded p-1 mb-1"> -->
-                                        <p class="">
+                                        <p class="bg-neutral-50 rounded-lg p-2 w-full">
                                             {{ $latestSchedule->driver->member->name }} {{ $latestSchedule->driver->member->last_name }}
                                         </p>
                                         <!-- <button type="submit" class="bg-red-500 text-white py-1 px-2 rounded mb-1">Undo</button> -->
@@ -112,7 +174,7 @@
                                     <form action="{{ url('admin/schedule/optionschedule') }}" method="POST" class="findDriverForm">
                                             @csrf
                                             <input type="hidden" name="booking_id" value="{{ $viewBooking->id }}">
-                                            <button type="button" class="bg-green-500 text-white py-1 px-2 rounded triggerFindDriver">Find A Driver</button>
+                                            <button type="button" class="bg-green-500 text-white py-1 px-2 rounded-lg w-full text-center triggerFindDriver">Find A Driver</button>
                                         </form>
                                     @else
                                     <form action="{{ url('admin/schedule/schedule') }}" method="POST" class="assignForm">
@@ -128,17 +190,16 @@
                                                         @endforeach
                                                     @endforeach
                                                 </select>
-                                                <button type="button" class="bg-green-500 text-white py-1 px-2 rounded triggerAssign">Assign Driver</button>
+                                                <button type="button" class="bg-neutral-50 rounded-lg p-2 w-full text-center triggerAssign">Assign Driver</button>
                                             </form>
                                     @endif
                                 @endif
                                 @endif
                                 @endforeach
-                               
-                            
+                                  
                     </div>
-                    @if($viewBooking->status == "accepted")
-                    <p><span class="font-bold mb-2">Driver Status:</span>
+                    <!-- @if($viewBooking->status == "accepted")
+                    <p><span class="font-bold text-neutral-700 w-full">Driver Status:</span>
                                 @if($viewBooking->schedule->isNotEmpty())
                                     @if($latestSchedule->driver_status == 'accepted')
                                         <span class="font-bold text-green-500">Driver Accepted</span>
@@ -156,39 +217,41 @@
                                 @else
                                     <span class="font-bold text-yellow-500">To be Scheduled</span>
                                 @endif
-                            @endif</p>
+                            @endif</p> -->
                     
                     
 
                     <!-- Driver Status -->
-                    <div class="mt-4">
+                    <div class="w-full lg:col-span-2">
+                <div class="flex flex-col md:flex-row gap-2 lg:col-span-2 w-full">
+                    @if($viewBooking->status == "active")
+                    <form action="{{ route('booking.accept', $viewBooking->id) }}" method="POST" class="w-full acceptForm">
+                        @csrf
+                        <button type="button" class="bg-green-500 text-white py-2 px-6 rounded-lg w-full text-center triggerConfirm">
+                            Accept
+                        </button>
+                    </form>
+                    <form action="{{ route('booking.reject', $viewBooking->id) }}" method="POST" class="cancelForm w-full">
+                        @csrf
+                        <button type="button" class="bg-red-500 text-white py-2 px-6 rounded-lg w-full text-center triggerCancel">
+                            Reject
+                        </button>
+                    </form>
+                    @endif
+                </div>
+            </div>
 
-                        <div class="flex gap-4">
-                        
-                           
-                            @if($viewBooking->status == "active")
-                            <p>
-                                <!-- <span class="font-bold mb-2">Accept/Decline</span> -->
-                            <form action="{{ route('booking.accept', $viewBooking->id) }}" method="POST" class="acceptForm" style="display:inline;">
-                                @csrf
-                                <button type="button" class="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 triggerConfirm">Accept</button>
-                            </form>
 
-                            <form action="{{ route('booking.reject', $viewBooking->id) }}" method="POST" class="cancelForm" style="display:inline;">
-                                @csrf
-                                <button type="button" class="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 triggerCancel">Reject</button>
-                            </form>
-                            @endif
-
-                            </p>
-                        </div>
                     </div>
+                    </div>
+
                 </div>
             </div>
 
 </div>
 
 </div>
+
 
 
 <script>
